@@ -38,8 +38,21 @@ import time
 # Add Python Pandas libraries for integration
 import pandas as pd
 
+# Add Google Authentication libraries for integration
+from google.api_core.exceptions import (
+    GoogleAPICallError,
+    NotFound,
+    PermissionDenied, 
+)
+from google.auth import default
+from google.auth.exceptions import DefaultCredentialsError
+from google.auth.transport.requests import AuthorizedSession
+
 # Add Google Secret Manager modules for integration
 from google.cloud import secretmanager
+
+# Add internal TikTok Ads modules for handling
+from config.schema import ensure_table_schema
 
 # Get environment variable for Company
 COMPANY = os.getenv("COMPANY") 
@@ -91,28 +104,45 @@ def fetch_campaign_metadata(campaign_id_list: list[str], fields: list[str] = Non
     logging.info(f"🔍 [FETCH] Preparing to fetch TikTok campaign metadata with {fetch_fields} field(s)...")
 
     try:
-    # 1.1.3. Get TikTok access token from Google Secret Manager
-        print(f"🔍 [FETCH] Retrieving TikTok access token for {ACCOUNT} from Google Secret Manager...")
-        logging.info(f"🔍 [FETCH] Retrieving TikTok access token for {ACCOUNT} from Google Secret Manager...")
+    # 1.1.3. Initialize Google Secret Manager client
         try:
-            secret_client = secretmanager.SecretManagerServiceClient()
-            secret_id = f"{COMPANY}_secret_{DEPARTMENT}_{PLATFORM}_access_token_{ACCOUNT}"
-            secret_name = f"projects/{PROJECT}/secrets/{secret_id}/versions/latest"
-            response = secret_client.access_secret_version(request={"name": secret_name})
-            access_token = response.payload.data.decode("utf-8")
-            print(f"✅ [FETCH] Successfully retrieved TikTok access token for {ACCOUNT}.")
-            logging.info(f"✅ [FETCH] Successfully retrieved TikTok access token for {ACCOUNT}.")
+            print(f"🔍 [FETCH] Initializing Google Secret Manager client for Google Cloud Platform project {PROJECT}...")
+            logging.info(f"🔍 [FETCH] Initializing Google Secret Manager client for Google Cloud Platform project {PROJECT}...")
+            google_secret_client = secretmanager.SecretManagerServiceClient()
+            print(f"✅ [FETCH] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
+            logging.info(f"✅ [FETCH] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
+        except DefaultCredentialsError as e:
+            raise RuntimeError("❌ [FETCH] Failed to initialize Google Secret Manager client due to credentials error.") from e
+        except PermissionDenied as e:
+            raise RuntimeError("❌ [FETCH] Failed to initialize Google Secret Manager client due to permission denial.") from e
+        except NotFound as e:
+            raise RuntimeError("❌ [FETCH] Failed to initialize Google Secret Manager client because secret not found.") from e
+        except GoogleAPICallError as e:
+            raise RuntimeError("❌ [FETCH] Failed to initialize Google Secret Manager client due to API call error.") from e
+        except Exception as e:
+            raise RuntimeError(f"❌ [FETCH] Failed to initialize Google Secret Manager client due to unexpected error {e}.") from e
+        
+    # 1.1.4. Get TikTok access token from Google Secret Manager
+        try:
+            print(f"🔍 [FETCH] Retrieving TikTok access token for {ACCOUNT} from Google Secret Manager...")
+            logging.info(f"🔍 [FETCH] Retrieving TikTok access token for {ACCOUNT} from Google Secret Manager...")
+            google_secret_id = f"{COMPANY}_secret_{DEPARTMENT}_{PLATFORM}_access_token_{ACCOUNT}"
+            google_secret_name = f"projects/{PROJECT}/secrets/{google_secret_id}/versions/latest"
+            response = google_secret_client.access_secret_version(request={"name": google_secret_name})
+            tiktok_access_token = response.payload.data.decode("utf-8")
+            print(f"✅ [FETCH] Successfully retrieved TikTok access token for {ACCOUNT} from Google Secret Manager.")
+            logging.info(f"✅ [FETCH] Successfully retrieved TikTok access token for {ACCOUNT} from Google Secret Manager.")
         except Exception as e:
             print(f"❌ [FETCH] Failed to retrieve TikTok access token for {ACCOUNT} from Google Secret Manager due to {e}.")
             logging.error(f"❌ [FETCH] Failed to retrieve TikTok access token for {ACCOUNT} from Google Secret Manager due to {e}.")
-            raise RuntimeError(f"❌ [FETCH] Failed to retrieve TikTok access token from Google Secret Manager: {e}")
+            raise RuntimeError(f"❌ [FETCH] Failed to retrieve TikTok access token for {ACCOUNT} from Google Secret Manager due to {e}.")
 
     # 1.1.4. Loop through all campaign_id(s)
         print(f"🔍 [FETCH] Retrieving metadata for {len(campaign_id_list)} TikTok campaign_id(s).")
         logging.info(f"🔍 [FETCH] Retrieving metadata for {len(campaign_id_list)} TikTok campaign_id(s).")
 
-        base_url = "https://business-api.tiktokglobalplatform.com/open_api/v1.3/campaign/get/"
-        headers = {"Access-Token": access_token}
+        base_url = "https://business-api.tiktok.com/open_api/v1.3/campaign/get/"
+        headers = {"Access-Token": tiktok_access_token}
 
         for campaign_id in campaign_id_list:
             try:
@@ -147,7 +177,7 @@ def fetch_campaign_metadata(campaign_id_list: list[str], fields: list[str] = Non
         try:
             print(f"🔄 [FETCH] Enforcing schema for {len(df)} row(s) of TikTok campaign metadata...")
             logging.info(f"🔄 [FETCH] Enforcing schema for {len(df)} row(s) of TikTok campaign metadata...")
-            df = ensure_table_schema(df, "fetch_campaign_metadata_tiktok")
+            df = ensure_table_schema(df, "fetch_campaign_metadata")
             print(f"✅ [FETCH] Successfully enforced schema for {len(df)} row(s) of TikTok campaign metadata.")
             logging.info(f"✅ [FETCH] Successfully enforced schema for {len(df)} row(s) of TikTok campaign metadata.")
         except Exception as e:
@@ -393,7 +423,6 @@ def fetch_ad_creative(ad_id_list: list[str]) -> pd.DataFrame:
     print(f"✅ [FETCH] Successfully fetched {len(df)} TikTok ad creative(s).")
     return df
 
-
 # 2. FETCH TIKTOK ADS INSIGHTS
 
 # 2.1. Fetch campaign insights for TikTok Ads
@@ -402,30 +431,59 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
     logging.info(f"🚀 [FETCH] Starting to fetch TikTok campaign insights from {start_date} to {end_date}...")    
 
     try:
-        # 3.1.1. Get TikTok Advertiser ID & Access Token from Secret Manager
-        print("🔍 [FETCH] Retrieving TikTok advertiser_id and access_token from Google Secret Manager...")
-        logging.info("🔍 [FETCH] Retrieving TikTok advertiser_id and access_token from Google Secret Manager...")
+        
+        # 2.1.1 Initialize Google Secret Manager client
+        try:
+            print(f"🔍 [FETCH] Initializing Google Secret Manager client for Google Cloud Platform project {PROJECT}...")
+            logging.info(f"🔍 [FETCH] Initializing Google Secret Manager client for Google Cloud Platform project {PROJECT}...")
+            google_secret_client = secretmanager.SecretManagerServiceClient()
+            print(f"✅ [FETCH] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
+            logging.info(f"✅ [FETCH] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
+        except DefaultCredentialsError as e:
+            raise RuntimeError("❌ [FETCH] Failed to initialize Google Secret Manager client due to credentials error.") from e
+        except PermissionDenied as e:
+            raise RuntimeError("❌ [FETCH] Failed to initialize Google Secret Manager client due to permission denial.") from e
+        except NotFound as e:
+            raise RuntimeError("❌ [FETCH] Failed to initialize Google Secret Manager client because secret not found.") from e
+        except GoogleAPICallError as e:
+            raise RuntimeError("❌ [FETCH] Failed to initialize Google Secret Manager client due to API call error.") from e
+        except Exception as e:
+            raise RuntimeError(f"❌ [FETCH] Failed to initialize Google Secret Manager client due to unexpected error {e}.") from e
 
-        secret_client = secretmanager.SecretManagerServiceClient()
-        adv_secret_id = f"{COMPANY}_secret_{DEPARTMENT}_tiktok_advertiser_id_{ACCOUNT}"
-        adv_secret_name = f"projects/{PROJECT}/secrets/{adv_secret_id}/versions/latest"
-        adv_response = secret_client.access_secret_version(request={"name": adv_secret_name})
-        advertiser_id = adv_response.payload.data.decode("utf-8")
+        # 2.1.2. Get TikTok Ads access token from Google Secret Manager
+        try: 
+            token_secret_id = f"{COMPANY}_secret_all_{PLATFORM}_token_access_user"
+            token_secret_name = f"projects/{PROJECT}/secrets/{token_secret_id}/versions/latest"
+            token_response = google_secret_client.access_secret_version(request={"name": token_secret_name})
+            tiktok_access_token = token_response.payload.data.decode("utf-8")
+            print(f"✅ [FETCH] Successfully retrieved TikTok access token for account {ACCOUNT} from Google Secret Manager.")
+            logging.info(f"✅ [FETCH] Successfully retrieved TikTok access token for account {ACCOUNT} from Google Secret Manager.")
+        except Exception as e:
+            print(f"❌ [FETCH] Failed to retrieve TikTok access token for {ACCOUNT} from Google Secret Manager due to {e}.")
+            logging.error(f"❌ [FETCH] Failed to retrieve TikTok access token for {ACCOUNT} from Google Secret Manager due to {e}.")
+            raise RuntimeError(f"❌ [FETCH] Failed to retrieve TikTok access token for {ACCOUNT} from Google Secret Manager due to {e}.")
 
-        # access_token (ở thực tế bạn sẽ có hàm refresh_token tự động -> get_access_token)
-        token_secret_id = f"{COMPANY}_secret_{DEPARTMENT}_tiktok_access_token_{ACCOUNT}"
-        token_secret_name = f"projects/{PROJECT}/secrets/{token_secret_id}/versions/latest"
-        token_response = secret_client.access_secret_version(request={"name": token_secret_name})
-        access_token = token_response.payload.data.decode("utf-8")
-
-        print(f"✅ [FETCH] Successfully retrieved TikTok advertiser_id {advertiser_id}.")
-        logging.info(f"✅ [FETCH] Successfully retrieved TikTok advertiser_id {advertiser_id}.")
+        # 2.1.3. Get TikTok Ads advertiser_id from Google Secret Manager
+        try:
+            print(f"🔍 [FETCH] Retrieving TikTok Ads access_token for account {ACCOUNT} from Google Secret Manager...")
+            logging.info(f"🔍 [FETCH] Retrieving TikTok Ads access_token for account {ACCOUNT} from Google Secret Manager...")
+            advertiser_secret_id = f"{COMPANY}_secret_{DEPARTMENT}_tiktok_account_id_{ACCOUNT}"
+            advertiser_secret_name = f"projects/{PROJECT}/secrets/{advertiser_secret_id}/versions/latest"
+            advertiser_secret_response = google_secret_client.access_secret_version(request={"name": advertiser_secret_name})
+            tiktok_advertiser_id = advertiser_secret_response.payload.data.decode("utf-8")
+            print(f"✅ [FETCH] Successfully retrieved TikTok advertiser_id {tiktok_advertiser_id} from Google Secret Manager.")
+            logging.info(f"✅ [FETCH] Successfully retrieved TikTok advertiser_id {tiktok_advertiser_id} from Google Secret Manager.")
+        except Exception as e:
+            print(f"❌ [FETCH] Failed to retrieve TikTok access token for {ACCOUNT} from Google Secret Manager due to {e}.")
+            logging.error(f"❌ [FETCH] Failed to retrieve TikTok access token for {ACCOUNT} from Google Secret Manager due to {e}.")
+            raise RuntimeError(f"❌ [FETCH] Failed to retrieve TikTok access token for {ACCOUNT} from Google Secret Manager due to {e}.")
 
         # 3.1.2. Define parameters
-        url = "https://business-api.tiktokglobalshop.com/open_api/v1.2/report/integrated/get/"
+        url = "https://business-api.tiktok.com/open_api/v1.3/report/integrated/get/"
         params = {
-            "advertiser_id": advertiser_id,
+            "advertiser_id": tiktok_advertiser_id,
             "report_type": "BASIC",
+            "data_level": "AUCTION_CAMPAIGN",
             "dimensions": ["campaign_id", "stat_time_day"],
             "metrics": ["spend", "impressions", "clicks"],
             "start_date": start_date,
@@ -440,21 +498,30 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
         all_records = []
         for attempt in range(2):
             try:
-                print(f"🔍 [FETCH] Fetching TikTok campaign insights for advertiser_id {advertiser_id} from {start_date} to {end_date}, attempt {attempt+1}...")
-                logging.info(f"🔍 [FETCH] Fetching TikTok campaign insights for advertiser_id {advertiser_id} from {start_date} to {end_date}, attempt {attempt+1}...")
+                print(f"🔍 [FETCH] Fetching TikTok campaign insights for advertiser_id {tiktok_advertiser_id} from {start_date} to {end_date}, attempt {attempt+1}...")
+                logging.info(f"🔍 [FETCH] Fetching TikTok campaign insights for advertiser_id {tiktok_advertiser_id} from {start_date} to {end_date}, attempt {attempt+1}...")
 
                 while True:
                     resp = requests.get(
                         url,
-                        headers={"Access-Token": access_token},
-                        params=params,
+                        headers={
+                            "Access-Token": tiktok_access_token,
+                            "Content-Type": "application/json",
+                        },
+                        json=params,
                         timeout=60
-                    ).json()
+                    )
 
-                    if resp.get("code") != 0:
-                        raise Exception(f"TikTok API error: {resp.get('message')}")
+                    try:
+                        resp_json = resp.json()
+                    except Exception:
+                        print(f"❌ [FETCH] Non-JSON response: {resp.status_code}, {resp.text[:200]}")
+                        raise
 
-                    data_list = resp["data"].get("list", [])
+                    if resp_json.get("code") != 0:
+                        raise Exception(f"TikTok API error: {resp_json.get('message')}")
+
+                    data_list = resp_json["data"].get("list", [])
                     all_records.extend(data_list)
 
                     if len(data_list) < params["page_size"]:
@@ -470,7 +537,7 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
                 print(f"✅ [FETCH] Successfully retrieved {len(df)} row(s) for TikTok campaign insights from {start_date} to {end_date}.")
                 logging.info(f"✅ [FETCH] Successfully retrieved {len(df)} row(s) for TikTok campaign insights from {start_date} to {end_date}.")
 
-                # 3.1.4. Enforce schema
+        # 3.1.4. Enforce schema
                 print(f"🔄 [FETCH] Enforcing schema for TikTok campaign insights from {start_date} to {end_date}...")
                 logging.info(f"🔄 [FETCH] Enforcing schema for TikTok campaign insights from {start_date} to {end_date}...")
                 df = ensure_table_schema(df, "fetch_campaign_insights")

@@ -54,6 +54,7 @@ from src.fetch import (
     fetch_campaign_insights,
     fetch_ad_insights
 )
+from config.schema import ensure_table_schema
 
 # Get environment variable for Company
 COMPANY = os.getenv("COMPANY") 
@@ -645,8 +646,6 @@ def ingest_campaign_insights(
     try:
         print(f"🔁 [INGEST] Trigger to enrich TikTok campaign insights from {start_date} to {end_date} with {len(df)} row(s)...")
         logging.info(f"🔁 [INGEST] Trigger to enrich TikTok campaign insights from {start_date} to {end_date} with {len(df)} row(s)...")
-        df = enrich_campaign_insights(df)
-        df["account_name"] = fetch_account_name()
         df["date_range"] = f"{start_date}_to_{end_date}"
         df["last_updated_at"] = datetime.utcnow().replace(tzinfo=pytz.UTC)
     except Exception as e:
@@ -660,11 +659,7 @@ def ingest_campaign_insights(
             "spend",
             "impressions",
             "clicks",
-            "cpc",
-            "cpm",
-            "ctr",
-            "conversion",
-            "conversion_rate"
+            "conversion"
         ]
         print(f"🔁 [INGEST] Casting TikTok campaign insights {numeric_fields} numeric field(s)...")
         logging.info(f"🔁 [INGEST] Casting TikTok campaign insights {numeric_fields} numeric field(s)...")
@@ -815,7 +810,7 @@ def ingest_tiktok_ad_insights(
     # 2.2.1. Call TikTok API to fetch ad insights
     print("🔍 [INGEST] Triggering to fetch TikTok ad insights from API...")
     logging.info("🔍 [INGEST] Triggering to fetch TikTok ad insights from API...")
-    df = fetch_tiktok_ad_insights(start_date, end_date)
+    df = fetch_ad_insights(start_date, end_date)
     if df.empty:
         print("⚠️ [INGEST] Empty TikTok ad insights returned.")
         logging.warning("⚠️ [INGEST] Empty TikTok ad insights returned.")    
@@ -847,11 +842,7 @@ def ingest_tiktok_ad_insights(
             "spend",
             "impressions",
             "clicks",
-            "reach",
             "conversions",
-            "cpc",
-            "cpm",
-            "ctr"
         ]
         print(f"🔁 [INGEST] Casting TikTok ad insights {numeric_fields} numeric field(s)...")
         logging.info(f"🔁 [INGEST] Casting TikTok ad insights {numeric_fields} numeric field(s)...")
@@ -977,3 +968,12 @@ def ingest_tiktok_ad_insights(
         raise
 
     return df
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description="Run Facebook Campaign Backfill")
+    parser.add_argument("--start_date", type=str, required=True, help="Start date (YYYY-MM-DD)")
+    parser.add_argument("--end_date", type=str, required=True, help="End date (YYYY-MM-DD)")
+    args = parser.parse_args()
+
+    ingest_campaign_insights(start_date=args.start_date, end_date=args.end_date)
