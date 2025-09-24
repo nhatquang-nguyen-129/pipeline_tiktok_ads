@@ -532,12 +532,31 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
                     print("⚠️ [FETCH] No data returned from TikTok API.")
                     logging.warning("⚠️ [FETCH] No data returned from TikTok API.")
                     return pd.DataFrame()
-
                 df = pd.DataFrame(all_records)
+                # 👀 Debug sample raw data
+                
+                print("🔍 [DEBUG] Sample TikTok API response row(s):")
+                print(df.head(5).to_dict(orient="records"))                
+                
                 print(f"✅ [FETCH] Successfully retrieved {len(df)} row(s) for TikTok campaign insights from {start_date} to {end_date}.")
                 logging.info(f"✅ [FETCH] Successfully retrieved {len(df)} row(s) for TikTok campaign insights from {start_date} to {end_date}.")
 
-        # 3.1.4. Enforce schema
+        # 3.1.4. Flatten TikTok API nested JSON (metrics + dimensions)
+                # ⚠️ [SECTION] TikTok JSON flattening: khác với Facebook, TikTok trả nested metrics/dimensions
+                flattened_records = []
+                for record in all_records:
+                    flat_row = {}
+                    # Copy dimensions
+                    flat_row.update(record.get("dimensions", {}))
+                    # Copy metrics
+                    flat_row.update(record.get("metrics", {}))
+                    flattened_records.append(flat_row)
+
+                df = pd.DataFrame(flattened_records)
+                print("🔍 [DEBUG] Sample TikTok API response after flattening:")
+                print(df.head(5).to_dict(orient="records"))
+
+        # 3.1.5. Enforce schema
                 print(f"🔄 [FETCH] Enforcing schema for TikTok campaign insights from {start_date} to {end_date}...")
                 logging.info(f"🔄 [FETCH] Enforcing schema for TikTok campaign insights from {start_date} to {end_date}...")
                 df = ensure_table_schema(df, "fetch_campaign_insights")
