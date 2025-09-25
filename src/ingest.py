@@ -51,6 +51,7 @@ from src.fetch import (
     fetch_campaign_metadata,
     fetch_adset_metadata,
     fetch_ad_metadata,
+    fetch_ad_creative,
     fetch_campaign_insights,
     fetch_ad_insights
 )

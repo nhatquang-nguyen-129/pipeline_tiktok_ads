@@ -35,14 +35,11 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
     # 1.1.1. Define schema mapping for Facebook data type
     mapping_tiktok_schema = {
         "fetch_campaign_metadata": {
+            "advertiser_id": str,
             "campaign_id": str,
             "campaign_name": str,
-            "campaign_type": str,
-            "objective_type": str,
             "status": str,
-            "create_time": "datetime64[ns, UTC]",
-            "modify_time": "datetime64[ns, UTC]",
-            "advertiser_id": str,
+            "create_time": "datetime64[ns, UTC]"         
         },
         "fetch_adset_metadata": {
             "adgroup_id": str,
@@ -104,6 +101,40 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "offline_shopping_events": int,                   # Purchases (offline)
             "onsite_shopping": int,                           # Purchases (TikTok Shop)
             "messaging_total_conversation_tiktok_direct_message": int  # Conversations (TikTok direct message)
+        },
+        "ingest_campaign_metadata": {
+            "advertiser_id": str,
+            "campaign_id": str,
+            "campaign_name": str,
+            "status": str,
+            "create_time": "datetime64[ns, UTC]"
+        },
+        "ingest_adset_metadata": {
+            "adgroup_id": str,
+            "adgroup_name": str,
+            "campaign_id": str,
+            "placement_type": str,
+            "status": str,
+            "create_time": "datetime64[ns, UTC]",
+            "advertiser_id": str,
+        },
+        "ingest_ad_metadata": {
+            "advertiser_id": str,
+            "ad_id": str,
+            "ad_name": str,
+            "adgroup_id": str,
+            "campaign_id": str,
+            "status": str,
+            "create_time": "datetime64[ns, UTC]"
+        },
+        "ingest_ad_creative": {
+            "ad_id": str,
+            "advertiser_id": str,
+            "creative_id": str,
+            "thumbnail_url": str, 
+            "video_id": str,
+            "image_id": str,
+            "create_time": "datetime64[ns, UTC]"
         },
         "ingest_campaign_insights": {
             "advertiser_id": str,
