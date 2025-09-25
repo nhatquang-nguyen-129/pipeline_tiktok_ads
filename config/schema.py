@@ -74,52 +74,71 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
         "fetch_campaign_insights": {
             "advertiser_id": str,
             "campaign_id": str,
-            "objective_type": str,
-            "spend": float,
-            "impressions": int,
-            "clicks": int,
-            "video_watched_2s": int, 
-            "conversions": int,
             "stat_time_day": str,
-        },
-
-        "fetch_ad_insights": {
-            "advertiser_id": str,
-            "campaign_id": str,
-            "adgroup_id": str,
-            "ad_id": str,
+            "objective_type": str,
+            "result": str,
             "spend": float,
             "impressions": int,
             "clicks": int,
             "video_watched_2s": int,
-            "conversions": int,
-            "stat_time_day": str,
-            "delivery_status": str,
+            "purchase": int,                                  # Unique purchases (app)
+            "complete_payment": int,                          # Purchases (website)
+            "onsite_total_purchase": int,                     # Purchases (TikTok)
+            "offline_shopping_events": int,                   # Purchases (offline)
+            "onsite_shopping": int,                           # Purchases (TikTok Shop)
+            "messaging_total_conversation_tiktok_direct_message": int  # Conversations (TikTok direct message)
         },
-
+        "fetch_ad_insights": {
+            "advertiser_id": str,
+            "ad_id": str,
+            "stat_time_day": str,
+            "objective_type": str,
+            "result": str,
+            "spend": float,
+            "impressions": int,
+            "clicks": int,
+            "video_watched_2s": int,
+            "purchase": int,                                  # Unique purchases (app)
+            "complete_payment": int,                          # Purchases (website)
+            "onsite_total_purchase": int,                     # Purchases (TikTok)
+            "offline_shopping_events": int,                   # Purchases (offline)
+            "onsite_shopping": int,                           # Purchases (TikTok Shop)
+            "messaging_total_conversation_tiktok_direct_message": int  # Conversations (TikTok direct message)
+        },
         "ingest_campaign_insights": {
             "advertiser_id": str,
             "campaign_id": str,
             "objective_type": str,
+            "result": str,
+            "stat_time_day": str,
             "spend": float,
             "impressions": int,
             "clicks": int,
-            "conversions": int,
-            "stat_time_day": str,
+            "video_watched_2s": int,
+            "purchase": int,                                  # Unique purchases (app)
+            "complete_payment": int,                          # Purchases (website)
+            "onsite_total_purchase": int,                     # Purchases (TikTok)
+            "offline_shopping_events": int,                   # Purchases (offline)
+            "onsite_shopping": int,                           # Purchases (TikTok Shop)
+            "messaging_total_conversation_tiktok_direct_message": int,  # Conversations (TikTok direct message)
             "last_updated_at": "datetime64[ns, UTC]"
         },
-
         "ingest_ad_insights": {
             "advertiser_id": str,
-            "campaign_id": str,
-            "adgroup_id": str,
             "ad_id": str,
+            "objective_type": str,
+            "result": str,
+            "stat_time_day": str,
             "spend": float,
             "impressions": int,
             "clicks": int,
-            "conversions": int,
-            "stat_time_day": str,
-            "delivery_status": str,
+            "video_watched_2s": int,
+            "purchase": int,                                  # Unique purchases (app)
+            "complete_payment": int,                          # Purchases (website)
+            "onsite_total_purchase": int,                     # Purchases (TikTok)
+            "offline_shopping_events": int,                   # Purchases (offline)
+            "onsite_shopping": int,                           # Purchases (TikTok Shop)
+            "messaging_total_conversation_tiktok_direct_message": int,  # Conversations (TikTok direct message)
             "last_updated_at": "datetime64[ns, UTC]"
         },
         "staging_campaign_insights": {
@@ -204,13 +223,14 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
         if col not in df.columns:
             df[col] = pd.NA
 
-    # 1.1.5. Handle numeric type include integer and float
+    # 1.1.5. Handle numeric type
         try:
             if dtype in [int, float]:
                 df[col] = df[col].apply(
-                    lambda x: x if isinstance(x, (int, float, np.number, type(None))) else np.nan
+                    lambda x: x if isinstance(x, (int, float, np.number, type(None))) 
+                    else (float(x.replace(",", "")) if isinstance(x, str) and x.replace(",", "").replace(".", "").isdigit() else np.nan)
                 )
-                df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0).astype(dtype)
+                df[col] = df[col].fillna(0).astype(dtype)
 
     # 1.1.6. Handle datetime type
             elif dtype == "datetime64[ns, UTC]":

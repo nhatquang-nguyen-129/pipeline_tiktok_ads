@@ -659,7 +659,11 @@ def ingest_campaign_insights(
             "spend",
             "impressions",
             "clicks",
-            "conversion"
+            "conversions",
+            "video_watched_2s",
+            "add_to_cart",
+            "complete_payment",
+            "purchase"
         ]
         print(f"🔁 [INGEST] Casting TikTok campaign insights {numeric_fields} numeric field(s)...")
         logging.info(f"🔁 [INGEST] Casting TikTok campaign insights {numeric_fields} numeric field(s)...")
@@ -799,50 +803,54 @@ def ingest_campaign_insights(
     return df
 
 # 2.2. Ingest TikTok Ad insights to Google BigQuery raw tables
-def ingest_tiktok_ad_insights(
+def ingest_ad_insights(
     start_date: str,
     end_date: str,
     write_disposition: str = "WRITE_APPEND"
 ) -> pd.DataFrame:
+
     print(f"🚀 [INGEST] Starting to ingest TikTok ad insights from {start_date} to {end_date}...")
     logging.info(f"🚀 [INGEST] Starting to ingest TikTok ad insights from {start_date} to {end_date}...")
 
-    # 2.2.1. Call TikTok API to fetch ad insights
-    print("🔍 [INGEST] Triggering to fetch TikTok ad insights from API...")
-    logging.info("🔍 [INGEST] Triggering to fetch TikTok ad insights from API...")
-    df = fetch_ad_insights(start_date, end_date)
+    # 2.1.1. Call TikTok API to fetch ad insights
+    print("🔍 [INGEST] Triggering to fetch TikTok ads insights from API...")
+    logging.info("🔍 [INGEST] Triggering to fetch TikTok ads insights from API...")
+    df = fetch_ad_insights(start_date, end_date)    
     if df.empty:
         print("⚠️ [INGEST] Empty TikTok ad insights returned.")
         logging.warning("⚠️ [INGEST] Empty TikTok ad insights returned.")    
         return df
 
-    # 2.2.2. Prepare full table_id for raw layer in BigQuery
-    first_date = pd.to_datetime(df["date"].dropna().iloc[0])
+    # 2.1.2. Prepare table_id
+    first_date = pd.to_datetime(df["stat_time_day"].dropna().iloc[0])
     y, m = first_date.year, first_date.month
-    raw_dataset = f"{COMPANY}_dataset_tiktok_api_raw"
-    table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_tiktok_{DEPARTMENT}_{ACCOUNT}_ad_m{m:02d}{y}"
+    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
+    table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_m{m:02d}{y}"
     print(f"🔍 [INGEST] Proceeding to ingest TikTok ad insights from {start_date} to {end_date} with table_id {table_id}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok ad insights from {start_date} to {end_date} with table_id {table_id}...")
- 
-    # 2.2.3. Enrich TikTok ad insights
+
+    # 2.1.3. Enrich TikTok ad insights
     try:
-        print(f"🔁 [INGEST] Triggering to enrich TikTok ad insights from {start_date} to {end_date} with {len(df)} row(s)...")
-        logging.info(f"🔁 [INGEST] Triggering to enrich TikTok ad insights from {start_date} to {end_date} with {len(df)} row(s)...")
-        df = enrich_tiktok_ad_insights(df)
+        print(f"🔁 [INGEST] Trigger to enrich TikTok ad insights from {start_date} to {end_date} with {len(df)} row(s)...")
+        logging.info(f"🔁 [INGEST] Trigger to enrich TikTok ad insights from {start_date} to {end_date} with {len(df)} row(s)...")
         df["date_range"] = f"{start_date}_to_{end_date}"
         df["last_updated_at"] = datetime.utcnow().replace(tzinfo=pytz.UTC)
     except Exception as e:
-        print(f"❌ [INGEST] Failed to trigger enrichment TikTok ad insights due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to trigger enrichment TikTok ad insights due to {e}.")
+        print(f"❌ [INGEST] Failed to trigger enrichment TikTok ad insights from {start_date} to {end_date} due to {e}.")
+        logging.error(f"❌ [INGEST] Failed to trigger enrichment TikTok ad insights from {start_date} to {end_date} due to {e}.")
         raise
 
-    # 2.2.4. Cast TikTok numeric fields to float
+    # 2.1.4. Cast TikTok numeric fields to float
     try:
         numeric_fields = [
             "spend",
             "impressions",
             "clicks",
             "conversions",
+            "video_watched_2s",
+            "add_to_cart",
+            "complete_payment",
+            "purchase"
         ]
         print(f"🔁 [INGEST] Casting TikTok ad insights {numeric_fields} numeric field(s)...")
         logging.info(f"🔁 [INGEST] Casting TikTok ad insights {numeric_fields} numeric field(s)...")
@@ -852,26 +860,28 @@ def ingest_tiktok_ad_insights(
         print(f"✅ [INGEST] Successfully casted TikTok ad insights {numeric_fields} numeric field(s) to float.")
         logging.info(f"✅ [INGEST] Successfully casted TikTok ad insights {numeric_fields} numeric field(s) to float.")
     except Exception as e:
-        print(f"❌ [INGEST] Failed to cast TikTok numeric field(s) to float due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to cast TikTok numeric field(s) to float due to {e}.")
+        print(f"❌ [INGEST] Failed to cast TikTok ad numeric field(s) to float due to {e}.")
+        logging.error(f"❌ [INGEST] Failed to cast TikTok ad numeric field(s) to float due to {e}.")
         raise
 
-    # 2.2.5. Enforce schema for TikTok ad insights
+    # 2.1.5. Enforce schema
     try:
         print(f"🔁 [INGEST] Triggering to enforce schema for {len(df)} row(s) of TikTok ad insights...")
         logging.info(f"🔁 [INGEST] Triggering to enforce schema for {len(df)} row(s) of TikTok ad insights...")
-        df = ensure_table_schema(df, "ingest_tiktok_ad_insights")
+        df = ensure_table_schema(df, schema_type="ingest_ad_insights")
     except Exception as e:
-        print(f"❌ [INGEST] Failed to enforce schema for TikTok ad insights due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to enforce schema for TikTok ad insights due to {e}.")
+        print(f"❌ [INGEST] Failed to trigger schema enforcement for TikTok ad insights due to {e}.")
+        logging.error(f"❌ [INGEST] Failed to trigger schema enforcement for TikTok ad insights due to {e}.")
         raise
 
-    # 2.2.6. Parse date column(s)
+    # 2.1.6. Parse date column(s)
     try:
-        print(f"🔁 [INGEST] Parsing TikTok ad insights date columns...")
-        logging.info(f"🔁 [INGEST] Parsing TikTok ad insights date columns...")
-        df["date"] = pd.to_datetime(df["date"])
-        df["date"] = df["date"].dt.strftime("%Y-%m-%d")
+        print(f"🔁 [INGEST] Parsing TikTok ad insights {df.columns.tolist()} date column(s)...")
+        logging.info(f"🔁 [INGEST] Parsing TikTok ad insights {df.columns.tolist()} date column(s)...")
+        df["date"] = pd.to_datetime(df["stat_time_day"])
+        df["year"] = df["date"].dt.year
+        df["month"] = df["date"].dt.month
+        df["date_start"] = df["date"].dt.strftime("%Y-%m-%d")
         print(f"✅ [INGEST] Successfully parsed date column(s) for TikTok ad insights.")
         logging.info(f"✅ [INGEST] Successfully parsed date column(s) for TikTok ad insights.")
     except Exception as e:
@@ -879,7 +889,7 @@ def ingest_tiktok_ad_insights(
         logging.error(f"❌ [INGEST] Failed to parse date column(s) for TikTok ad insights due to {e}.")
         raise
 
-    # 2.2.7. Delete existing row(s) or create new table if not exist
+    # 2.1.7. Delete existing row(s) or create new table if not exist
     try:
         print(f"🔍 [INGEST] Checking TikTok ad insights table {table_id} existence...")
         logging.info(f"🔍 [INGEST] Checking TikTok ad insights table {table_id} existence...")
@@ -888,16 +898,14 @@ def ingest_tiktok_ad_insights(
             client = bigquery.Client(project=PROJECT)
         except DefaultCredentialsError as e:
             raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to credentials error.") from e
-
         try:
             client.get_table(table_id)
             table_exists = True
         except Exception:
             table_exists = False
-
         if not table_exists:
-            print(f"⚠️ [INGEST] TikTok ad insights table {table_id} not found → creating...")
-            logging.warning(f"⚠️ [INGEST] TikTok ad insights table {table_id} not found → creating...")
+            print(f"⚠️ [INGEST] TikTok ad insights table {table_id} not found then table creation will be proceeding...")
+            logging.warning(f"⚠️ [INGEST] TikTok ad insights table {table_id} not found then table creation will be proceeding...")
             schema = []
             for col, dtype in df.dtypes.items():
                 if dtype.name.startswith("int"):
@@ -911,46 +919,54 @@ def ingest_tiktok_ad_insights(
                 else:
                     bq_type = "STRING"
                 schema.append(bigquery.SchemaField(col, bq_type))
-
             table = bigquery.Table(table_id, schema=schema)
-            table.time_partitioning = bigquery.TimePartitioning(
-                type_=bigquery.TimePartitioningType.DAY,
-                field="date"
-            )
+            effective_partition = "date" if "date" in df.columns else None
+            if effective_partition:
+                table.time_partitioning = bigquery.TimePartitioning(
+                    type_=bigquery.TimePartitioningType.DAY,
+                    field=effective_partition
+                )
+                print(f"🔍 [INGEST] Creating TikTok ad insights {table_id} using partition on {effective_partition}...")
+                logging.info(f"🔍 [INGEST] Creating TikTok ad insights {table_id} using partition on {effective_partition}...")
             table = client.create_table(table)
-            print(f"✅ [INGEST] Successfully created TikTok ad insights table {table_id}.")
-            logging.info(f"✅ [INGEST] Successfully created TikTok ad insights table {table_id}.")
+            print(f"✅ [INGEST] Successfully created TikTok ad insights table {table_id} with partition on {effective_partition}.")
+            logging.info(f"✅ [INGEST] Successfully created TikTok ad insights table {table_id} with partition on {effective_partition}.")
         else:
-            new_dates = df["date"].dropna().unique().tolist()
-            query_existing = f"SELECT DISTINCT date FROM `{table_id}`"
-            existing_dates = [row.date for row in client.query(query_existing).result()]
+            new_dates = df["date_start"].dropna().unique().tolist()
+            query_existing = f"SELECT DISTINCT date_start FROM `{table_id}`"
+            existing_dates = [row.date_start for row in client.query(query_existing).result()]
             overlap = set(new_dates) & set(existing_dates)
             if overlap:
-                print(f"⚠️ [INGEST] Found overlapping dates {overlap} → deleting...")
-                logging.warning(f"⚠️ [INGEST] Found overlapping dates {overlap} → deleting...")
+                print(f"⚠️ [INGEST] Found {len(overlap)} overlapping date(s) {overlap} in TikTok ad insights {table_id} table then deletion will be proceeding...")
+                logging.warning(f"⚠️ [INGEST] Found {len(overlap)} overlapping date(s) {overlap} in TikTok ad insights {table_id} table then deletion will be proceeding...")
                 for date_val in overlap:
                     query = f"""
                         DELETE FROM `{table_id}`
-                        WHERE date = @date_value
+                        WHERE date_start = @date_value
                     """
                     job_config = bigquery.QueryJobConfig(
                         query_parameters=[bigquery.ScalarQueryParameter("date_value", "STRING", date_val)]
                     )
-                    client.query(query, job_config=job_config).result()
-                    print(f"✅ [INGEST] Deleted existing rows for {date_val}.")
-                    logging.info(f"✅ [INGEST] Deleted existing rows for {date_val}.")
+                    try:
+                        result = client.query(query, job_config=job_config).result()
+                        deleted_rows = result.num_dml_affected_rows
+                        print(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) for {date_val} in TikTok ad insights {table_id} table.")
+                        logging.info(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) for {date_val} in TikTok ad insights {table_id} table.")
+                    except Exception as e:
+                        print(f"❌ [INGEST] Failed to delete existing rows in TikTok ad insights {table_id} table for {date_val} due to {e}.")
+                        logging.error(f"❌ [INGEST] Failed to delete existing rows in TikTok ad insights {table_id} table for {date_val} due to {e}.")
             else:
-                print("✅ [INGEST] No overlapping dates found → skipping deletion.")
-                logging.info("✅ [INGEST] No overlapping dates found → skipping deletion.")
+                print(f"✅ [INGEST] No overlapping dates found in TikTok ad insights {table_id} table then deletion is skipped.")
+                logging.info(f"✅ [INGEST] No overlapping dates found in TikTok ad insights {table_id} table then deletion is skipped.")
     except Exception as e:
         print(f"❌ [INGEST] Failed during TikTok ad insights ingestion due to {e}.")
         logging.error(f"❌ [INGEST] Failed during TikTok ad insights ingestion due to {e}.")
         raise
 
-    # 2.2.8. Upload to BigQuery
+    # 2.1.8. Upload to BigQuery
     try:
-        print(f"🔍 [INGEST] Uploading {len(df)} row(s) of TikTok ad insights to {table_id}...")
-        logging.info(f"🔍 [INGEST] Uploading {len(df)} row(s) of TikTok ad insights to {table_id}...")
+        print(f"🔍 [INGEST] Uploading {len(df)} row(s) of TikTok ad insights to table {table_id}...")
+        logging.info(f"🔍 [INGEST] Uploading {len(df)} row(s) of TikTok ad insights to table {table_id}...")
         job_config = bigquery.LoadJobConfig(
             write_disposition=write_disposition,
             source_format=bigquery.SourceFormat.PARQUET,
@@ -959,14 +975,18 @@ def ingest_tiktok_ad_insights(
                 field="date",
             ),
         )
-        client.load_table_from_dataframe(df, table_id, job_config=job_config).result()
+        load_job = client.load_table_from_dataframe(
+            df,
+            table_id,
+            job_config=job_config
+        )
+        load_job.result()
         print(f"✅ [INGEST] Successfully uploaded {len(df)} row(s) of TikTok ad insights.")
         logging.info(f"✅ [INGEST] Successfully uploaded {len(df)} row(s) of TikTok ad insights.")
     except Exception as e:
         print(f"❌ [INGEST] Failed to upload TikTok ad insights due to {e}.")
         logging.error(f"❌ [INGEST] Failed to upload TikTok ad insights due to {e}.")
         raise
-
     return df
 
 if __name__ == "__main__":
@@ -976,4 +996,4 @@ if __name__ == "__main__":
     parser.add_argument("--end_date", type=str, required=True, help="End date (YYYY-MM-DD)")
     args = parser.parse_args()
 
-    ingest_campaign_insights(start_date=args.start_date, end_date=args.end_date)
+    ingest_ad_insights(start_date=args.start_date, end_date=args.end_date)
