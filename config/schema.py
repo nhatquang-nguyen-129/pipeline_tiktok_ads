@@ -52,13 +52,15 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "advertiser_id": str,
         },
         "fetch_ad_metadata": {
+            "advertiser_id": str,
             "ad_id": str,
             "ad_name": str,
             "adgroup_id": str,
             "campaign_id": str,
             "status": str,
             "create_time": "datetime64[ns, UTC]",
-            "advertiser_id": str,
+            "ad_format": str,
+            "optimization_event": str
         },
         "fetch_ad_creative": {
             "ad_id": str,
@@ -127,7 +129,9 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "adgroup_id": str,
             "campaign_id": str,
             "status": str,
-            "create_time": "datetime64[ns, UTC]"
+            "create_time": "datetime64[ns, UTC]",
+            "ad_format": str,
+            "optimization_event": str
         },
         "ingest_ad_creative": {
             "ad_id": str,

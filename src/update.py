@@ -175,129 +175,64 @@ def update_campaign_insights(start_date: str, end_date: str):
 
 # 1.2. Update Facebook ad insights data for a given date range
 def update_ad_insights(start_date: str, end_date: str):
-    print(f"🚀 [UPDATE] Starting Facebook ad insights update from {start_date} to {end_date}...")
-    logging.info(f"🚀 [UPDATE] Starting Facebook Ads ad insights update from {start_date} to {end_date}...")
+    print(f"🚀 [UPDATE] Starting TikTok Ads ad insights update from {start_date} to {end_date}...")
+    logging.info(f"🚀 [UPDATE] Starting TikTok Ads ad insights update from {start_date} to {end_date}...")
 
     # 1.2.1. Start timing the update process
     start_time = time.time()
 
-    # 1.2.2. Initialize Facebook SDK session
-    try:
-        secret_client = secretmanager.SecretManagerServiceClient()
-        DEFAULT_SECRET_ID = f"{COMPANY}_secret_all_{PLATFORM}_token_access_user"
-        name = f"projects/{PROJECT}/secrets/{DEFAULT_SECRET_ID}/versions/latest"
-        response = secret_client.access_secret_version(name=name)
-        access_token = response.payload.data.decode("utf-8") if response.payload.data else None
-        if not access_token:
-            print(f"❌ [UPDATE] Failed to retrieve Facebook access token from Secret Manager secret_id {DEFAULT_SECRET_ID}.")
-            logging.error(f"❌ [UPDATE] Failed to retrieve Facebook access token from Secret Manager secret_id {DEFAULT_SECRET_ID}.")
-            raise RuntimeError(f"❌ [UPDATE] Failed to retrieve Facebook access token from Secret Manager secret_id {DEFAULT_SECRET_ID}.")
-        print(f"🔍 [UPDATE] Initializing Facebook SDK session...")
-        logging.info(f"🔍 [UPDATE] Initializing Facebook SDK session...")
-        FacebookAdsApi.init(access_token=access_token, timeout=180)
-        print("✅ [UPDATE] Successfully initialized Facebook SDK session.")
-        logging.info("✅ [UPDATE] Successfully initialized Facebook SDK session.")
-    except Exception as e:
-        print(f"❌ [UPDATE] Failed to initialize Facebook SDK session due to {str(e)}.")
-        logging.error(f"❌ [UPDATE] Failed to initialize Facebook SDK session due to {str(e)}.")
-        raise
-
-    # 1.2.3. Initialize Google BigQuery session
-    try:
-        print(f"🔍 [UPDATE] Initializing Google BigQuery client for project {PROJECT}...")
-        logging.info(f"🔍 [UPDATE] Initializing Google BigQuery client for project {PROJECT}...")
-        client = bigquery.Client(project=PROJECT)
-        print(f"✅ [UPDATE] Successfully initialized Google BigQuery client for {PROJECT}.")
-        logging.info(f"✅ [UPDATE] Successfully initialized Google BigQuery client for {PROJECT}.")
-    except DefaultCredentialsError as e:
-        raise RuntimeError(f"❌ [UPDATE] Failed to initialize Google BigQuery client due to credentials error.") from e
-    except Exception as e:
-        print(f"❌ [UPDATE] Failed to initialize Google BigQuery client due to {str(e)}.")
-        logging.error(f"❌ [UPDATE] Failed to initialize Google BigQuery client due to {str(e)}.")
-
-    # 1.2.4. Prepare table_id
+    # 1.2.2. Prepare table_id
     raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
     print(f"🔍 [UPDATE] Proceeding to update Facebook ad insights from {start_date} to {end_date}...")
     logging.info(f"🔍 [UPDATE] Proceeding to update Facebook ad insights from {start_date} to {end_date}...")
 
-    # 1.2.5. Iterate over input date range to verify data freshness
-    date_range = pd.date_range(start=start_date, end=end_date)
-    updated_ad_ids = set()
-    for date in date_range:
-        day_str = date.strftime("%Y-%m-%d")
-        y, m = date.year, date.month
-        table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_m{m:02d}{y}"
-        print(f"🔎 [UPDATE] Evaluating {day_str} in Facebook ad insights table {table_id}...")
-        logging.info(f"🔎 [UPDATE] Evaluating {day_str} in Facebook ad insights table {table_id}...")      
-        should_ingest = False
-        try:
-            client.get_table(table_id)
-        except NotFound:
-            print(f"⚠️ [UPDATE] Facebook ad insights table {table_id} not found then ingestion will be starting...")
-            logging.warning(f"⚠️ [UPDATE] Facebook ad insights table {table_id} not found then ingestion will be starting...")
-            should_ingest = True
-        else:
-            query = f"""
-                SELECT MAX(last_updated_at) as last_updated
-                FROM `{table_id}`
-                WHERE date_start = @day_str
-            """
-            job_config = bigquery.QueryJobConfig(
-                query_parameters=[bigquery.ScalarQueryParameter("day_str", "STRING", day_str)]
-            )
-            try:
-                result = client.query(query, job_config=job_config).result()
-                last_updated = list(result)[0]["last_updated"]
-                if not last_updated:
-                    print(f"⚠️ [UPDATE] Facebook ad insights for day {day_str} was not found then ingestion will be starting...")
-                    logging.warning(f"⚠️ [UPDATE] Facebook ad insights for day {day_str} was not found then ingestion will be starting...")
-                    should_ingest = True
-                else:
-                    delta = datetime.now(timezone.utc) - last_updated
-                    if delta > timedelta(hours=1):
-                        print(f"⚠️ [UPDATE] Facebook ad insights is outdated with last update was {last_updated} then ingestion will be starting...")
-                        logging.warning(f"⚠️ [UPDATE] Facebook ad insights is outdated with last update was {last_updated} then ingestion will be starting...")
-                        should_ingest = True
-                    else:
-                        print(f"✅ [UPDATE] Facebook ad insights for day {day_str} is fresh then ingestion is skipped.")
-                        logging.info(f"✅ [UPDATE] Facebook ad insights for day {day_str} is fresh then ingestion is skipped.")
-            except Exception as e:
-                print(f"❌ [UPDATE] Failed to verify Facebook ad insights data freshness for {day_str} due to {e}.")
-                logging.error(f"❌ [UPDATE] Failed to verify Facebook ad insights data freshness for {day_str} due to {e}.")
-                should_ingest = True
-
-    # 1.2.6. Ingest Facebook ad insights
-        if should_ingest:
-            try:
-                print(f"🔄 [UPDATE] Triggering to ingest Facebook ad insights for {day_str}...")
-                logging.info(f"🔄 [UPDATE] Triggering to ingest Facebook ad insights for {day_str}...")
-                df = ingest_ad_insights(
-                    start_date=day_str,
-                    end_date=day_str,
-                    write_disposition="WRITE_APPEND"
-                )
-                if "ad_id" in df.columns:
-                    updated_ad_ids.update(df["ad_id"].dropna().unique())
-            except Exception as e:
-                print(f"❌ [UPDATE] Failed to trigger Facebook ad insights ingestion for {day_str} due to {e}.")
-                logging.error(f"❌ [UPDATE] Failed to trigger Facebook ad insights ingestion for {day_str} due to {e}.")
+    # 1.2.3. Triger to ingest TikTok Ads Âd insights
+    try:
+        print(f"🔄 [UPDATE] Triggering to ingest TikTok Ads ad insights from {start_date} to {end_date}...")
+        logging.info(f"🔄 [UPDATE] Triggering to ingest TikTok Ads ad insights from {start_date} to {end_date}...")
+        df = ingest_ad_insights(
+            start_date=start_date,
+            end_date=end_date
+        )
+        updated_ad_ids = set()
+        if "campaign_id" in df.columns:
+            updated_ad_ids.update(df["campaign_id"].dropna().unique())
+    except Exception as e:
+        print(f"❌ [UPDATE] Failed to ingest TikTok Ads ad insights from {start_date} to {end_date} due to {e}.")
+        logging.error(f"❌ [UPDATE] Failed to ingest TikTok Ads ad insights from {start_date} to {end_date} due to {e}.")
 
     # 1.2.7. Ingest Facebook ad metadata
     if updated_ad_ids:
-        print(f"🔄 [UPDATE] Triggering to ingest Facebook ad metadata for {len(updated_ad_ids)} ad_id(s)...")
-        logging.info(f"🔄 [UPDATE] Triggering to ingest Facebook ad metadata for {len(updated_ad_ids)} ad_id(s)...")
+        print(f"🔄 [UPDATE] Triggering to ingest TikTok Ads ad metadata for {len(updated_ad_ids)} ad_id(s)...")
+        logging.info(f"🔄 [UPDATE] Triggering to ingest TikTok Ads ad metadata for {len(updated_ad_ids)} ad_id(s)...")
         try:
             ingest_ad_metadata(ad_id_list=list(updated_ad_ids))
         except Exception as e:
-            print(f"❌ [UPDATE] Failed to trigger Facebook ad metadata ingestion for {len(updated_ad_ids)} ad_id(s) due to {e}.")
-            logging.error(f"❌ [UPDATE] Failed to trigger Facebook ad metadata ingestion for {len(updated_ad_ids)} ad_id(s) due to {e}.")
+            print(f"❌ [UPDATE] Failed to trigger TikTok Ads ad metadata ingestion for {len(updated_ad_ids)} ad_id(s) due to {e}.")
+            logging.error(f"❌ [UPDATE] Failed to trigger TikTok ad metadata ingestion for {len(updated_ad_ids)} ad_id(s) due to {e}.")
 
     # 1.2.8. Ingest Facebook adset metadata
         try:
             print(f"🔄 [UPDATE] Triggering to ingest Facebook adset metadata for {len(updated_ad_ids)} ad_id(s)...")
             logging.info(f"🔄 [UPDATE] Triggering to ingest Facebook adset metadata for {len(updated_ad_ids)} ad_id(s)...")
+            
+            try:
+                print(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+                logging.info(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+                google_bigquery_client = bigquery.Client(project=PROJECT)
+                print(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+                logging.info(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+            except DefaultCredentialsError as e:
+                raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to credentials error.") from e
+            except Forbidden as e:
+                raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to permission denial.") from e
+            except GoogleAPICallError as e:
+                raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to API call error.") from e
+            except Exception as e:
+                raise RuntimeError(f"❌ [INGEST] Failed to initialize Google BigQuery client due to {e}.") from e
+            
             raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
-            tables = client.list_tables(dataset=raw_dataset)
+            tables = google_bigquery_client.list_tables(dataset=raw_dataset)
             pattern = rf"^{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_m\d{{2}}\d{{4}}$"
             ad_tables = [
                 f"{PROJECT}.{raw_dataset}.{table.table_id}"
@@ -305,8 +240,8 @@ def update_ad_insights(start_date: str, end_date: str):
             ]
             union_query = " UNION DISTINCT ".join([
                 f"""
-                SELECT DISTINCT CAST(adset_id AS STRING) AS adset_id
-                FROM `{tbl}` WHERE ad_id IN UNNEST(@ad_ids) AND adset_id IS NOT NULL
+                SELECT DISTINCT CAST(adgroup_id AS STRING) AS adgroup_id
+                FROM `{tbl}` WHERE ad_id IN UNNEST(@ad_ids) AND adgroup_id IS NOT NULL
                 """
                 for tbl in ad_tables
             ])
@@ -315,7 +250,7 @@ def update_ad_insights(start_date: str, end_date: str):
                     bigquery.ArrayQueryParameter("ad_ids", "STRING", list(updated_ad_ids))
                 ]
             )
-            adset_ids_df = client.query(union_query, job_config=job_config).to_dataframe()
+            adset_ids_df = google_bigquery_client.query(union_query, job_config=job_config).to_dataframe()
             adset_id_list = adset_ids_df["adset_id"].dropna().unique().tolist()
             ingest_adset_metadata(adset_id_list=adset_id_list)
         except Exception as e:
