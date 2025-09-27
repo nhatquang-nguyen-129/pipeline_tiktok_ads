@@ -104,20 +104,19 @@ def mart_campaign_all() -> None:
                 SAFE_CAST(noi_dung AS STRING) AS noi_dung,
                 SAFE_CAST(nen_tang AS STRING) AS nen_tang,
                 SAFE_CAST(hinh_thuc AS STRING) AS hinh_thuc,
-                SAFE_CAST(nganh_hang AS STRING) AS nganh_hang,  -- thêm nganh_hang
+                SAFE_CAST(nganh_hang AS STRING) AS nganh_hang,
                 SAFE_CAST(campaign_name AS STRING) AS campaign_name,
                 CAST(`date` AS DATE) AS ngay,
                 SAFE_CAST(spend AS FLOAT64) AS spend,
                 SAFE_CAST(result AS INT64) AS result,
                 SAFE_CAST(result_type AS STRING) AS result_type,
-                SAFE_CAST(purchase AS INT64) AS purchase,
-                SAFE_CAST(messaging_conversations_started AS INT64) AS messaging_conversations_started,
-                SAFE_CAST(reach AS INT64) AS reach,
                 SAFE_CAST(impressions AS INT64) AS impressions,
                 SAFE_CAST(clicks AS INT64) AS clicks,
+                SAFE_CAST(video_watched_2s AS INT64) AS video_watched_2s,
+                SAFE_CAST(purchase AS INT64) AS purchase,
                 CASE
-                    WHEN REGEXP_CONTAINS(delivery_status, r"ACTIVE") THEN "🟢"
-                    WHEN REGEXP_CONTAINS(delivery_status, r"PAUSED") THEN "⚪"
+                    WHEN REGEXP_CONTAINS(delivery_status, r"ENABLE") THEN "🟢"
+                    WHEN REGEXP_CONTAINS(delivery_status, r"DISABLE") THEN "⚪"
                     ELSE "❓"
                 END AS trang_thai
             FROM `{staging_table_campaign}`

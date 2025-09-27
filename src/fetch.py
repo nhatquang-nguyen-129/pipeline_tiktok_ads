@@ -81,7 +81,7 @@ MODE = os.getenv("MODE")
 # 1. FETCH TIKTOK ADS METADATA
 
 # 1.1. Fetch campaign metadata for TikTok Ads
-def fetch_campaign_metadata(campaign_id_list: list[str], fields: list[str] = None) -> pd.DataFrame:
+def fetch_campaign_metadata(campaign_id_list: list[str]) -> pd.DataFrame:
     print(f"🚀 [FETCH] Starting to fetch TikTok Ads campaign metadata for {len(campaign_id_list)} campaign_id(s)...")
     logging.info(f"🚀 [FETCH] Starting to fetch TikTok Ads campaign metadata for {len(campaign_id_list)} campaign_id(s)...")
 
@@ -92,17 +92,16 @@ def fetch_campaign_metadata(campaign_id_list: list[str], fields: list[str] = Non
         return pd.DataFrame()
 
     # 1.1.2. Prepare fields
-    default_fields = [
+    fetch_fields_default = [
         "advertiser_id",
         "campaign_id",
         "campaign_name",
         "operation_status",
         "create_time"
     ]
-    fetch_fields = fields if fields else default_fields
     all_records = []
-    print(f"🔍 [FETCH] Preparing to fetch TikTok Ads campaign metadata with {fetch_fields} field(s)...")
-    logging.info(f"🔍 [FETCH] Preparing to fetch TikTok Ads campaign metadata with {fetch_fields} field(s)...")
+    print(f"🔍 [FETCH] Preparing to fetch TikTok Ads campaign metadata with {fetch_fields_default} field(s)...")
+    logging.info(f"🔍 [FETCH] Preparing to fetch TikTok Ads campaign metadata with {fetch_fields_default} field(s)...")
 
     try:
     
@@ -163,7 +162,7 @@ def fetch_campaign_metadata(campaign_id_list: list[str], fields: list[str] = Non
             print(f"🔍 [FETCH] Retrieving TikTok Ads advertiser_name for advertiser_id {advertiser_id}...")
             logging.info(f"🔍 [FETCH] Retrieving TikTok Ads account name for advertiser_id {advertiser_id}...")
             payload = {"advertiser_ids": [advertiser_id]}
-            response = requests.post(advertiser_info_url, headers=advertiser_info_headers, json=payload)
+            response = requests.get(advertiser_info_url, headers=advertiser_info_headers, json=payload)
             advertiser_data_response = response.json()
             advertiser_name = None
             if advertiser_data_response.get("code") == 0 and advertiser_data_response.get("data", {}).get("list"):
@@ -174,8 +173,8 @@ def fetch_campaign_metadata(campaign_id_list: list[str], fields: list[str] = Non
                 print(f"⚠️ [FETCH] No advertiser_name returned for TikTok Ads advertiser_id {advertiser_id}.")
                 logging.warning(f"⚠️ [FETCH] No advertiser_name returned for TikTok Ads advertiser_id {advertiser_id}.")
         except Exception as e:
-            print(f"❌ [FETCH] Failed to fetch metadata for TikTok Ads campaign_id {campaign_id} due to {e}.")
-            logging.error(f"❌ [FETCH] Failed to fetch metadata for TikTok Ads campaign_id {campaign_id} due to {e}.")
+            print(f"❌ [FETCH] Failed to fetch advertiser_name for TikTok Ads advertiser_id {advertiser_id} due to {e}.")
+            logging.error(f"❌ [FETCH] Failed to fetch advertiser_name for TikTok Ads advertiser_id {advertiser_id} due to {e}.")
 
     # 1.1.7. Make TikTok API call for campaign endpoint
         campaign_get_url = "https://business-api.tiktok.com/open_api/v1.3/campaign/get/"
@@ -192,7 +191,7 @@ def fetch_campaign_metadata(campaign_id_list: list[str], fields: list[str] = Non
                 payload = {
                     "advertiser_id": advertiser_id,
                     "filtering": {"campaign_ids": [campaign_id]},
-                    "fields": fetch_fields
+                    "fields": fetch_fields_default
                 }
 
                 response = requests.get(campaign_get_url, headers=campaign_get_headers, json=payload)
@@ -238,7 +237,7 @@ def fetch_campaign_metadata(campaign_id_list: list[str], fields: list[str] = Non
         return pd.DataFrame()
 
 # 1.2. Fetch adset metdata for TikTok Ads
-def fetch_adset_metadata(adgroup_id_list: list[str], fields: list[str] = None) -> pd.DataFrame:
+def fetch_adset_metadata(adgroup_id_list: list[str]) -> pd.DataFrame:
     print(f"🚀 [FETCH] Starting to fetch TikTok {len(adgroup_id_list)} adgroup metadata(s)...")
     logging.info(f"🚀 [FETCH] Starting to fetch TikTok {len(adgroup_id_list)} adgroup metadata(s)...")
 
@@ -249,7 +248,7 @@ def fetch_adset_metadata(adgroup_id_list: list[str], fields: list[str] = None) -
         return pd.DataFrame()
 
     # 1.2.2. Prepare fields
-    default_fields = [
+    fetch_fields_default = [
         "advertiser_id",
         "campaign_id",
         "adgroup_id",
@@ -257,10 +256,9 @@ def fetch_adset_metadata(adgroup_id_list: list[str], fields: list[str] = None) -
         "advertiser_name",
         "adgroup_name"
     ]
-    fetch_fields = fields if fields else default_fields
     all_records = []
-    print(f"🔍 [FETCH] Preparing to fetch TikTok adset metadata with {fetch_fields} field(s)...")
-    logging.info(f"🔍 [FETCH] Preparing to fetch TikTok adset metadata with {fetch_fields} field(s)...")
+    print(f"🔍 [FETCH] Preparing to fetch TikTok adset metadata with {fetch_fields_default} field(s)...")
+    logging.info(f"🔍 [FETCH] Preparing to fetch TikTok adset metadata with {fetch_fields_default} field(s)...")
 
     try:
     
@@ -322,7 +320,7 @@ def fetch_adset_metadata(adgroup_id_list: list[str], fields: list[str] = None) -
                 params = {
                     "tiktok_advertiser_id": tiktok_advertiser_id,
                     "filtering": json.dumps({"adgroup_ids": [adgroup_id]}),
-                    "fields": fetch_fields
+                    "fields": fetch_fields_default
                 }
 
                 resp = requests.get(tiktok_adgroup_url, headers=headers, params=params)

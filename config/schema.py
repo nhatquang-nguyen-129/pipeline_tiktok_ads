@@ -174,13 +174,15 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "messaging_total_conversation_tiktok_direct_message": int,  # Conversations (TikTok direct message)
             "last_updated_at": "datetime64[ns, UTC]"
         },
-        "staging_ad_insights": {
-            # Raw fields từ ingest
-            "advertiser_id": str,
-            "ad_id": str,
-            "objective_type": str,
+        "staging_campaign_insights": {
+            "account_id": str,
+            "account_name": str,
+            "campaign_id": str,
+            "campaign_name": str,
+            "delivery_status": str,
+            "result_type": str,
             "result": str,
-            "stat_time_day": str,
+            "date_start": str,
             "spend": float,
             "impressions": int,
             "clicks": int,
@@ -192,6 +194,7 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "onsite_shopping": int,                           # Purchases (TikTok Shop)
             "messaging_total_conversation_tiktok_direct_message": int,  # Conversations (TikTok direct message)
             "last_updated_at": "datetime64[ns, UTC]",
+            "invalid_campaign_name": str,
 
             # Các field mapping nội bộ
             "hinh_thuc": str,

@@ -126,7 +126,7 @@ def staging_campaign_insights() -> None:
         print(f"✅ [STAGING] Successfully found {len(raw_tables)} raw TikTok Ads campaign insights table(s).")
         logging.info(f"✅ [STAGING] Successfully found {len(raw_tables)} raw TikTok Ads campaign insights table(s).")
 
-    # 1.1.4. Query all raw TikTok Ads campaign table(s)
+    # 1.1.3. Query raw table(s)
         all_dfs = []
         for raw_table in raw_tables:
             print(f"🔄 [STAGING] Querying raw Facebook campaign insights table {raw_table}...")
@@ -135,8 +135,8 @@ def staging_campaign_insights() -> None:
                 SELECT
                     raw.*,
                     metadata.campaign_name,
-                    metadata.advertiser_name AS account_name,
-                    metadata.operation_status AS delivery_status
+                    metadata.advertiser_name,
+                    metadata.operation_status
                 FROM `{raw_table}` AS raw
                 LEFT JOIN `{raw_campaign_metadata}` AS metadata
                     ON CAST(raw.campaign_id AS STRING) = CAST(metadata.campaign_id AS STRING)
@@ -144,11 +144,11 @@ def staging_campaign_insights() -> None:
             """
             try:
                 df_month = google_bigquery_client.query(query).to_dataframe()
-                print(f"✅ [STAGING] Successfully queried {len(df_month)} row(s) of raw TikTok Ads campaign insights from {raw_table}.")
-                logging.info(f"✅ [STAGING] Successfully queried {len(df_month)} row(s) of raw TikTok Ads campaign insights from {raw_table}.")
+                print(f"✅ [STAGING] Successfully queried {len(df_month)} row(s) of raw Facebook campaign insights from {raw_table}.")
+                logging.info(f"✅ [STAGING] Successfully queried {len(df_month)} row(s) of raw Facebook campaign insights from {raw_table}.")
             except Exception as e:
-                print(f"❌ [STAGING] Failed to query TikTok Ads campaign insights raw table {raw_table} due to {e}.")
-                logging.warning(f"❌ [STAGING] Failed to query TikTok Ads campaign insights raw table {raw_table} due to {e}.")
+                print(f"❌ [STAGING] Failed to query Facebook campaign insights raw table {raw_table} due to {e}.")
+                logging.warning(f"❌ [STAGING] Failed to query Facebook campaign insights raw table {raw_table} due to {e}.")
                 continue
 
     # 1.1.5. Enrich TikTok Ads insights
@@ -156,23 +156,26 @@ def staging_campaign_insights() -> None:
             try:
                 print(f"🔄 [STAGING] Triggering to normalize and enrich staging TikTok Ads campaign insights field(s) for {len(df_month)} row(s) from {raw_table}...")
                 logging.info(f"🔄 [STAGING] Triggering to normalize and enrich staging TikTok Ads campaign insights field(s) for {len(df_month)} row(s) from {raw_table}...")
-
-                # 🔹 Đổi tên field TikTok -> đồng bộ với schema Facebook
                 df_month = df_month.rename(columns={
                     "advertiser_id": "account_id",
                     "objective_type": "result_type",
-                    "stat_time_day": "date_start"
-                })
-
+                    "advertiser_name": "account_name",
+                    "operation_status": "delivery_status"
+                })               
                 df_month = enrich_campaign_fields(df_month, table_id=raw_table)
-
                 if "nhan_su" in df_month.columns:
                     df_month["nhan_su"] = df_month["nhan_su"].apply(remove_string_accents)
-
                 all_dfs.append(df_month)
             except Exception as e:
                 print(f"❌ [STAGING] Failed to trigger enrichment for staging TikTok Ads campaign insights due to {e}.")
                 logging.warning(f"❌ [STAGING] Failed to trigger enrichment for staging TikTok Ads campaign insights due to {e}.") 
+        if not all_dfs:
+            print("⚠️ [STAGING] No data found in any raw TikTok Ads campaign insights table(s).")
+            logging.warning("⚠️ [STAGING] No data found in any raw TikTok Ads campaign insights table(s).")
+            return
+        df_all = pd.concat(all_dfs, ignore_index=True)
+        print(f"✅ [STAGING] Successfully combined {len(df_all)} row(s) from all TikTok Ads raw campaign insights table(s).")
+        logging.info(f"✅ [STAGING] Successfully combined {len(df_all)} row(s) from all TikTok Ads raw campaign insights table(s).")
 
     # 1.1.6. Enforce schema for TikTok Ads campaign insights
         try:
