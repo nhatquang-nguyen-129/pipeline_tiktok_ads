@@ -657,12 +657,7 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
 # 2. INGEST TIKTOK ADS INSIGHTS
 
 # 2.1. Ingest campaign insights for TikToK Ads
-def ingest_campaign_insights(
-    start_date: str,
-    end_date: str,
-    write_disposition: str = "WRITE_APPEND"
-) -> pd.DataFrame:
-
+def ingest_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
     print(f"🚀 [INGEST] Starting to ingest TikTok Ads campaign insights from {start_date} to {end_date}...")
     logging.info(f"🚀 [INGEST] Starting to ingest TikTok Ads campaign insights from {start_date} to {end_date}...")
 
@@ -810,7 +805,7 @@ def ingest_campaign_insights(
         print(f"🔍 [INGEST] Uploading {len(df)} row(s) of TikTok Ads campaign insights to table {table_id}...")
         logging.info(f"🔍 [INGEST] Uploading {len(df)} row(s) of TikTok ADs campaign insights to table {table_id}...")
         job_config = bigquery.LoadJobConfig(
-            write_disposition=write_disposition,
+            write_disposition="WRITE_APPEND",
             source_format=bigquery.SourceFormat.PARQUET,
             time_partitioning=bigquery.TimePartitioning(
                 type_=bigquery.TimePartitioningType.DAY,
@@ -832,12 +827,7 @@ def ingest_campaign_insights(
     return df
 
 # 2.2. Ingest ad insights for TikTok Ads
-def ingest_ad_insights(
-    start_date: str,
-    end_date: str,
-    write_disposition: str = "WRITE_APPEND"
-) -> pd.DataFrame:
-
+def ingest_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
     print(f"🚀 [INGEST] Starting to ingest TikTok Ads ad insights from {start_date} to {end_date}...")
     logging.info(f"🚀 [INGEST] Starting to ingest TikTok Ads ad insights from {start_date} to {end_date}...")
 
@@ -983,7 +973,7 @@ def ingest_ad_insights(
         print(f"🔍 [INGEST] Uploading {len(df)} row(s) of TikTok Ads ad insights to table {table_id}...")
         logging.info(f"🔍 [INGEST] Uploading {len(df)} row(s) of TikTok Ads ad insights to table {table_id}...")
         job_config = bigquery.LoadJobConfig(
-            write_disposition=write_disposition,
+            write_disposition="WRITE_APPEND",
             source_format=bigquery.SourceFormat.PARQUET,
             time_partitioning=bigquery.TimePartitioning(
                 type_=bigquery.TimePartitioningType.DAY,

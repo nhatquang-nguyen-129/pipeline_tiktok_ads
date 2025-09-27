@@ -238,8 +238,8 @@ def fetch_campaign_metadata(campaign_id_list: list[str]) -> pd.DataFrame:
 
 # 1.2. Fetch adset metdata for TikTok Ads
 def fetch_adset_metadata(adgroup_id_list: list[str]) -> pd.DataFrame:
-    print(f"🚀 [FETCH] Starting to fetch TikTok {len(adgroup_id_list)} adgroup metadata(s)...")
-    logging.info(f"🚀 [FETCH] Starting to fetch TikTok {len(adgroup_id_list)} adgroup metadata(s)...")
+    print(f"🚀 [FETCH] Starting to fetch TikTok Ads {len(adgroup_id_list)} adset metadata(s)...")
+    logging.info(f"🚀 [FETCH] Starting to fetch TikTok Ads {len(adgroup_id_list)} adset metadata(s)...")
 
     # 1.2.1. Validate input
     if not adgroup_id_list:
