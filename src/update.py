@@ -195,8 +195,8 @@ def update_ad_insights(start_date: str, end_date: str):
             end_date=end_date
         )
         updated_ad_ids = set()
-        if "campaign_id" in df.columns:
-            updated_ad_ids.update(df["campaign_id"].dropna().unique())
+        if "ad_id" in df.columns:
+            updated_ad_ids.update(df["ad_id"].dropna().unique())
     except Exception as e:
         print(f"❌ [UPDATE] Failed to ingest TikTok Ads ad insights from {start_date} to {end_date} due to {e}.")
         logging.error(f"❌ [UPDATE] Failed to ingest TikTok Ads ad insights from {start_date} to {end_date} due to {e}.")
@@ -210,52 +210,6 @@ def update_ad_insights(start_date: str, end_date: str):
         except Exception as e:
             print(f"❌ [UPDATE] Failed to trigger TikTok Ads ad metadata ingestion for {len(updated_ad_ids)} ad_id(s) due to {e}.")
             logging.error(f"❌ [UPDATE] Failed to trigger TikTok ad metadata ingestion for {len(updated_ad_ids)} ad_id(s) due to {e}.")
-
-    # 1.2.8. Ingest Facebook adset metadata
-        try:
-            print(f"🔄 [UPDATE] Triggering to ingest Facebook adset metadata for {len(updated_ad_ids)} ad_id(s)...")
-            logging.info(f"🔄 [UPDATE] Triggering to ingest Facebook adset metadata for {len(updated_ad_ids)} ad_id(s)...")
-            
-            try:
-                print(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
-                logging.info(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
-                google_bigquery_client = bigquery.Client(project=PROJECT)
-                print(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-                logging.info(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-            except DefaultCredentialsError as e:
-                raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to credentials error.") from e
-            except Forbidden as e:
-                raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to permission denial.") from e
-            except GoogleAPICallError as e:
-                raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to API call error.") from e
-            except Exception as e:
-                raise RuntimeError(f"❌ [INGEST] Failed to initialize Google BigQuery client due to {e}.") from e
-            
-            raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
-            tables = google_bigquery_client.list_tables(dataset=raw_dataset)
-            pattern = rf"^{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_m\d{{2}}\d{{4}}$"
-            ad_tables = [
-                f"{PROJECT}.{raw_dataset}.{table.table_id}"
-                for table in tables if re.match(pattern, table.table_id)
-            ]
-            union_query = " UNION DISTINCT ".join([
-                f"""
-                SELECT DISTINCT CAST(adgroup_id AS STRING) AS adgroup_id
-                FROM `{tbl}` WHERE ad_id IN UNNEST(@ad_ids) AND adgroup_id IS NOT NULL
-                """
-                for tbl in ad_tables
-            ])
-            job_config = bigquery.QueryJobConfig(
-                query_parameters=[
-                    bigquery.ArrayQueryParameter("ad_ids", "STRING", list(updated_ad_ids))
-                ]
-            )
-            adset_ids_df = google_bigquery_client.query(union_query, job_config=job_config).to_dataframe()
-            adset_id_list = adset_ids_df["adset_id"].dropna().unique().tolist()
-            ingest_adset_metadata(adset_id_list=adset_id_list)
-        except Exception as e:
-            print(f"❌ [UPDATE] Failed to trigger Facebook adset metadata ingestion for {len(updated_ad_ids)} ad_id(s) due to {e}.")
-            logging.error(f"❌ [UPDATE] Failed to trigger Facebook adset metadata ingestion for {len(updated_ad_ids)} ad_id(s) due to {e}.")
 
     # 1.2.9. Ingest Facebook ad creative
         print(f"🔄 [UPDATE] Triggering to ingest Facebook ad creative for {len(updated_ad_ids)} ad_id(s)...")
@@ -325,4 +279,4 @@ if __name__ == "__main__":
     parser.add_argument("--end_date", type=str, required=True, help="End date (YYYY-MM-DD)")
     args = parser.parse_args()
 
-    update_campaign_insights(start_date=args.start_date, end_date=args.end_date)
+    update_ad_insights(start_date=args.start_date, end_date=args.end_date)

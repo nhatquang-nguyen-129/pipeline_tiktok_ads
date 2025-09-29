@@ -56,8 +56,10 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "ad_id": str,
             "ad_name": str,
             "adgroup_id": str,
+            "adgroup_name": str,
             "campaign_id": str,
-            "status": str,
+            "campaign_name": str,
+            "operation_status": str,
             "create_time": "datetime64[ns, UTC]",
             "ad_format": str,
             "optimization_event": str
@@ -113,22 +115,15 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "operation_status": str,
             "create_time": "datetime64[ns, UTC]"
         },
-        "ingest_adset_metadata": {
-            "adgroup_id": str,
-            "adgroup_name": str,
-            "campaign_id": str,
-            "placement_type": str,
-            "status": str,
-            "create_time": "datetime64[ns, UTC]",
-            "advertiser_id": str,
-        },
         "ingest_ad_metadata": {
             "advertiser_id": str,
             "ad_id": str,
             "ad_name": str,
             "adgroup_id": str,
+            "adgroup_name": str,
             "campaign_id": str,
-            "status": str,
+            "campaign_name": str,
+            "operation_status": str,
             "create_time": "datetime64[ns, UTC]",
             "ad_format": str,
             "optimization_event": str
