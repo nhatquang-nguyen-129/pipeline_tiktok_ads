@@ -67,11 +67,10 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
         "fetch_ad_creative": {
             "ad_id": str,
             "advertiser_id": str,
-            "creative_id": str,
-            "thumbnail_url": str, 
             "video_id": str,
-            "image_id": str,
-            "create_time": "datetime64[ns, UTC]",
+            "video_cover_url": str,
+            "preview_url": str,
+            "create_time": "datetime64[ns, UTC]"
         },
         "fetch_campaign_insights": {
             "advertiser_id": str,
@@ -131,10 +130,9 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
         "ingest_ad_creative": {
             "ad_id": str,
             "advertiser_id": str,
-            "creative_id": str,
-            "thumbnail_url": str, 
             "video_id": str,
-            "image_id": str,
+            "video_cover_url": str,
+            "preview_url": str,
             "create_time": "datetime64[ns, UTC]"
         },
         "ingest_campaign_insights": {

@@ -61,7 +61,6 @@ from google.cloud import secretmanager
 # Add internal TikTok Ads module for handling
 from src.ingest import (
     ingest_campaign_metadata,
-    ingest_adset_metadata,
     ingest_ad_metadata,
     ingest_ad_creative,
     ingest_campaign_insights,
