@@ -259,9 +259,8 @@ def staging_ad_insights() -> None:
     try:
         raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
         raw_campaign_metadata = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_campaign_metadata"
-        raw_adset_metadata = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_adset_metadata"
         raw_ad_metadata = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_metadata"
-        raw_creative_metadata = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_creative_metadata"
+        raw_ad_creative = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_creative_metadata"
         print(f"🔍 [STAGING] Using raw table metadata {raw_dataset} to build staging table for TikTok Ads ad insights...")
         logging.info(f"🔍 [STAGING] Using raw table metadata {raw_dataset} to build staging table for TikTok Ads ad insights...")
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"

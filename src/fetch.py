@@ -564,7 +564,6 @@ def fetch_ad_creative(ad_id_list: list[str]) -> pd.DataFrame:
             # map nhanh video_id -> metadata
             video_map = {v["video_id"]: v for v in all_videos if v.get("video_id")}
 
-
             video_records = []
             for record in all_records:
                 vid = record.get("video_id")
@@ -608,7 +607,6 @@ def fetch_ad_creative(ad_id_list: list[str]) -> pd.DataFrame:
                 print(f"✅ [MERGE] Successfully merged {len(df_merged)} ads with video metadata.")
                 logging.info(f"✅ [MERGE] Successfully merged {len(df_merged)} ads with video metadata.")
 
-                # 🔍 Debug: sample
                 print("🔍 [DEBUG] Sample merged records:")
                 print(df_merged.head(5).to_json(orient="records", indent=2, force_ascii=False))
                 logging.info(f"🔍 [DEBUG] Sample merged records: {df_merged.head(5).to_dict(orient='records')}")
@@ -625,20 +623,14 @@ def fetch_ad_creative(ad_id_list: list[str]) -> pd.DataFrame:
 
 
     # 1.4.7–1.4.8 simplified: only return ad_id + video_id
+        print(f"✅ [FETCH] Successfully built DataFrame with {len(df_merged)} row(s). Sample:")
+        print(df_merged.head(5).to_dict(orient="records"))
         try:
-            df = pd.DataFrame(all_records)
-            if df.empty:
-                print("⚠️ [FETCH] No TikTok Ads ad creative fetched into DataFrame.")
-                logging.warning("⚠️ [FETCH] No TikTok Ads ad creative fetched into DataFrame.")
-                return pd.DataFrame()
-
-            print(f"✅ [FETCH] Successfully built DataFrame with {len(df)} row(s). Sample:")
-            print(df.head(5).to_dict(orient="records"))
 
             # enforce schema
-            print(f"🔄 [FETCH] Enforcing schema for {len(df)} row(s) of TikTok Ads ad creative...")
-            logging.info(f"🔄 [FETCH] Enforcing schema for {len(df)} row(s) of TikTok Ads ad creative...")
-            df = ensure_table_schema(df, "fetch_ad_creative")
+            print(f"🔄 [FETCH] Enforcing schema for {len(df_merged)} row(s) of TikTok Ads ad creative...")
+            logging.info(f"🔄 [FETCH] Enforcing schema for {len(df_merged)} row(s) of TikTok Ads ad creative...")
+            df = ensure_table_schema(df_merged, "fetch_ad_creative")
             print(f"✅ [FETCH] Schema enforced for {len(df)} row(s).")
             logging.info(f"✅ [FETCH] Schema enforced for {len(df)} row(s).")
 
