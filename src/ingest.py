@@ -3,9 +3,9 @@
 TIKTOK INGESTION MODULE
 ------------------------------------------------------------------
 This module ingests raw data from the TikTok Marketing API into 
-Google BigQuery, forming the raw data layer of the Ads Data Pipeline.
+Google BigQuery by forming the raw data layer of the Ads Data Pipeline.
 
-It orchestrates the full ingestion flow: from authenticating the SDK, 
+It orchestrates the full ingestion flow, from authenticating the SDK, 
 to fetching data, enriching it, validating schema, and loading into 
 BigQuery tables organized by campaign, ad, creative and metadata.
 
@@ -27,9 +27,6 @@ from datetime import datetime
 
 # Add timezone ultilities for integration
 import pytz
-
-# Add JSON ultilities for integration
-import json 
 
 # Add logging ultilities forintegration
 import logging
