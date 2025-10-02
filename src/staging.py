@@ -2,9 +2,9 @@
 ==================================================================
 TIKTOK STAGING MODULE
 ------------------------------------------------------------------
-This module transforms raw TikTok Ads data into enriched,  
-normalized **staging tables** in BigQuery, acting as the bridge  
-between raw API ingestion and final MART-level analytics.
+This module transforms raw TikTok Ads data into enriched, normalized 
+staging tables in Google BigQuery, acting as the bridge between raw 
+API ingestion and final MART-level analytics.
 
 It combines raw ad/campaign/creative data, applies business logic  
 (e.g., parsing naming conventions, standardizing fields), and  
@@ -34,7 +34,6 @@ import pandas as pd
 from google.api_core.exceptions import (
     Forbidden,
     GoogleAPICallError,
-    NotFound
 )
 
 # Add Google Authentication libraries for integration
@@ -43,7 +42,7 @@ from google.auth.exceptions import DefaultCredentialsError
 # Add Google Cloud modules for integration
 from google.cloud import bigquery
 
-# Add internal Facebook module for handling
+# Add internal TikTok module for handling
 from config.utils import remove_string_accents
 from config.schema import ensure_table_schema
 from src.enrich import (
@@ -74,21 +73,23 @@ MODE = os.getenv("MODE")
 
 # 1. TRANSFORM TIKTOK ADS RAW DATA INTO CLEANED STAGING TABLES
 
-# 1.1. Transform TikTok Ads campaigninsights from raw tables into cleaned staging tables
+# 1.1. Transform TikTok Ads campaign insights from raw tables into cleaned staging tables
 def staging_campaign_insights() -> None:
-    print("🚀 [STAGING] Starting unified staging process for TikTok Ads campaign insights...")
-    logging.info("🚀 [STAGING] Starting unified staging process for TikTok Ads campaign insights...")
+    print("🚀 [STAGING] Starting to build staging TikTok Ads ad insights table...")
+    logging.info("🚀 [STAGING] Starting to build staging TikTok Ads ad insights table...")
 
     # 1.1.1. Prepare table_id for TikTok Ads campaign insights
     try: 
         raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
+        print(f"🔍 [STAGING] Using raw TikTok Ads campaign insights table from Google BigQuery dataset {raw_dataset} to build staging table...")
+        logging.info(f"🔍 [STAGING] Using raw TikTok Ads campaign insights table from Google BigQuery dataset {raw_dataset} to build staging table...")
         raw_campaign_metadata = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_campaign_metadata"
-        print(f"🔍 [STAGING] Using raw table metadata {raw_dataset} to build staging table for TikTok Ads campaign insights...")
-        logging.info(f"🔍 [STAGING] Using raw table metadata {raw_dataset} to build staging table for TikTok Ads campaign insights....")
+        print(f"🔍 [STAGING] Using raw TikTok Ads campaign metadata table from Google BigQuery table {raw_campaign_metadata} to build staging table...")
+        logging.info(f"🔍 [STAGING] Using raw TikTok Ads campaign metadata table from Google BigQuery table {raw_campaign_metadata} to build staging table...")       
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
-        staging_campaign_insights = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
-        print(f"🔍 [STAGING] Preparing to build staging table {staging_campaign_insights} for TikTok Ads campaign insights...")
-        logging.info(f"🔍 [STAGING] Preparing to build staging table {staging_campaign_insights} for TikTok Ads campaign insights...")
+        staging_campaign_table = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
+        print(f"🔍 [STAGING] Preparing to build staging table {staging_campaign_table} for TikTok Ads campaign insights...")
+        logging.info(f"🔍 [STAGING] Preparing to build staging table {staging_campaign_table} for TikTok Ads campaign insights...")
 
     # 1.1.2. Initialize Google BigQuery client
         try:
@@ -107,9 +108,7 @@ def staging_campaign_insights() -> None:
             raise RuntimeError(f"❌ [STAGING] Failed to initialize Google BigQuery client due to {e}.") from e
 
     # 1.1.3. Scan all raw TikTok Ads campaign table(s)
-        print("🔍 [STAGING] Scanning all raw TikTok Ads campaign insights table(s)...")
-        logging.info("🔍 [STAGING] Scanning all raw TikTok Ads campaign insights table(s)...")
-        query_tables = f"""
+        query_campaign_raw = f"""
             SELECT table_name
             FROM `{PROJECT}.{raw_dataset}.INFORMATION_SCHEMA.TABLES`
             WHERE REGEXP_CONTAINS(
@@ -117,114 +116,134 @@ def staging_campaign_insights() -> None:
                 r'^{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_campaign_m[0-1][0-9][0-9]{{4}}$'
             )
         """
-        raw_tables = [row.table_name for row in google_bigquery_client.query(query_tables).result()]
-        raw_tables = [f"{PROJECT}.{raw_dataset}.{t}" for t in raw_tables]
-        if not raw_tables:
+        print("🔍 [STAGING] Scanning all raw TikTok Ads campaign insights table(s)...")
+        logging.info("🔍 [STAGING] Scanning all raw TikTok Ads campaign insights table(s)...")
+        raw_campaign_tables = [row.table_name for row in google_bigquery_client.query(query_campaign_raw).result()]
+        raw_campaign_tables = [f"{PROJECT}.{raw_dataset}.{t}" for t in raw_campaign_tables]
+        if not raw_campaign_tables:
             print("⚠️ [STAGING] No raw TikTok Ads campaign insights table(s) found then staging is skipped.")
             logging.warning("⚠️ [STAGING] No raw TikTok Ads campaign insights table(s) found then staging is skipped.")
             return
-        print(f"✅ [STAGING] Successfully found {len(raw_tables)} raw TikTok Ads campaign insights table(s).")
-        logging.info(f"✅ [STAGING] Successfully found {len(raw_tables)} raw TikTok Ads campaign insights table(s).")
+        print(f"✅ [STAGING] Successfully found {len(raw_campaign_tables)} raw TikTok Ads campaign insights table(s).")
+        logging.info(f"✅ [STAGING] Successfully found {len(raw_campaign_tables)} raw TikTok Ads campaign insights table(s).")
 
-    # 1.1.3. Query raw table(s)
-        all_dfs = []
-        for raw_table in raw_tables:
-            print(f"🔄 [STAGING] Querying raw Facebook campaign insights table {raw_table}...")
-            logging.info(f"🔄 [STAGING] Querying raw Facebook campaign insights table {raw_table}...")
-            query = f"""
+    # 1.1.4. Query raw TikTok Ads campaign table(s)
+        staging_df_combined = []
+        for raw_campaign_table in raw_campaign_tables:
+            query_campaign_staging = f"""
                 SELECT
                     raw.*,
                     metadata.campaign_name,
                     metadata.advertiser_name,
                     metadata.operation_status
-                FROM `{raw_table}` AS raw
+                FROM `{raw_campaign_table}` AS raw
                 LEFT JOIN `{raw_campaign_metadata}` AS metadata
                     ON CAST(raw.campaign_id AS STRING) = CAST(metadata.campaign_id AS STRING)
-                    AND CAST(raw.advertiser_id  AS STRING) = CAST(metadata.advertiser_id  AS STRING)
+                    AND CAST(raw.advertiser_id  AS STRING) = CAST(metadata.advertiser_id AS STRING)
             """
             try:
-                df_month = google_bigquery_client.query(query).to_dataframe()
-                print(f"✅ [STAGING] Successfully queried {len(df_month)} row(s) of raw Facebook campaign insights from {raw_table}.")
-                logging.info(f"✅ [STAGING] Successfully queried {len(df_month)} row(s) of raw Facebook campaign insights from {raw_table}.")
+                print(f"🔄 [STAGING] Querying raw TikTok Ads campaign insights table {raw_campaign_table}...")
+                logging.info(f"🔄 [STAGING] Querying raw TikTok Ads campaign insights table {raw_campaign_table}...")
+                staging_df_queried = google_bigquery_client.query(query_campaign_staging).to_dataframe()
+                print(f"✅ [STAGING] Successfully queried {len(staging_df_queried)} row(s) of raw TikTok Ads campaign insights from {raw_campaign_table}.")
+                logging.info(f"✅ [STAGING] Successfully queried {len(staging_df_queried)} row(s) of raw TikTok Ads campaign insights from {raw_campaign_table}.")
             except Exception as e:
-                print(f"❌ [STAGING] Failed to query Facebook campaign insights raw table {raw_table} due to {e}.")
-                logging.warning(f"❌ [STAGING] Failed to query Facebook campaign insights raw table {raw_table} due to {e}.")
+                print(f"❌ [STAGING] Failed to query raw TikTok Ads campaign insights table {raw_campaign_table} due to {e}.")
+                logging.warning(f"❌ [STAGING] Failed to query raw TikTok Ads campaign insights table {raw_campaign_table} due to {e}.")
                 continue
 
-    # 1.1.5. Enrich TikTok Ads insights
-        if not df_month.empty:
+    # 1.1.5. Enrich TikTok Ads campaign insights
+        if not staging_df_queried.empty:
             try:
-                print(f"🔄 [STAGING] Triggering to normalize and enrich staging TikTok Ads campaign insights field(s) for {len(df_month)} row(s) from {raw_table}...")
-                logging.info(f"🔄 [STAGING] Triggering to normalize and enrich staging TikTok Ads campaign insights field(s) for {len(df_month)} row(s) from {raw_table}...")
-                df_month = df_month.rename(columns={
+                print(f"🔄 [STAGING] Triggering to enrich staging TikTok Ads campaign insights field(s) for {len(staging_df_queried)} row(s) from {raw_campaign_table}...")
+                logging.info(f"🔄 [STAGING] Triggering to enrich staging TikTok Ads campaign insights field(s) for {len(staging_df_queried)} row(s) from {raw_campaign_table}...")
+                staging_df_enriched = enrich_campaign_fields(staging_df_queried, table_id=raw_campaign_table)
+                if "nhan_su" in staging_df_enriched.columns:
+                    staging_df_enriched["nhan_su"] = staging_df_enriched["nhan_su"].apply(remove_string_accents)
+                staging_df_renamed = staging_df_enriched.rename(columns={
                     "advertiser_id": "account_id",
                     "objective_type": "result_type",
                     "advertiser_name": "account_name",
                     "operation_status": "delivery_status"
-                })               
-                df_month = enrich_campaign_fields(df_month, table_id=raw_table)
-                if "nhan_su" in df_month.columns:
-                    df_month["nhan_su"] = df_month["nhan_su"].apply(remove_string_accents)
-                all_dfs.append(df_month)
+                })                           
+                staging_df_combined.append(staging_df_renamed)
             except Exception as e:
                 print(f"❌ [STAGING] Failed to trigger enrichment for staging TikTok Ads campaign insights due to {e}.")
                 logging.warning(f"❌ [STAGING] Failed to trigger enrichment for staging TikTok Ads campaign insights due to {e}.") 
-        if not all_dfs:
+        if not staging_df_combined:
             print("⚠️ [STAGING] No data found in any raw TikTok Ads campaign insights table(s).")
             logging.warning("⚠️ [STAGING] No data found in any raw TikTok Ads campaign insights table(s).")
             return
-        df_all = pd.concat(all_dfs, ignore_index=True)
-        print(f"✅ [STAGING] Successfully combined {len(df_all)} row(s) from all TikTok Ads raw campaign insights table(s).")
-        logging.info(f"✅ [STAGING] Successfully combined {len(df_all)} row(s) from all TikTok Ads raw campaign insights table(s).")
+        staging_df_concatenated = pd.concat(staging_df_combined, ignore_index=True)
+        print(f"✅ [STAGING] Successfully combined {len(staging_df_concatenated)} row(s) from all TikTok Ads raw campaign insights table(s).")
+        logging.info(f"✅ [STAGING] Successfully combined {len(staging_df_concatenated)} row(s) from all TikTok Ads raw campaign insights table(s).")
 
     # 1.1.6. Enforce schema for TikTok Ads campaign insights
         try:
-            print(f"🔄 [STAGING] Triggering to enforce schema for {len(df_all)} row(s) of staging TikTok Ads campaign insights...")
-            logging.info(f"🔄 [STAGING] Triggering to enforce schema for {len(df_all)} row(s) of staging TikTok Ads campaign insights...")
-            df_all = ensure_table_schema(df_all, "staging_campaign_insights")
+            print(f"🔄 [STAGING] Triggering to enforce schema for {len(staging_df_concatenated)} row(s) of staging TikTok Ads campaign insights...")
+            logging.info(f"🔄 [STAGING] Triggering to enforce schema for {len(staging_df_concatenated)} row(s) of staging TikTok Ads campaign insights...")
+            staging_df_enforced = ensure_table_schema(staging_df_concatenated, "staging_campaign_insights")
         except Exception as e:
-            print(f"❌ [STAGING] Failed to trigger schema enforcement for {len(df_all)} row(s) of staging Facebook campaign insights due to {e}.")
-            logging.error(f"❌ [STAGING] Failed to trigger schema enforcement for {len(df_all)} row(s) of staging Facebook campaign insights due to {e}.")
+            print(f"❌ [STAGING] Failed to trigger schema enforcement for {len(staging_df_enforced)} row(s) of staging TikTok Ads campaign insights due to {e}.")
+            logging.error(f"❌ [STAGING] Failed to trigger schema enforcement for {len(staging_df_enforced)} row(s) of staging TikTok Ads campaign insights due to {e}.")
             raise   
 
     # 1.1.7. Upload TikTok Ads campaign insigts to Google BigQuery        
         try:
-            print(f"🔍 [STAGING] Uploading {len(df_all)} row(s) of staging TikTok Ads campaign insights to Google BigQuery table {staging_campaign_insights}...")
-            logging.info(f"🔍 [STAGING] Uploading {len(df_all)} row(s) of staging TikTok Ads campaign insights to Google BigQuery table {staging_campaign_insights}...")
-            df_all = df_all.drop_duplicates()
-            clustering_fields = [f for f in ["chuong_trinh", "ma_ngan_sach_cap_1", "nhan_su"] if f in df_all.columns]
+            print(f"🔍 [STAGING] Preparing to upload {len(staging_df_enforced)} row(s) of staging TikTok Ads campaign insights to Google BigQuery table {staging_campaign_table}...")
+            logging.info(f"🔍 [STAGING] Preparing to upload {len(staging_df_enforced)} row(s) of staging TikTok Ads campaign insights to Google BigQuery table {staging_campaign_table}...")
+            staging_df_deduplicated = staging_df_enforced.drop_duplicates()
+            clustering_fields = [f for f in ["chuong_trinh", "ma_ngan_sach_cap_1", "nhan_su"] if f in staging_df_deduplicated.columns]
             try:
-                google_bigquery_client.get_table(staging_campaign_insights)
-                table_exists = True
+                google_bigquery_client.get_table(staging_campaign_table)
+                staging_table_exists = True
             except Exception:
-                table_exists = False
-            if not table_exists:
-                schema = []
-                for col, dtype in df_all.dtypes.items():
+                staging_table_exists = False
+            if not staging_table_exists:
+                new_table_schema = []
+                for col, dtype in staging_df_deduplicated.dtypes.items():
                     if dtype.name.startswith("int"):
-                        bq_type = "INT64"
+                        google_bigquery_type = "INT64"
                     elif dtype.name.startswith("float"):
-                        bq_type = "FLOAT64"
+                        google_bigquery_type = "FLOAT64"
                     elif dtype.name == "bool":
-                        bq_type = "BOOL"
+                        google_bigquery_type = "BOOL"
                     elif "datetime" in dtype.name:
-                        bq_type = "TIMESTAMP"
+                        google_bigquery_type = "TIMESTAMP"
                     else:
-                        bq_type = "STRING"
-                    schema.append(bigquery.SchemaField(col, bq_type))
-                table = bigquery.Table(staging_campaign_insights, schema=schema)
-                if "date" in df_all.columns:
-                    table.time_partitioning = bigquery.TimePartitioning(
+                        google_bigquery_type = "STRING"
+                    new_table_schema.append(bigquery.SchemaField(col, google_bigquery_type))
+                new_table_configuration = bigquery.Table(staging_campaign_table, schema=new_table_schema)
+                if "date" in staging_df_deduplicated.columns:
+                    new_table_configuration.time_partitioning = bigquery.TimePartitioning(
                         type_=bigquery.TimePartitioningType.DAY,
                         field="date"
                     )
                     if clustering_fields:  
-                        table.clustering_fields = clustering_fields  
-                    print(f"🔍 [STAGING] Creating staging TikTok Ads campaign insights table {staging_campaign_insights} with partition on date...")
-                    logging.info(f"🔍 [STAGING] Creating staging TikTok Ads campaign insights table {staging_campaign_insights} with partition on date...")
-                table = google_bigquery_client.create_table(table)
-                print(f"✅ [STAGING] Successfully created staging TikTok Ads campaign insights table {staging_campaign_insights}.")
-                logging.info(f"✅ [STAGING] Successfully created staging TikTok Ads campaign insights table {staging_campaign_insights}.")
+                        new_table_configuration.clustering_fields = clustering_fields  
+                    print(f"🔍 [STAGING] Creating staging TikTok Ads campaign insights table with defined name {staging_campaign_table} and partition on date...")
+                    logging.info(f"🔍 [STAGING] Creating staging TikTok Ads campaign insights table with defined name {staging_campaign_table} and partition on date...")
+                new_table_metadata = google_bigquery_client.create_table(new_table_configuration)
+                print(f"✅ [STAGING] Successfully created staging TikTok Ads campaign insights table with actual name {new_table_metadata.full_table_id}.")
+                logging.info(f"✅ [STAGING] Successfully created staging TikTok Ads campaign insights table with actual name {new_table_metadata.full_table_id}.")
+                try: 
+                    print(f"🔍 [STAGING] Uploading {len(staging_df_enforced)} row(s) of staging TikTok Ads campaign insights to new Google BigQuery table {staging_campaign_table}...")
+                    logging.info(f"🔍 [STAGING] Uploading {len(staging_df_enforced)} row(s) of staging TikTok Ads campaign insights to new Google BigQuery table {staging_campaign_table}...")
+                    job_config = bigquery.LoadJobConfig(
+                        write_disposition="WRITE_APPEND",
+                        source_format=bigquery.SourceFormat.PARQUET
+                    )
+                    load_job = google_bigquery_client.load_table_from_dataframe(
+                        staging_df_enforced,
+                        staging_campaign_table,
+                        job_config=job_config
+                    )
+                    load_job.result()
+                    print(f"✅ [STAGING] Successfully uploaded {len(staging_df_enforced)} row(s) of staging TikTok Ads campaign insights to new Google BigQuery table {staging_campaign_table}.")
+                    logging.info(f"✅ [STAGING] Successfully uploaded {len(staging_df_enforced)} row(s) of staging TikTok Ads campaign insights to new Google BigQuery table {staging_campaign_table}.")
+                except Exception as e:
+                    print(f"❌ [STAGING] Failed to upload staging TikTok Ads campaign insights after created new Google BigQuery Table due to {e}.")
+                    logging.error(f"❌ [STAGING] Failed to upload staging TikTok Ads campaign insights after created new Google BigQuery Table due to {e}.")    
             else:
                 job_config = bigquery.LoadJobConfig(
                     write_disposition="WRITE_TRUNCATE",
@@ -236,19 +255,19 @@ def staging_campaign_insights() -> None:
                     clustering_fields=clustering_fields if clustering_fields else None
                 )
                 load_job = google_bigquery_client.load_table_from_dataframe(
-                    df_all,
-                    staging_campaign_insights,
+                    staging_df_enforced,
+                    staging_campaign_table,
                     job_config=job_config
                 )
                 load_job.result()
-                print(f"✅ [STAGING] Successfully uploaded {len(df_all)} row(s) to staging TikTok Ads campaign insights table {staging_campaign_insights}.")
-                logging.info(f"✅ [STAGING] Successfully uploaded {len(df_all)} row(s) to staging TikTok Ads campaign insights table {staging_campaign_insights}.")
+                print(f"✅ [STAGING] Successfully replace {len(staging_df_enforced)} row(s) to existed staging TikTok Ads campaign insights table {staging_campaign_table}.")
+                logging.info(f"✅ [STAGING] Successfully replace {len(staging_df_enforced)} row(s) to existed staging TikTok Ads campaign insights table {staging_campaign_table}.")
         except Exception as e:
-            print(f"❌ [STAGING] Failed to upload staging TikTok Ads campaign insights due to {e}.")
-            logging.error(f"❌ [STAGING] Failed to upload staging TikTok Ads campaign insights due to {e}.")
+            print(f"❌ [STAGING] Failed during staging TikTok Ads campaign insights upload due to {e}.")
+            logging.error(f"❌ [STAGING] Failed during staging TikTok Ads campaign insights upload due to {e}.")
     except Exception as e:
-        print(f"❌ [STAGING] Faild to unify staging TikTok Ads campaign insights table due to {e}.")
-        logging.error(f"❌ [STAGING] Faild to unify staging TikTok Ads campaign insights table due to {e}.")
+        print(f"❌ [STAGING] Faild to build staging TikTok Ads campaign insights table due to {e}.")
+        logging.error(f"❌ [STAGING] Faild to build staging TikTok Ads campaign insights table due to {e}.")
 
 # 1.2. Transform TikTok Ads ad insights from raw tables into cleaned staging tables
 def staging_ad_insights() -> None:
