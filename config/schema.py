@@ -209,16 +209,42 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "date": "datetime64[ns, UTC]"
         },
         "staging_ad_insights": {
+            # Join keys & metadata
+            "account_id": str,               # từ advertiser_id
             "ad_id": str,
             "ad_name": str,
-            "campaign_id": str,
             "adset_id": str,
             "adset_name": str,
+            "campaign_id": str,
             "campaign_name": str,
             "date_start": str,
-            "date_stop": str,
+            "delivery_status": str,          # từ operation_status
+            "ad_format": str,
+            "optimization_event": str,
+            "video_id": str,
+            "video_cover_url": str,
+            "preview_url": str,
+
+            # TikTok metrics gốc
+            "objective_type": str,
+            "result": str,
+            "stat_time_day": str,
             "spend": float,
-            "delivery_status": str,
+            "impressions": int,
+            "clicks": int,
+            "video_watched_2s": int,
+            "purchase": int,
+            "complete_payment": int,
+            "onsite_total_purchase": int,
+            "offline_shopping_events": int,
+            "onsite_shopping": int,
+            "messaging_total_conversation_tiktok_direct_message": int,
+            "last_updated_at": "datetime64[ns, UTC]",
+            "date": "datetime64[ns, UTC]",
+            "year": int,
+            "month": int,
+
+            # Enriched fields (giữ nguyên tiếng Việt, áp dụng cho mọi platform)
             "hinh_thuc": str,
             "ma_ngan_sach_cap_1": str,
             "ma_ngan_sach_cap_2": str,
@@ -236,16 +262,7 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "nen_tang": str,
             "phong_ban": str,
             "tai_khoan": str,
-            "thumbnail_url": str,
-            "result": int,
-            "result_type": str,
-            "purchase": int,
-            "reach": int,
-            "impressions": int,
-            "clicks": int,
-            "messaging_conversations_started": int,
-            "date": "datetime64[ns, UTC]",
-        },
+        }
     }
     
     # 1.1.2. Validate that the given schema_type exists

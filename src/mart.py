@@ -148,11 +148,23 @@ def mart_creative_all() -> None:
         print(f"🔍 [MART] Using staging table {staging_table} for creative performance (All)...")
         logging.info(f"🔍 [MART] Using staging table {staging_table} for creative performance (All)...")
 
-    # 2.1.2. Query staging table(s)
+    # 2.1.2. Initialize Google BigQuery client
         try:
-            client = bigquery.Client(project=PROJECT)
+            print(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+            logging.info(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+            google_bigquery_client = bigquery.Client(project=PROJECT)
+            print(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+            logging.info(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
         except DefaultCredentialsError as e:
-            raise RuntimeError("Cannot initialize BigQuery client. Check your credentials.") from e
+            raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to credentials error.") from e
+        except Forbidden as e:
+            raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to permission denial.") from e
+        except GoogleAPICallError as e:
+            raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to API call error.") from e
+        except Exception as e:
+            raise RuntimeError(f"❌ [INGEST] Failed to initialize Google BigQuery client due to {e}.") from e
+
+    # 2.1.2. Query staging table(s)
         query = f"""
             CREATE OR REPLACE TABLE `{mart_table_creative_all}`
             PARTITION BY ngay
@@ -170,31 +182,31 @@ def mart_creative_all() -> None:
                 SAFE_CAST(campaign_name AS STRING) AS campaign_name,
                 SAFE_CAST(adset_name AS STRING) AS adset_name,
                 SAFE_CAST(ad_name AS STRING) AS ad_name,
-                SAFE_CAST(thumbnail_url AS STRING) AS thumbnail_url,
+                SAFE_CAST(video_cover_url AS STRING) AS video_cover_url,
                 SAFE_CAST(vi_tri AS STRING) AS vi_tri,
                 SAFE_CAST(doi_tuong AS STRING) AS doi_tuong,
                 SAFE_CAST(dinh_dang AS STRING) AS dinh_dang,
                 CAST(date AS DATE) AS ngay,
                 SAFE_CAST(spend AS FLOAT64) AS spend,
                 SAFE_CAST(result AS INT64) AS result,
-                SAFE_CAST(result_type AS STRING) AS result_type,
-                SAFE_CAST(purchase AS INT64) AS purchase,
-                SAFE_CAST(messaging_conversations_started AS INT64) AS messaging_conversations_started,
-                SAFE_CAST(reach AS INT64) AS reach,
                 SAFE_CAST(impressions AS INT64) AS impressions,
                 SAFE_CAST(clicks AS INT64) AS clicks,
                 CASE
-                    WHEN REGEXP_CONTAINS(delivery_status, r"ACTIVE") THEN "🟢"
-                    WHEN REGEXP_CONTAINS(delivery_status, r"PAUSED") THEN "⚪"
+                    WHEN REGEXP_CONTAINS(delivery_status, r"ENABLE") THEN "🟢"
+                    WHEN REGEXP_CONTAINS(delivery_status, r"DISABLE") THEN "⚪"
                     ELSE "❓"
                 END AS trang_thai
             FROM `{staging_table}`
         """
-        client.query(query).result()
+        google_bigquery_client.query(query).result()
         count_query = f"SELECT COUNT(1) AS row_count FROM `{mart_table_creative_all}`"
-        row_count = list(client.query(count_query).result())[0]["row_count"]
+        row_count = list(google_bigquery_client.query(count_query).result())[0]["row_count"]
         print(f"✅ [MART] Successfully created materialized table {mart_table_creative_all} with {row_count} row(s) for Facebook creative performance (All).")
         logging.info(f"✅ [MART] Successfully created materialized table {mart_table_creative_all} with {row_count} row(s) for Facebook creative performance (All).")
     except Exception as e:
         print(f"❌ [MART] Failed to build materialized table for Facebook creative performance (All) due to {e}.")
         logging.error(f"❌ [MART] Failed to build materialized table for Facebook creative performance (All) due to {e}.")
+
+if __name__ == "__main__":
+
+    mart_creative_all()
