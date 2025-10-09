@@ -2,16 +2,16 @@
 ==================================================================
 TIKTOK ENRICHMENT MODULE
 ------------------------------------------------------------------
-This module transforms raw TikTok Ads insights into a clean, 
-BigQuery-ready format optimized for downstream analytics and reporting.
+This module transforms raw TikTok Ads insights into a optimized
+format for downstream analytics and reporting.
 
 It provides a centralized structure for mapping business logic and 
 cleaning performance data while promoting clarity, consistency, 
 and maintainability across the data pipeline.
 
-✔️ Maps `optimization_goal` to the relevant action type  
-✔️ Extracts standardized performance metrics and ensures schema consistency  
-✔️ Reduces payload by removing unnecessary fields such as the full `actions` array
+✔️ Map `optimization_goal` to the relevant action type  
+✔️ Standardize performance metrics and ensures schema consistency  
+✔️ Reduce payload by removing unnecessary field(s)
 
 ⚠️ This module focuses *only* on enrichment.  
 It does **not** handle data fetching, ingestion, or metric modeling.
@@ -71,13 +71,12 @@ def enrich_campaign_fields(df: pd.DataFrame, table_id: str) -> pd.DataFrame:
             lambda x: len(str(x).split("_")) < 9
         )
 
-        # 1.1.4. Warnings if invalid campaigns exist
         invalid_count = df["invalid_campaign_name"].sum()
         if invalid_count > 0:
             print(f"⚠️ [ENRICH] Found {invalid_count} invalid campaign_name(s) with insufficient parts.")
             logging.warning(f"⚠️ [ENRICH] Found {invalid_count} invalid campaign_name(s) with insufficient parts.")
 
-        # 1.1.5. Summarize enrichment result(s)
+    # 1.1.4. Summarize enrichment result(s)
         print(f"✅ [ENRICH] Successfully enriched field(s) for staging TikTok Ads campaign insights with {len(df)} row(s).")
         logging.info(f"✅ [ENRICH] Successfully enriched field(s) for staging TikTok Ads campaign insights with {len(df)} row(s).")
 

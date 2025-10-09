@@ -844,12 +844,3 @@ def ingest_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
         logging.error(f"❌ [INGEST] Failed to upload TikTok Ads ad insights due to {e}.")
         raise
     return df
-
-if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser(description="Run Facebook Campaign Backfill")
-    parser.add_argument("--start_date", type=str, required=True, help="Start date (YYYY-MM-DD)")
-    parser.add_argument("--end_date", type=str, required=True, help="End date (YYYY-MM-DD)")
-    args = parser.parse_args()
-
-    ingest_ad_insights(start_date=args.start_date, end_date=args.end_date)
