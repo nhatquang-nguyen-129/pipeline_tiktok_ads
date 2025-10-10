@@ -87,7 +87,7 @@ def fetch_campaign_metadata(campaign_id_list: list[str]) -> pd.DataFrame:
     if not campaign_id_list:
         print("⚠️ [FETCH] Empty TikTok Ads campaign_id_list provided then fetching is suspended.")
         logging.warning("⚠️ [FETCH] Empty TikTok Ads campaign_id_list provided then fetching is suspended.")
-        return pd.DataFrame()
+        raise ValueError("⚠️ [FETCH] Empty TikTok Ads campaign_id_list provided then fetching is suspended.")
 
     # 1.1.2. Prepare fields for TikTok Ads campaign metadata
     fetch_fields_default = [
@@ -247,7 +247,7 @@ def fetch_ad_metadata(ad_id_list: list[str]) -> pd.DataFrame:
     if not ad_id_list:
         print("⚠️ [FETCH] Empty TikTok Ads ad_id_list provided then fetching is suspended.")
         logging.warning("⚠️ [FETCH] Empty TikTok Ads ad_id_list provided then fetching is suspended.")
-        return pd.DataFrame()
+        raise ValueError("⚠️ [FETCH] Empty TikTok Ads ad_id_list provided then fetching is suspended.")
 
     # 1.2.2. Prepare fields for TikTok Ads ad metadata
     fetch_fields_default = [
@@ -373,11 +373,11 @@ def fetch_ad_metadata(ad_id_list: list[str]) -> pd.DataFrame:
 
     # 1.2.8. Convert to Python DataFrame
         try:
-            print(f"🔄 [FETCH] Converting TikTok Ads ad metadata to Python DataFrame with {len(df)} row(s)...")
-            logging.info(f"🔄 [FETCH] Converting TikTok Ads ad metadata to Python DataFrame with {len(df)} row(s)...")
-            df = pd.DataFrame(all_records)
-            print(f"✅ [FETCH] Successfully converted TikTok Ads ad metadata to Python DataFrame with {len(df)} row(s).")
-            logging.info(f"✅ [FETCH] Successfully converted TikTok Ads ad metadata to Python DataFrame with {len(df)} row(s).")
+            print(f"🔄 [FETCH] Converting TikTok Ads ad metadata to Python DataFrame...")
+            logging.info(f"🔄 [FETCH] Converting TikTok Ads ad metadata to Python DataFrame...")
+            fetch_df_flattened = pd.DataFrame(all_records)
+            print(f"✅ [FETCH] Successfully converted TikTok Ads ad metadata to Python DataFrame with {len(fetch_df_flattened)} row(s).")
+            logging.info(f"✅ [FETCH] Successfully converted TikTok Ads ad metadata to Python DataFrame with {len(fetch_df_flattened)} row(s).")
         except Exception as e:
             print(f"❌ [FETCH] Failed to convert TikTok Ads ad metadata to Python DataFrame due to {e}.")
             logging.error(f"❌ [FETCH] Failed to convert TikTok Ads ad metadata to Python DataFrame due to {e}.")
@@ -385,20 +385,21 @@ def fetch_ad_metadata(ad_id_list: list[str]) -> pd.DataFrame:
 
     # 1.2.9. Enforce schema for Python DataFrame
         try:
-            print(f"🔄 [FETCH] Enforcing schema for {len(df)} row(s) of TikTok Ads ad metadata...")
-            logging.info(f"🔄 [FETCH] Enforcing schema for {len(df)} row(s) of TikTok Ads ad metadata...")            
-            df = ensure_table_schema(df, "fetch_ad_metadata")
-            print(f"✅ [FETCH] Successfully enforced schema for TikTok ad metadata with {len(df)} row(s).")
-            logging.info(f"✅ [FETCH] Successfully enforced schema for TikTok ad metadata with {len(df)} row(s).")
+            print(f"🔄 [FETCH] Enforcing schema for {len(fetch_df_flattened)} row(s) of TikTok Ads ad metadata...")
+            logging.info(f"🔄 [FETCH] Enforcing schema for {len(fetch_df_flattened)} row(s) of TikTok Ads ad metadata...")            
+            fetch_df_enforced = ensure_table_schema(fetch_df_flattened, "fetch_ad_metadata")
+            print(f"✅ [FETCH] Successfully enforced schema for TikTok ad metadata with {len(fetch_df_enforced)} row(s).")
+            logging.info(f"✅ [FETCH] Successfully enforced schema for TikTok ad metadata with {len(fetch_df_enforced)} row(s).")
         except Exception as e:
             print(f"❌ [FETCH] Failed to enforce schema for TikTok ad metadata due to {e}.")
             logging.error(f"❌ [FETCH] Failed to enforce schema for TikTok ad metadata due to {e}.")
             return pd.DataFrame()
 
     # 1.2.10. Summarize fetch result(s)
-        print(f"✅ [FETCH] Successfully fetched TikTok Ads ad metadata with {len(df)} row(s).")
-        logging.info(f"✅ [FETCH] Successfully fetched TikTok Ads ad metadata with {len(df)} row(s).")
-        return df
+        fetch_df_final = fetch_df_enforced
+        print(f"✅ [FETCH] Successfully fetched TikTok Ads ad metadata with {len(fetch_df_final)} row(s).")
+        logging.info(f"✅ [FETCH] Successfully fetched TikTok Ads ad metadata with {len(fetch_df_final)} row(s).")
+        return fetch_df_final
     except Exception as e:
         print(f"❌ [FETCH] Failed to fetch TikTok Ads ad metadata due to {e}.")
         logging.error(f"❌ [FETCH] Failed to fetch TikTok Ads ad metadata due to {e}.")
@@ -413,7 +414,7 @@ def fetch_ad_creative(ad_id_list: list[str]) -> pd.DataFrame:
     if not ad_id_list:
         print("⚠️ [FETCH] Empty TikTok ad_id_list provided then fetching is suspended.")
         logging.warning("⚠️ [FETCH] Empty TikTok ad_id_list provided then fetching is suspended.")
-        return pd.DataFrame()
+        raise ValueError("⚠️ [FETCH] Empty TikTok Ads ad_id_list provided then fetching is suspended.")
 
     all_records = []
     try:

@@ -107,7 +107,7 @@ def staging_campaign_insights() -> None:
         except Exception as e:
             raise RuntimeError(f"❌ [STAGING] Failed to initialize Google BigQuery client due to {e}.") from e
 
-    # 1.1.3. Scan all raw TikTok Ads campaign table(s)
+    # 1.1.3. Scan all raw TikTok Ads campaign insights table(s)
         query_campaign_raw = f"""
             SELECT table_name
             FROM `{PROJECT}.{raw_dataset}.INFORMATION_SCHEMA.TABLES`
@@ -127,7 +127,7 @@ def staging_campaign_insights() -> None:
         print(f"✅ [STAGING] Successfully found {len(raw_campaign_tables)} raw TikTok Ads campaign insights table(s).")
         logging.info(f"✅ [STAGING] Successfully found {len(raw_campaign_tables)} raw TikTok Ads campaign insights table(s).")
 
-    # 1.1.4. Query raw TikTok Ads campaign table(s)
+    # 1.1.4. Query all raw TikTok Ads campaign table(s)
         staging_df_combined = []
         for raw_campaign_table in raw_campaign_tables:
             query_campaign_staging = f"""
@@ -334,7 +334,7 @@ def staging_ad_insights() -> None:
         print(f"✅ [STAGING] Successfully found {len(raw_ad_tables)} raw TikTok Ads ad insights table(s).")
         logging.info(f"✅ [STAGING] Successfully found {len(raw_ad_tables)} raw TikTok Ads ad insights table(s).")
 
-    # 1.2.4. Query raw TikTok Ads ad insights table(s)
+    # 1.2.4. Query all raw TikTok Ads ad insights table(s)
         staging_df_combined = []
         for raw_ad_table in raw_ad_tables:
             query_ad_staging = f"""

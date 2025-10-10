@@ -63,7 +63,7 @@ def mart_campaign_all() -> None:
     print(f"🚀 [MART] Starting to build materialized table for TikTok Ads campaign performance...")
     logging.info(f"🚀 [MART] Starting to build materialized table TikTok Ads campaign performance...")
 
-    # 1.1.1. Prepare table_id
+    # 1.1.1. Prepare table_id for TikTok campaign performance
     try:
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
         staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
@@ -90,7 +90,7 @@ def mart_campaign_all() -> None:
         except Exception as e:
             raise RuntimeError(f"❌ [INGEST] Failed to initialize Google BigQuery client due to {e}.") from e
     
-    # 1.1.2. Query all staging table(s)
+    # 1.1.3. Query all staging Tiktok Ads campaign table(s)
         query = f"""
             CREATE OR REPLACE TABLE `{mart_table_performance}`
             PARTITION BY ngay
@@ -122,6 +122,8 @@ def mart_campaign_all() -> None:
             FROM `{staging_table_campaign}`
             WHERE date IS NOT NULL
         """
+        print(f"🔍 [MART] Creating materialized table {mart_table_performance} for TikTok Ads campaign performance...")
+        logging.info(f"🔍 [MART] Creating materialized table {mart_table_performance} for TikTok Ads campaign performance...")
         google_bigquery_client.query(query).result()
         count_query = f"SELECT COUNT(1) AS row_count FROM `{mart_table_performance}`"
         row_count = list(google_bigquery_client.query(count_query).result())[0]["row_count"]
@@ -131,7 +133,6 @@ def mart_campaign_all() -> None:
         print(f"❌ [MART] Failed to build materialized table for TikTok Ads campaign performance due to {e}.")
         logging.error(f"❌ [MART] Failed to build materialized table for TikTok Ads campaign performance due to {e}.")
 
-
 # 2. MONTHLY MATERIALIZED TABLE FOR CREATIVE PERFORMANCE FROM STAGING TABLE(S)
 
 # 2.1. Build materialized table for Facebook creative performance by union all staging tables
@@ -139,12 +140,12 @@ def mart_creative_all() -> None:
     print("🚀 [MART] Starting to build materialized table for Facebook creative performance (All)...")
     logging.info("🚀 [MART] Starting to build materialized table for Facebook creative performance (All)...")
 
-    # 2.1.1. Prepare table_id
+    # 2.1.1. Prepare table_id for TikTok Ads ad creative
     try:
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
         staging_table = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"
         mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
-        mart_table_creative_all = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_creative_performance"
+        mart_table_creative = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_creative_performance"
         print(f"🔍 [MART] Using staging table {staging_table} for creative performance (All)...")
         logging.info(f"🔍 [MART] Using staging table {staging_table} for creative performance (All)...")
 
@@ -164,9 +165,9 @@ def mart_creative_all() -> None:
         except Exception as e:
             raise RuntimeError(f"❌ [INGEST] Failed to initialize Google BigQuery client due to {e}.") from e
 
-    # 2.1.2. Query staging table(s)
+    # 2.1.3. Query all staging TikTok Ads ad table(s)
         query = f"""
-            CREATE OR REPLACE TABLE `{mart_table_creative_all}`
+            CREATE OR REPLACE TABLE `{mart_table_creative}`
             PARTITION BY ngay
             CLUSTER BY nhan_su, ma_ngan_sach_cap_1, nganh_hang, chuong_trinh
             AS
@@ -198,15 +199,13 @@ def mart_creative_all() -> None:
                 END AS trang_thai
             FROM `{staging_table}`
         """
+        print(f"🔍 [MART] Creating materialized table {mart_table_creative} for TikTok Ads creative performance...")
+        logging.info(f"🔍 [MART] Creating materialized table {mart_table_creative} for TikTok Ads creative performance...")
         google_bigquery_client.query(query).result()
-        count_query = f"SELECT COUNT(1) AS row_count FROM `{mart_table_creative_all}`"
+        count_query = f"SELECT COUNT(1) AS row_count FROM `{mart_table_creative}`"
         row_count = list(google_bigquery_client.query(count_query).result())[0]["row_count"]
-        print(f"✅ [MART] Successfully created materialized table {mart_table_creative_all} with {row_count} row(s) for Facebook creative performance (All).")
-        logging.info(f"✅ [MART] Successfully created materialized table {mart_table_creative_all} with {row_count} row(s) for Facebook creative performance (All).")
+        print(f"✅ [MART] Successfully created materialized table {mart_table_creative} with {row_count} row(s) for TikTok Ads creative performance.")
+        logging.info(f"✅ [MART] Successfully created materialized table {mart_table_creative} with {row_count} row(s) for TikTok Ads creative performance.")
     except Exception as e:
-        print(f"❌ [MART] Failed to build materialized table for Facebook creative performance (All) due to {e}.")
-        logging.error(f"❌ [MART] Failed to build materialized table for Facebook creative performance (All) due to {e}.")
-
-if __name__ == "__main__":
-
-    mart_creative_all()
+        print(f"❌ [MART] Failed to build materialized table for TikTok Ads creative performance due to {e}.")
+        logging.error(f"❌ [MART] Failed to build materialized table for TikTok Ads creative performance due to {e}.")
