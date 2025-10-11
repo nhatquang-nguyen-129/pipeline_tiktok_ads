@@ -105,17 +105,12 @@ def update_campaign_insights(start_date: str, end_date: str):
 
     # 1.1.1. Start timing the update process
     start_time = time.time()
-    print(f"⏱️ [UPDATE] Already started to updated TikTok campaign insights at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
-    logging.info(f"⏱️ [UPDATE] Already started to updated TikTok campaign insights at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
+    print(f"🔍 [UPDATE] Proceeding to update TikTok campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
+    logging.info(f"🔍 [UPDATE] Proceeding to update TikTok campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
 
     try:
 
-    # 1.1.2. Prepare table_id for TikTok Ads campaign insights update
-        raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
-        print(f"🔍 [UPDATE] Proceeding to update TikTok Ads campaign insights from {start_date} to {end_date}...")
-        logging.info(f"🔍 [UPDATE] Proceeding to update TikTok Ads campaign insights from {start_date} to {end_date}...")
-
-    # 1.1.3. Triger to ingest TikTok Ads campaign insights
+    # 1.1.2. Triger to ingest TikTok Ads campaign insights
         try:
             print(f"🔄 [UPDATE] Triggering to ingest TikTok Ads campaign insights from {start_date} to {end_date}...")
             logging.info(f"🔄 [UPDATE] Triggering to ingest TikTok Ads campaign insights from {start_date} to {end_date}...")
@@ -130,7 +125,7 @@ def update_campaign_insights(start_date: str, end_date: str):
             print(f"❌ [UPDATE] Failed to trigger TikTok Ads campaign insights ingestion from {start_date} to {end_date} due to {e}.")
             logging.error(f"❌ [UPDATE] Failed to trigger TikTok Ads campaign insights ingestion from {start_date} to {end_date} due to {e}.")
 
-    # 1.1.4. Trigger to ingest TikTok Ads campaign metadata
+    # 1.1.3. Trigger to ingest TikTok Ads campaign metadata
         if updated_campaign_ids:
             print(f"🔄 [UPDATE] Triggering to ingest TikTok Ads campaign metadata for {len(updated_campaign_ids)} campaign_id(s)...")
             logging.info(f"🔄 [UPDATE] Triggering to ingest TikTok Ads campaign metadata for {len(updated_campaign_ids)} campaign_id(s)...")
@@ -143,7 +138,7 @@ def update_campaign_insights(start_date: str, end_date: str):
             print("⚠️ [UPDATE] No updated campaign_ids for TikTok Ads campaign metadata then ingestion is skipped.")
             logging.warning("⚠️ [UPDATE] No updated campaign_ids for TikTok Ads campaign metadata then ingestion is skipped.")
 
-    # 1.1.5 Trigger to rebuild staging TikTok Ads campaign insights table
+    # 1.1.4 Trigger to rebuild staging TikTok Ads campaign insights table
         if updated_campaign_ids:
             print("🔄 [UPDATE] Triggering to rebuild staging TikTok Ads campaign insights table...")
             logging.info("🔄 [UPDATE] Triggering to rebuild staging TikTok Ads campaign insights table...")
@@ -156,7 +151,7 @@ def update_campaign_insights(start_date: str, end_date: str):
             print("⚠️ [UPDATE] No updates for TikTok Ads campaign insights then staging table rebuild is skipped.")
             logging.warning("⚠️ [UPDATE] No updates for TikTok Ads campaign insights then staging table rebuild is skipped.")
 
-    # 1.1.6. Trigger to rebuild materialized TikTok Ads campaign performance table
+    # 1.1.5. Trigger to rebuild materialized TikTok Ads campaign performance table
         if updated_campaign_ids:
             print("🔄 [UPDATE] Triggering to rebuild materialized TikTok Ads campaign performance table...")
             logging.info("🔄 [UPDATE] Triggering to rebuild materialized TikTok Ads campaign performance table...")
@@ -169,7 +164,7 @@ def update_campaign_insights(start_date: str, end_date: str):
             print("⚠️ [UPDATE] No updates for TikTok Ads campaign insights then skip building materialized table(s).")
             logging.warning("⚠️ [UPDATE] No updates for TikTok Ads campaign insights then skip building materialized table(s).")
 
-    # 1.1.7. Summarize update result(s)
+    # 1.1.6. Summarize update result(s)
     except Exception as e:
         print(f"❌ [UPDATE] Failed to update TikTok Ads campaign insights from {start_date} to {end_date} due to {e}.")
         logging.error(f"❌ [UPDATE] Failed to update TikTok Ads campaign insights from {start_date} to {end_date} due to {e}.")
