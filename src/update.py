@@ -161,8 +161,8 @@ def update_campaign_insights(start_date: str, end_date: str):
                 print(f"❌ [UPDATE] Failed to trigger materialized table rebuild for TikTok Ads campaign performance due to {e}.")
                 logging.error(f"❌ [UPDATE] Failed to trigger materialized table rebuild for TikTok Ads campaign performance due to {e}.")
         else:
-            print("⚠️ [UPDATE] No updates for TikTok Ads campaign insights then skip building materialized table(s).")
-            logging.warning("⚠️ [UPDATE] No updates for TikTok Ads campaign insights then skip building materialized table(s).")
+            print("⚠️ [UPDATE] No updates for TikTok Ads campaign insights then materialized table rebuild for campaign performance is skipped.")
+            logging.warning("⚠️ [UPDATE] No updates for TikTok Ads campaign insights then materialized table rebuild for campaign performance is skipped.")
 
     # 1.1.6. Summarize update result(s)
     except Exception as e:
@@ -174,85 +174,90 @@ def update_campaign_insights(start_date: str, end_date: str):
 
 # 1.2. Update Facebook ad insights data for a given date range
 def update_ad_insights(start_date: str, end_date: str):
-    print(f"🚀 [UPDATE] Starting TikTok Ads ad insights update from {start_date} to {end_date}...")
-    logging.info(f"🚀 [UPDATE] Starting TikTok Ads ad insights update from {start_date} to {end_date}...")
+    print(f"🚀 [UPDATE] Starting to update TikTok Ads ad insights from {start_date} to {end_date}...")
+    logging.info(f"🚀 [UPDATE] Starting to update TikTok Ads ad insights from {start_date} to {end_date}...")
 
     # 1.2.1. Start timing the update process
     start_time = time.time()
+    print(f"🔍 [UPDATE] Proceeding to update TikTok ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
+    logging.info(f"🔍 [UPDATE] Proceeding to update TikTok ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
 
-    # 1.2.2. Prepare table_id
-    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
-    print(f"🔍 [UPDATE] Proceeding to update Facebook ad insights from {start_date} to {end_date}...")
-    logging.info(f"🔍 [UPDATE] Proceeding to update Facebook ad insights from {start_date} to {end_date}...")
-
-    # 1.2.3. Triger to ingest TikTok Ads Âd insights
     try:
-        print(f"🔄 [UPDATE] Triggering to ingest TikTok Ads ad insights from {start_date} to {end_date}...")
-        logging.info(f"🔄 [UPDATE] Triggering to ingest TikTok Ads ad insights from {start_date} to {end_date}...")
-        df = ingest_ad_insights(
-            start_date=start_date,
-            end_date=end_date
-        )
-        updated_ad_ids = set()
-        if "ad_id" in df.columns:
-            updated_ad_ids.update(df["ad_id"].dropna().unique())
+
+    # 1.2.2. Triger to ingest TikTok Ads ad insights
+        try:
+            print(f"🔄 [UPDATE] Triggering to ingest TikTok Ads ad insights from {start_date} to {end_date}...")
+            logging.info(f"🔄 [UPDATE] Triggering to ingest TikTok Ads campaign ad from {start_date} to {end_date}...")
+            update_df_ingested = ingest_ad_insights(
+                start_date=start_date,
+                end_date=end_date
+            )
+            updated_ad_ids = set()
+            if "ad_id" in update_df_ingested.columns:
+                updated_ad_ids.update(update_df_ingested["ad_id"].dropna().unique())
+        except Exception as e:
+            print(f"❌ [UPDATE] Failed to trigger TikTok Ads ad insights ingestion from {start_date} to {end_date} due to {e}.")
+            logging.error(f"❌ [UPDATE] Failed to trigger TikTok Ads ad insights ingestion from {start_date} to {end_date} due to {e}.")
+
+    # 1.2.3. Trigger to ingest TikTok Ads ad metadata
+        if updated_ad_ids:
+            print(f"🔄 [UPDATE] Triggering to ingest TikTok Ads ad metadata for {len(updated_ad_ids)} ad_id(s)...")
+            logging.info(f"🔄 [UPDATE] Triggering to ingest TikTok Ads ad metadata for {len(updated_ad_ids)} ad_id(s)...")
+            try:
+                ingest_ad_metadata(ad_id_list=list(updated_ad_ids))
+            except Exception as e:
+                print(f"❌ [UPDATE] Failed to trigger TikTok Ads ad metadata ingestion for {len(updated_ad_ids)} ad_id(s) due to {e}.")
+                logging.error(f"❌ [UPDATE] Failed to trigger TikTok ad metadata ingestion for {len(updated_ad_ids)} ad_id(s) due to {e}.")
+        else:
+            print("⚠️ [UPDATE] No updated ad_id(s) for TikTok Ads ad metadata then ingestion is skipped.")
+            logging.warning("⚠️ [UPDATE] No updated ad_id(s) for TikTok Ads ad metadata then ingestion is skipped.")
+
+    # 1.2.4. Trigger to ingest TikTok Ads ad creative
+        if updated_ad_ids:
+            print(f"🔄 [UPDATE] Triggering to ingest TikTok Ads ad creative for {len(updated_ad_ids)} ad_id(s)...")
+            logging.info(f"🔄 [UPDATE] Triggering to ingest TikTok Ads ad creative for {len(updated_ad_ids)} ad_id(s)...")
+            try:
+                ingest_ad_creative(ad_id_list=list(updated_ad_ids))
+            except Exception as e:
+                print(f"❌ [UPDATE] Failed to trigger TikTok Ads ad creative ingestion for {len(updated_ad_ids)} ad_id(s) due to {e}.")
+                logging.error(f"❌ [UPDATE] Failed to trigger TikTok Ads ad creative ingestion for {len(updated_ad_ids)} ad_id(s) due to {e}.")
+        else:
+            print("⚠️ [UPDATE] No updated ad_id(s) for TikTok Ads ad creative then ingestion is skipped.")
+            logging.warning("⚠️ [UPDATE] No updated ad_id(s) for TikTok Ads ad creative then ingestion is skipped.")
+
+    # 1.2.5. Trigger to rebuild TikTok Ads ad insights table
+        if updated_ad_ids:
+            print("🔄 [UPDATE] Triggering to rebuild staging TikTok Ads ad insights table...")
+            logging.info("🔄 [UPDATE] Triggering to rebuild staging TikTok Ads ad insights table...")
+            try:
+                staging_ad_insights()
+            except Exception as e:
+                print(f"❌ [UPDATE] Failed to trigger staging table rebuild for TikTok Ads ad insights due to {e}.")
+                logging.error(f"❌ [UPDATE] Failed to trigger staging table rebuild for TikTok Ads ad insights due to {e}.")
+        else:
+            print("⚠️ [UPDATE] No updated for TikTok Ads ad insights then staging table rebuild is skipped.")
+            logging.warning("⚠️ [UPDATE] No updated for TikTok Ads ad insights then staging table rebuild is skipped.")
+
+    # 1.2.6. Trigger to rebuild materialized TikTok Ads creative performance
+        if updated_ad_ids:
+            try:
+                print("🔄 [UPDATE] Triggering to rebuild materialized TikTok Ads creative performance table...")
+                logging.info("🔄 [UPDATE] Triggering to rebuild materialized TikTok Ads creative performance table...")
+                mart_creative_all()
+            except Exception as e:
+                print(f"❌ [UPDATE] Failed to trigger materialized table rebuild for TikTok Ads creative performance due to {e}.")
+                logging.error(f"❌ [UPDATE] Failed to trigger materialized table rebuild for TikTok Ads creative performance due to {e}.")
+        else:
+            print("⚠️ [UPDATE] No updated for TikTok ad insights then materialized table rebuild for creative performance is skipped.")
+            logging.warning("⚠️ [UPDATE] No updated for TikTok ad insights then materialized table rebuild for creative performance is skipped.")
+
+    # 1.2.7. Summarize update result(s)
     except Exception as e:
-        print(f"❌ [UPDATE] Failed to ingest TikTok Ads ad insights from {start_date} to {end_date} due to {e}.")
-        logging.error(f"❌ [UPDATE] Failed to ingest TikTok Ads ad insights from {start_date} to {end_date} due to {e}.")
-
-    # 1.2.7. Ingest Facebook ad metadata
-    if updated_ad_ids:
-        print(f"🔄 [UPDATE] Triggering to ingest TikTok Ads ad metadata for {len(updated_ad_ids)} ad_id(s)...")
-        logging.info(f"🔄 [UPDATE] Triggering to ingest TikTok Ads ad metadata for {len(updated_ad_ids)} ad_id(s)...")
-        try:
-            ingest_ad_metadata(ad_id_list=list(updated_ad_ids))
-        except Exception as e:
-            print(f"❌ [UPDATE] Failed to trigger TikTok Ads ad metadata ingestion for {len(updated_ad_ids)} ad_id(s) due to {e}.")
-            logging.error(f"❌ [UPDATE] Failed to trigger TikTok ad metadata ingestion for {len(updated_ad_ids)} ad_id(s) due to {e}.")
-
-    # 1.2.9. Ingest Facebook ad creative
-        print(f"🔄 [UPDATE] Triggering to ingest Facebook ad creative for {len(updated_ad_ids)} ad_id(s)...")
-        logging.info(f"🔄 [UPDATE] Triggering to ingest Facebook ad creative for {len(updated_ad_ids)} ad_id(s)...")
-        try:
-            ingest_ad_creative(ad_id_list=list(updated_ad_ids))
-        except Exception as e:
-            print(f"❌ [UPDATE] Failed to trigger Facebook ad creative ingestion for {len(updated_ad_ids)} ad_id(s) due to {e}.")
-            logging.error(f"❌ [UPDATE] Failed to trigger Facebook ad creative ingestion for {len(updated_ad_ids)} ad_id(s) due to {e}.")
-    else:
-        print("⚠️ [UPDATE] No updated ad_id(s) for Facebook ad metadata then ingestion is skipped.")
-        logging.warning("⚠️ [UPDATE] No updated ad_id(s) for Facebook ad metadata then ingestion is skipped.")
-
-    # 1.2.10. Rebuild staging Facebook ad insights table
-    if updated_ad_ids:
-        print("🔄 [UPDATE] Triggering to rebuild staging Facebook ad insights table...")
-        logging.info("🔄 [UPDATE] Triggering to rebuild staging Facebook ad insights table...")
-        try:
-            staging_ad_insights()
-        except Exception as e:
-            print(f"❌ [UPDATE] Failed to trigger staging table rebuild for Facebook ad insights due to {e}.")
-            logging.error(f"❌ [UPDATE] Failed to trigger staging table rebuild for Facebook ad insights due to {e}.")
-    else:
-        print("⚠️ [UPDATE] No updated for Facebook ad insights then staging table rebuild is skipped.")
-        logging.warning("⚠️ [UPDATE] No updated for Facebook ad insights then staging table rebuild is skipped.")
-
-    # 1.2.11. Rebuild materialized Facebook creative performance
-    if updated_ad_ids:
-        print("🔄 [UPDATE] Triggering to rebuild materialized Facebook creative performance table...")
-        logging.info("🔄 [UPDATE] Triggering to rebuild materialized Facebook creative performance table...")
-        try:
-            mart_creative_all()
-        except Exception as e:
-            print(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook creative performance due to {e}.")
-            logging.error(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook creative performance due to {e}.")
-
-    else:
-        print("⚠️ [UPDATE] No updated for Facebook ad insights then skip building festival creative materialized table.")
-        logging.warning("⚠️ [UPDATE] No updated for Facebook ad insights then skip building festival creative materialized table.")
-
-    # 1.2.13. Measure the total execution time
+        print(f"❌ [UPDATE] Failed to update TikTok Ads ad insights from {start_date} to {end_date} due to {e}.")
+        logging.error(f"❌ [UPDATE] Failed to update TikTok Ads ad insights from {start_date} to {end_date} due to {e}.")
     elapsed = round(time.time() - start_time, 2)
-    print(f"✅ [UPDATE] Successfully completed Facebook Ads ad insights update in {elapsed}s.")
-    logging.info(f"✅ [UPDATE] Successfully completed Facebook Ads ad insights update in {elapsed}s.")
+    print(f"🏆 [UPDATE] Successfully completed TikTok Ads campaign insights update from {start_date} to {end_date} in {elapsed}s.")
+    logging.info(f"🏆 [UPDATE] Successfully completed TikTok Ads campaign insights update from {start_date} to {end_date} in {elapsed}s.")
 
 if __name__ == "__main__":
     import argparse
