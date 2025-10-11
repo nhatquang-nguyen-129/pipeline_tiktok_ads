@@ -534,15 +534,12 @@ def fetch_ad_creative(ad_id_list: list[str]) -> pd.DataFrame:
         try:
             page = 1
             all_videos = []
-            # fetch theo từng page để tránh mất dữ liệu
             while True:
                 params = {
                     "advertiser_id": advertiser_id,
                     "page": page,
-                    "page_size": 100   # TikTok API thường cho max 100
+                    "page_size": 100
                 }
-
-
                 response = requests.get(
                     video_get_url,
                     headers=video_get_headers,

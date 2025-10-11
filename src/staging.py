@@ -78,8 +78,9 @@ def staging_campaign_insights() -> None:
     print("🚀 [STAGING] Starting to build staging TikTok Ads ad insights table...")
     logging.info("🚀 [STAGING] Starting to build staging TikTok Ads ad insights table...")
 
-    # 1.1.1. Prepare table_id for TikTok Ads campaign insights
     try: 
+
+    # 1.1.1. Prepare table_id for TikTok Ads campaign insights
         raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
         print(f"🔍 [STAGING] Using raw TikTok Ads campaign insights table from Google BigQuery dataset {raw_dataset} to build staging table...")
         logging.info(f"🔍 [STAGING] Using raw TikTok Ads campaign insights table from Google BigQuery dataset {raw_dataset} to build staging table...")
@@ -282,8 +283,9 @@ def staging_ad_insights() -> None:
     print("🚀 [STAGING] Starting to build staging TikTok Ads ad insights table...")
     logging.info("🚀 [STAGING] Starting to build staging TikTok Ads ad insights table...")
 
-    # 1.2.1. Prepare table_id for TikTok Ads ad insights
     try:
+
+    # 1.2.1. Prepare table_id for TikTok Ads ad insights
         raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
         print(f"🔍 [STAGING] Using raw TikTok Ads ad insights table from Google BigQuery dataset {raw_dataset} to build staging table...")
         logging.info(f"🔍 [STAGING] Using raw TikTok Ads ad insights table from Google BigQuery dataset {raw_dataset} to build staging table...")
