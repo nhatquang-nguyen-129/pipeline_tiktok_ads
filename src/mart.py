@@ -112,7 +112,7 @@ def mart_campaign_all() -> None:
                 SAFE_CAST(result_type AS STRING) AS result_type,
                 SAFE_CAST(impressions AS INT64) AS impressions,
                 SAFE_CAST(clicks AS INT64) AS clicks,
-                SAFE_CAST(video_watched_2s AS INT64) AS video_watched_2s,
+                SAFE_CAST(engaged_view_15s AS INT64) AS engaged_view_15s,
                 SAFE_CAST(purchase AS INT64) AS purchase,
                 CASE
                     WHEN REGEXP_CONTAINS(delivery_status, r"ENABLE") THEN "🟢"

@@ -136,7 +136,9 @@ def staging_campaign_insights() -> None:
                     raw.*,
                     metadata.campaign_name,
                     metadata.advertiser_name,
-                    metadata.operation_status
+                    metadata.operation_status,
+                    metadata.objective_type,
+                    metadata.objective
                 FROM `{raw_campaign_table}` AS raw
                 LEFT JOIN `{raw_campaign_metadata}` AS metadata
                     ON CAST(raw.campaign_id AS STRING) = CAST(metadata.campaign_id AS STRING)
@@ -163,7 +165,7 @@ def staging_campaign_insights() -> None:
                     staging_df_enriched["nhan_su"] = staging_df_enriched["nhan_su"].apply(remove_string_accents)
                 staging_df_renamed = staging_df_enriched.rename(columns={
                     "advertiser_id": "account_id",
-                    "objective_type": "result_type",
+                    "objective": "result_type",
                     "advertiser_name": "account_name",
                     "operation_status": "delivery_status"
                 })                           
@@ -375,30 +377,39 @@ def staging_ad_insights() -> None:
                 continue
 
     # 1.2.5. Enrich TikTok Ads ad insights
-            if not staging_df_queried.empty:
-                try:
-                    print(f"🔄 [STAGING] Triggering to enrich staging TikTok Ads ad insights field(s) for {len(staging_df_queried)} row(s) from {raw_ad_table}...")
-                    logging.info(f"🔄 [STAGING] Triggering to enrich staging TikTok Ads ad insights field(s) for {len(staging_df_queried)} row(s) from {raw_ad_table}...")
-                    staging_df_enriched = enrich_ad_fields(staging_df_queried, table_id=raw_ad_table)
-                    if "nhan_su" in staging_df_enriched.columns:
-                        staging_df_enriched["nhan_su"] = staging_df_enriched["nhan_su"].apply(remove_string_accents)
-                    staging_df_renamed = staging_df_enriched.rename(columns={
-                        "advertiser_id": "account_id",
-                        "adgroup_id": "adset_id",
-                        "adgroup_name": "adset_name",
-                        "operation_status": "delivery_status"
-                    })
-                    staging_df_combined.append(staging_df_renamed)
-                except Exception as e:
-                    print(f"❌ [STAGING] Failed to trigger enrichment for staging TikTok Ads ad insights due to {e}.")
-                    logging.warning(f"❌ [STAGING] Failed to trigger enrichment for staging TikTok Ads ad insights due to {e}.") 
-            if not staging_df_combined:
-                print("⚠️ [STAGING] No data found in any raw TikTok Ads ad insights table(s).")
-                logging.warning("⚠️ [STAGING] No data found in any raw TikTok Ads ad insights table(s).")
-                return
-            staging_df_concatenated = pd.concat(staging_df_combined, ignore_index=True)
-            print(f"✅ [STAGING] Successfully combined {len(staging_df_concatenated)} row(s) from all TikTok Ads raw ad insights table(s).")
-            logging.info(f"✅ [STAGING] Successfully combined {len(staging_df_concatenated)} row(s) from all TikTok Ads raw ad insights table(s).")
+        if not staging_df_queried.empty:
+            try:
+                print(f"🔄 [STAGING] Triggering to enrich staging TikTok Ads ad insights field(s) for {len(staging_df_queried)} row(s) from {raw_ad_table}...")
+                logging.info(f"🔄 [STAGING] Triggering to enrich staging TikTok Ads ad insights field(s) for {len(staging_df_queried)} row(s) from {raw_ad_table}...")
+
+                # rename first so enrich_ad_fields sees adset_name
+                staging_df_to_enrich = staging_df_queried.rename(columns={
+                    "advertiser_id": "account_id",
+                    "adgroup_id": "adset_id",
+                    "adgroup_name": "adset_name",
+                    "operation_status": "delivery_status"
+                })
+
+                staging_df_enriched = enrich_ad_fields(staging_df_to_enrich, table_id=raw_ad_table)
+
+                if "nhan_su" in staging_df_enriched.columns:
+                    staging_df_enriched["nhan_su"] = staging_df_enriched["nhan_su"].apply(remove_string_accents)
+
+                staging_df_combined.append(staging_df_enriched)
+
+            except Exception as e:
+                print(f"❌ [STAGING] Failed to trigger enrichment for staging TikTok Ads ad insights due to {e}.")
+                logging.warning(f"❌ [STAGING] Failed to trigger enrichment for staging TikTok Ads ad insights due to {e}.")
+
+        if not staging_df_combined:
+            print("⚠️ [STAGING] No data found in any raw TikTok Ads ad insights table(s).")
+            logging.warning("⚠️ [STAGING] No data found in any raw TikTok Ads ad insights table(s).")
+            return
+
+        staging_df_concatenated = pd.concat(staging_df_combined, ignore_index=True)
+        print(f"✅ [STAGING] Successfully combined {len(staging_df_concatenated)} row(s) from all TikTok Ads raw ad insights table(s).")
+        logging.info(f"✅ [STAGING] Successfully combined {len(staging_df_concatenated)} row(s) from all TikTok Ads raw ad insights table(s).")
+
 
     # 1.2.6. Enforce schema for TikTok Ads ad insights
         try:

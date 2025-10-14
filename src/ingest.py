@@ -251,7 +251,7 @@ def ingest_ad_metadata(ad_id_list: list) -> pd.DataFrame:
         try:
             print(f"🔁 [INGEST] Triggering to fetch TikTok Ads ad metadata for {len(ad_id_list)} ad_id(s)...")
             logging.info(f"🔁 [INGEST] Triggering to fetch TikTok Ads ad metadata for {len(ad_id_list)} ad_id(s)...")
-            ingest_df_fetched = fetch_campaign_metadata(ad_id_list=ad_id_list)
+            ingest_df_fetched = fetch_ad_metadata(ad_id_list=ad_id_list)
             if ingest_df_fetched.empty:
                 print("⚠️ [INGEST] Empty TikTok Ads ad metadata returned then ingestion is suspended.")
                 logging.warning("⚠️ [INGEST] Empty TikTok Ads ad metadata returned then ingestion is suspended.")

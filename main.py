@@ -59,117 +59,78 @@ MODE = os.getenv("MODE")
 
 # Get validated environment variables
 if not all([COMPANY, PLATFORM, ACCOUNT, LAYER, MODE]):
-    raise EnvironmentError("❌ [MAIN] Missing required environment variables COMPANY/PLATFORM/ACCOUNT/LAYER/MODE.")
+    raise EnvironmentError("❌ [MAIN] Failed to trigger entry point for TikTok Ads update due to missing required environment variables.")
+if PLATFORM != "tiktok":
+    raise ValueError(f"❌ [MAIN] Failed to trigger entry point for TikTok Ads update due to unsupported platform '{PLATFORM}'.")
 
 # 1. DYNAMIC IMPORT MODULE BASED ON PLATFORM
+
+# 1.1. Main entry point path
 try:
-    update_module = importlib.import_module(f"services.{PLATFORM}.update")
+    update_module = importlib.import_module(f"src.update")
 except ModuleNotFoundError:
-    raise ImportError(f"❌ [MAIN] Platform '{PLATFORM}' is not supported so please ensure services/{PLATFORM}/update.py exists.")
+    raise ImportError(f"❌ [MAIN] Failed to trigger entry point for TikTok Ads update due to module not found and expected path is 'services/{PLATFORM}/update.py'.")
 
 # 1.2. Main entrypoint function
 def main():
+    
+    # 1.2.1. Initialize runtime context
     today = datetime.today()
 
-    # 1.2.1. PLATFORM = facebook (keep original logic)
-    if PLATFORM == "facebook":
-        try:
-            update_campaign_insights = update_module.update_campaign_insights
-            update_ad_insights = update_module.update_ad_insights
-        except AttributeError:
-            raise ImportError(f"❌ [MAIN] Facebook update module must define update_campaign_insights and update_ad_insights.")
-        layers = [layer.strip() for layer in LAYER.split(",") if layer.strip()]
-        if len(layers) != 1:
-            raise ValueError("⚠️ [MAIN] Only one layer is supported per execution so please run separately for each layer.")
-        if MODE == "today":
-            start_date = end_date = today.strftime("%Y-%m-%d")
-        elif MODE == "last3days":
-            start = today - timedelta(days=3)
-            start_date = start.strftime("%Y-%m-%d")
-            end_date = today.strftime("%Y-%m-%d")
-        elif MODE == "last7days":
-            start = today - timedelta(days=7)
-            start_date = start.strftime("%Y-%m-%d")
-            end_date = today.strftime("%Y-%m-%d")
-        elif MODE == "thismonth":
-            start = today.replace(day=1)
-            start_date = start.strftime("%Y-%m-%d")
-            end_date = today.strftime("%Y-%m-%d")
-        elif MODE == "lastmonth":
-            first_day_this_month = today.replace(day=1)
-            last_day_last_month = first_day_this_month - timedelta(days=1)
-            first_day_last_month = last_day_last_month.replace(day=1)
-            start_date = first_day_last_month.strftime("%Y-%m-%d")
-            end_date = last_day_last_month.strftime("%Y-%m-%d")
-        else:
-            raise ValueError(f"⚠️ [MAIN] Unsupported mode {MODE} so please re-check input environment variable.")
-        if "campaign" in layers:
-            print(f"🚀 [MAIN] Starting to update {PLATFORM} campaign insights of {COMPANY} in {MODE} mode and {layers} layer from {start_date} to {end_date}...")
-            logging.info(f"🚀 [MAIN] Starting to update {PLATFORM} campaign insights of {COMPANY} in {MODE} mode and {layers} layer from {start_date} to {end_date}...")
-            update_campaign_insights(start_date=start_date, end_date=end_date)
-            print(f"✅ [MAIN] Successfully completed update {PLATFORM} campaign insights of {COMPANY} in {MODE} mode and {layers} layer from {start_date} to {end_date}.")
-            logging.info(f"✅ [MAIN] Successfully completed update {PLATFORM} campaign insights of {COMPANY} in {MODE} mode and {layers} layer from {start_date} to {end_date}.")
-        if "ad" in layers:
-            print(f"🚀 [MAIN] Starting to update {PLATFORM} ad insights of {COMPANY} in {MODE} mode and {layers} layer from {start_date} to {end_date}...")
-            logging.info(f"🚀 [MAIN] Starting to update {PLATFORM} ad insights of {COMPANY} in {MODE} mode and {layers} layer from {start_date} to {end_date}...")
-            update_ad_insights(start_date=start_date, end_date=end_date)
-            print(f"✅ [MAIN] Successfully completed update {PLATFORM} ad insights of {COMPANY} in {MODE} mode and {layers} layer from {start_date} to {end_date}.")
-            logging.info(f"✅ [MAIN] Successfully completed update {PLATFORM} ad insights of {COMPANY} in {MODE} mode and {layers} layer from {start_date} to {end_date}.")
+    # 1.2.2. Load required function(s) from TikTok Ads update module(s)
+    try:
+        update_campaign_insights = update_module.update_campaign_insights
+        update_ad_insights = update_module.update_ad_insights
+    except AttributeError:
+        raise ImportError("⚠️ [MAIN] Failed to get TikTok Ads update module in src/update.py.")
 
-    # 1.2.2. PLATFORM = budget
-    elif PLATFORM == "budget":
-        try:
-            update_budget_allocation = update_module.update_budget_allocation
-        except AttributeError:
-            raise ImportError(f"❌ [MAIN] Budget update module must define 'update_budget_allocation'.")
-        if MODE == "thismonth":
-            thang = today.strftime("%Y-%m")   # e.g. "2025-08"
-        elif MODE == "lastmonth":
-            first_day_this_month = today.replace(day=1)
-            last_day_last_month = first_day_this_month - timedelta(days=1)
-            thang = last_day_last_month.strftime("%Y-%m")   # e.g. "2025-07"
-        else:
-            raise ValueError(f"⚠️ [MAIN] Unsupported mode {MODE} for budget. Use thismonth or lastmonth.")
-        if LAYER != "all":
-            raise ValueError("⚠️ [MAIN] Budget only supports LAYER=all.")
-        print(f"🚀 [MAIN] Starting to update budget allocation of {COMPANY} for {thang}...")
-        logging.info(f"🚀 [MAIN] Starting to update budget allocation of {COMPANY} for {thang}...")
-        update_budget_allocation(thang)
-        print(f"✅ [MAIN] Successfully completed update budget allocation of {COMPANY} for {thang}.")
-        logging.info(f"✅ [MAIN] Successfully completed update budget allocation of {COMPANY} for {thang}.")
+    # 1.2.3. Validate layer for TikTok Ads main entry point
+    layers = [layer.strip() for layer in LAYER.split(",") if layer.strip()]
+    if len(layers) != 1:
+        raise ValueError("⚠️ [MAIN] Failed to execute more than one layer for TikTok Ads main entry point.")
+    layer = layers[0]
 
-     # 1.2.3. PLATFORM = ads
-    elif PLATFORM == "ads":
-        try:
-            update_spend = update_module.update_spend_all
-            update_recon = update_module.update_recon_all
-        except AttributeError:
-            raise ImportError(f"❌ [MAIN] Ads update module must define 'mart_spend_all' and 'mart_recon_all'.")
-        layers = [layer.strip() for layer in LAYER.split(",") if layer.strip()]
-        if len(layers) != 1:
-            raise ValueError("⚠️ [MAIN] Ads only supports one LAYER per execution (spend or recon).")
-        if MODE != "all":
-            raise ValueError("⚠️ [MAIN] Ads only supports MODE=all.")
-        layer = layers[0]
-        if layer == "spend":
-            print(f"🚀 [MAIN] Starting to build unified ads spend mart for {COMPANY}...")
-            logging.info(f"🚀 [MAIN] Starting to build unified ads spend mart for {COMPANY}...")
-            update_spend()
-            print(f"✅ [MAIN] Successfully built unified ads spend mart for {COMPANY}.")
-            logging.info(f"✅ [MAIN] Successfully built unified ads spend mart for {COMPANY}.")
-        elif layer == "recon":
-            print(f"🚀 [MAIN] Starting to build unified ads spend reconciliation mart for {COMPANY}...")
-            logging.info(f"🚀 [MAIN] Starting to build unified ads spend reconciliation mart for {COMPANY}...")
-            update_recon()
-            print(f"✅ [MAIN] Successfully built unified ads spend reconciliation mart for {COMPANY}.")
-            logging.info(f"✅ [MAIN] Successfully built unified ads spend reconciliation mart for {COMPANY}.")
-        else:
-            raise ValueError(f"⚠️ [MAIN] Unsupported ads LAYER={layer}. Use spend or recon.")
+    # 1.2.4. Validate computation date range for TikTok Ads main entry point
+    if MODE == "today":
+        start_date = end_date = today.strftime("%Y-%m-%d")
+    elif MODE == "last3days":
+        start = today - timedelta(days=3)
+        start_date = start.strftime("%Y-%m-%d")
+        end_date = today.strftime("%Y-%m-%d")
+    elif MODE == "last7days":
+        start = today - timedelta(days=7)
+        start_date = start.strftime("%Y-%m-%d")
+        end_date = today.strftime("%Y-%m-%d")
+    elif MODE == "thismonth":
+        start = today.replace(day=1)
+        start_date = start.strftime("%Y-%m-%d")
+        end_date = today.strftime("%Y-%m-%d")
+    elif MODE == "lastmonth":
+        first_day_this_month = today.replace(day=1)
+        last_day_last_month = first_day_this_month - timedelta(days=1)
+        first_day_last_month = last_day_last_month.replace(day=1)
+        start_date = first_day_last_month.strftime("%Y-%m-%d")
+        end_date = last_day_last_month.strftime("%Y-%m-%d")
+    else:
+        raise ValueError(f"⚠️ [MAIN] Failed to excute mode {MODE} for TikTok Ads main entry point, please use one of 'today', 'last3days', 'last7days', 'thismonth' and 'lastmonth'.")
 
-# 1.3. Entrypoint guard to run main() when this script is executed directly
+    # 1.2.5. Execute TikTok Ads main entry point based on layer
+    if layer == "campaign":
+        print(f"🚀 [MAIN] Trigger to update TikTok Ads campaign insights update for company {COMPANY}, deparment {DEPARTMENT}, account {ACCOUNT} and mode {MODE} from {start_date} to {end_date}...")
+        logging.info(f"🚀 [MAIN] Trigger to update TikTok Ads campaign insights update for company {COMPANY}, deparment {DEPARTMENT}, account {ACCOUNT} and mode {MODE} from {start_date} to {end_date}...")
+        update_campaign_insights(start_date=start_date, end_date=end_date)
+    elif layer == "ad":
+        print(f"🚀 [MAIN] Trigger to update TikTok Ads ad insights update for company {COMPANY}, deparment {DEPARTMENT}, account {ACCOUNT} and mode {MODE} from {start_date} to {end_date}...")
+        logging.info(f"🚀 [MAIN] Trigger to update TikTok Ads ad insights update for company {COMPANY}, deparment {DEPARTMENT}, account {ACCOUNT} and mode {MODE} from {start_date} to {end_date}...")
+        update_ad_insights(start_date=start_date, end_date=end_date)
+    else:
+        raise ValueError(f"⚠️ [MAIN] Failed to excute layer {MODE} for TikTok Ads main entry point and please use one of 'campaign' or 'ad'.")
+
+# 1.3. Entrypoint guard
 if __name__ == "__main__":
     try:
         main()
     except Exception as e:
         logging.error(f"❌ Update failed: {e}")
+        print(f"❌ Update failed: {e}")
         sys.exit(1)

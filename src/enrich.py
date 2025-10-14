@@ -39,8 +39,7 @@ def enrich_campaign_fields(df: pd.DataFrame, table_id: str) -> pd.DataFrame:
     logging.info("🚀 [ENRICH] Starting to enrich staging TikTok Ads campaign field(s)...")  
 
     try:
-    
-    # 1.1.1. Enrich table-level field(s)
+        # 1.1.1. Enrich table-level field(s)
         table_name = table_id.split(".")[-1]
         match = re.search(
             r"^(?P<company>\w+)_table_(?P<platform>\w+)_(?P<department>\w+)_(?P<account>\w+)_campaign_m\d{6}$",
@@ -51,22 +50,18 @@ def enrich_campaign_fields(df: pd.DataFrame, table_id: str) -> pd.DataFrame:
             df["phong_ban"] = match.group("department")
             df["tai_khoan"] = match.group("account")
 
-    # 1.1.2. Enrich campaign-level field(s)
-        def safe_split(name: str, idx: int):
-            parts = str(name).split("_")
-            return parts[idx] if len(parts) > idx else None
+        # 1.1.2. Enrich campaign-level field(s)
+        df["hinh_thuc"]          = df["campaign_name"].apply(lambda x: str(x).split("_")[0] if len(str(x).split("_")) > 0 else None)
+        df["khu_vuc"]            = df["campaign_name"].apply(lambda x: str(x).split("_")[1] if len(str(x).split("_")) > 1 else None)
+        df["ma_ngan_sach_cap_1"] = df["campaign_name"].apply(lambda x: str(x).split("_")[2] if len(str(x).split("_")) > 2 else None)
+        df["ma_ngan_sach_cap_2"] = df["campaign_name"].apply(lambda x: str(x).split("_")[3] if len(str(x).split("_")) > 3 else None)
+        df["nganh_hang"]         = df["campaign_name"].apply(lambda x: str(x).split("_")[4] if len(str(x).split("_")) > 4 else None)
+        df["nhan_su"]            = df["campaign_name"].apply(lambda x: str(x).split("_")[5] if len(str(x).split("_")) > 5 else None)
+        df["chuong_trinh"]       = df["campaign_name"].apply(lambda x: str(x).split("_")[7] if len(str(x).split("_")) > 7 else None)
+        df["noi_dung"]           = df["campaign_name"].apply(lambda x: str(x).split("_")[8] if len(str(x).split("_")) > 8 else None)
+        df["thang"]              = pd.to_datetime(df["date_start"]).dt.strftime("%Y-%m")
 
-        df["hinh_thuc"]         = df["campaign_name"].apply(lambda x: safe_split(x, 0))
-        df["khu_vuc"]           = df["campaign_name"].apply(lambda x: safe_split(x, 1))
-        df["ma_ngan_sach_cap_1"]= df["campaign_name"].apply(lambda x: safe_split(x, 2))
-        df["ma_ngan_sach_cap_2"]= df["campaign_name"].apply(lambda x: safe_split(x, 3))
-        df["nganh_hang"]        = df["campaign_name"].apply(lambda x: safe_split(x, 4))
-        df["nhan_su"]           = df["campaign_name"].apply(lambda x: safe_split(x, 5))
-        df["chuong_trinh"]      = df["campaign_name"].apply(lambda x: safe_split(x, 7))
-        df["noi_dung"]          = df["campaign_name"].apply(lambda x: safe_split(x, 8))
-        df["thang"]             = pd.to_datetime(df["date_start"]).dt.strftime("%Y-%m")
-
-    # 1.1.3. Add invalid campaign_name warning
+        # 1.1.3. Add invalid campaign_name warning
         df["invalid_campaign_name"] = df["campaign_name"].apply(
             lambda x: len(str(x).split("_")) < 9
         )
@@ -76,13 +71,14 @@ def enrich_campaign_fields(df: pd.DataFrame, table_id: str) -> pd.DataFrame:
             print(f"⚠️ [ENRICH] Found {invalid_count} invalid campaign_name(s) with insufficient parts.")
             logging.warning(f"⚠️ [ENRICH] Found {invalid_count} invalid campaign_name(s) with insufficient parts.")
 
-    # 1.1.4. Summarize enrichment result(s)
+        # 1.1.4. Summarize enrichment result(s)
         print(f"✅ [ENRICH] Successfully enriched field(s) for staging TikTok Ads campaign insights with {len(df)} row(s).")
         logging.info(f"✅ [ENRICH] Successfully enriched field(s) for staging TikTok Ads campaign insights with {len(df)} row(s).")
 
     except Exception as e:
         print(f"❌ [ENRICH] Failed to enrich staging TikTok Ads campaign field(s) due to {e}.")
         logging.error(f"❌ [ENRICH] Failed to enrich staging TikTok Ads campaign field(s) due to {e}.")
+
     return df
 
 # 1.2. Enrich structured ad-level fields from adset_name and campaign_name

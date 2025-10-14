@@ -40,16 +40,9 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "campaign_id": str,
             "campaign_name": str,
             "operation_status": str,
+            "objective_type": str,
+            "objective": str,            
             "create_time": "datetime64[ns, UTC]"
-        },
-        "fetch_adset_metadata": {
-            "adgroup_id": str,
-            "adgroup_name": str,
-            "campaign_id": str,
-            "placement_type": str,
-            "status": str,
-            "create_time": "datetime64[ns, UTC]",
-            "advertiser_id": str,
         },
         "fetch_ad_metadata": {
             "advertiser_id": str,
@@ -76,35 +69,33 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "advertiser_id": str,
             "campaign_id": str,
             "stat_time_day": str,
-            "objective_type": str,
             "result": str,
             "spend": float,
             "impressions": int,
             "clicks": int,
-            "video_watched_2s": int,
-            "purchase": int,                                  # Unique purchases (app)
-            "complete_payment": int,                          # Purchases (website)
-            "onsite_total_purchase": int,                     # Purchases (TikTok)
-            "offline_shopping_events": int,                   # Purchases (offline)
-            "onsite_shopping": int,                           # Purchases (TikTok Shop)
-            "messaging_total_conversation_tiktok_direct_message": int  # Conversations (TikTok direct message)
+            "engaged_view_15s": int,
+            "purchase": int,
+            "complete_payment": int,
+            "onsite_total_purchase": int,
+            "offline_shopping_events": int,
+            "onsite_shopping": int,
+            "messaging_total_conversation_tiktok_direct_message": int
         },
         "fetch_ad_insights": {
             "advertiser_id": str,
             "ad_id": str,
             "stat_time_day": str,
-            "objective_type": str,
             "result": str,
             "spend": float,
             "impressions": int,
             "clicks": int,
-            "video_watched_2s": int,
-            "purchase": int,                                  # Unique purchases (app)
-            "complete_payment": int,                          # Purchases (website)
-            "onsite_total_purchase": int,                     # Purchases (TikTok)
-            "offline_shopping_events": int,                   # Purchases (offline)
-            "onsite_shopping": int,                           # Purchases (TikTok Shop)
-            "messaging_total_conversation_tiktok_direct_message": int  # Conversations (TikTok direct message)
+            "engaged_view_15s": int,
+            "purchase": int,
+            "complete_payment": int,
+            "onsite_total_purchase": int,
+            "offline_shopping_events": int,
+            "onsite_shopping": int,
+            "messaging_total_conversation_tiktok_direct_message": int
         },
         "ingest_campaign_metadata": {
             "advertiser_id": str,
@@ -112,6 +103,8 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "campaign_id": str,
             "campaign_name": str,
             "operation_status": str,
+            "objective_type": str,
+            "objective": str,            
             "create_time": "datetime64[ns, UTC]"
         },
         "ingest_ad_metadata": {
@@ -138,33 +131,31 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
         "ingest_campaign_insights": {
             "advertiser_id": str,
             "campaign_id": str,
-            "objective_type": str,
             "result": str,
             "stat_time_day": str,
             "spend": float,
             "impressions": int,
             "clicks": int,
-            "video_watched_2s": int,
-            "purchase": int,                                  # Unique purchases (app)
-            "complete_payment": int,                          # Purchases (website)
-            "onsite_total_purchase": int,                     # Purchases (TikTok)
-            "offline_shopping_events": int,                   # Purchases (offline)
-            "onsite_shopping": int,                           # Purchases (TikTok Shop)
-            "messaging_total_conversation_tiktok_direct_message": int,  # Conversations (TikTok direct message)
+            "engaged_view_15s": int,
+            "purchase": int,
+            "complete_payment": int,
+            "onsite_total_purchase": int,
+            "offline_shopping_events": int,
+            "onsite_shopping": int,
+            "messaging_total_conversation_tiktok_direct_message": int,
             "last_updated_at": "datetime64[ns, UTC]"
         },
         "ingest_ad_insights": {
             "advertiser_id": str,
             "ad_id": str,
-            "objective_type": str,
             "result": str,
             "stat_time_day": str,
             "spend": float,
             "impressions": int,
             "clicks": int,
-            "video_watched_2s": int,
-            "purchase": int,                                  # Unique purchases (app)
-            "complete_payment": int,                          # Purchases (website)
+            "engaged_view_15s": int,
+            "purchase": int,
+            "complete_payment": int,
             "onsite_total_purchase": int,                     # Purchases (TikTok)
             "offline_shopping_events": int,                   # Purchases (offline)
             "onsite_shopping": int,                           # Purchases (TikTok Shop)
@@ -183,7 +174,7 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "spend": float,
             "impressions": int,
             "clicks": int,
-            "video_watched_2s": int,
+            "engaged_view_15s": int,
             "purchase": int,                                  # Unique purchases (app)
             "complete_payment": int,                          # Purchases (website)
             "onsite_total_purchase": int,                     # Purchases (TikTok)
@@ -220,19 +211,18 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "date_start": str,
             "delivery_status": str,          # từ operation_status
             "ad_format": str,
-            "optimization_event": str,
             "video_id": str,
             "video_cover_url": str,
             "preview_url": str,
+            "optimization_event": str,
 
             # TikTok metrics gốc
-            "objective_type": str,
             "result": str,
             "stat_time_day": str,
             "spend": float,
             "impressions": int,
             "clicks": int,
-            "video_watched_2s": int,
+            "engaged_view_15s": int,
             "purchase": int,
             "complete_payment": int,
             "onsite_total_purchase": int,
