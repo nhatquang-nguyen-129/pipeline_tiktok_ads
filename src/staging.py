@@ -43,7 +43,7 @@ from google.auth.exceptions import DefaultCredentialsError
 from google.cloud import bigquery
 
 # Add internal TikTok module for handling
-from config.schema import ensure_table_schema
+from src.schema import ensure_table_schema
 from src.enrich import (
     enrich_campaign_fields,
     enrich_ad_fields
