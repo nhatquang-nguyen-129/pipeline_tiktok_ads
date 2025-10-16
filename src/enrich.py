@@ -127,7 +127,7 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, table_id: str) -> pd.DataFra
 
     # 1.2.4. Enrich campaign-level field(s)
         if "campaign_name" in enrich_df_processing.columns:
-            camp_parts = df["campaign_name"].fillna("").str.split("_")
+            camp_parts = enrich_df_processing["campaign_name"].fillna("").str.split("_")
             enrich_df_processing["hinh_thuc"] = camp_parts.str[0].fillna("unknown")
             enrich_df_processing["khu_vuc"] = camp_parts.str[1].fillna("unknown")
             enrich_df_processing["ma_ngan_sach_cap_1"] = camp_parts.str[2].fillna("unknown")
