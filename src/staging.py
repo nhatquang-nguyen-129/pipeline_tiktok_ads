@@ -43,7 +43,6 @@ from google.auth.exceptions import DefaultCredentialsError
 from google.cloud import bigquery
 
 # Add internal TikTok module for handling
-from config.utils import remove_string_accents
 from config.schema import ensure_table_schema
 from src.enrich import (
     enrich_campaign_fields,
@@ -160,26 +159,55 @@ def staging_campaign_insights() -> None:
             try:
                 print(f"🔄 [STAGING] Triggering to enrich staging TikTok Ads campaign insights field(s) for {len(staging_df_queried)} row(s) from {raw_campaign_table}...")
                 logging.info(f"🔄 [STAGING] Triggering to enrich staging TikTok Ads campaign insights field(s) for {len(staging_df_queried)} row(s) from {raw_campaign_table}...")
+
                 staging_df_enriched = enrich_campaign_fields(staging_df_queried, table_id=raw_campaign_table)
+
+                # Inline remove Vietnamese accents (no external function call)
                 if "nhan_su" in staging_df_enriched.columns:
-                    staging_df_enriched["nhan_su"] = staging_df_enriched["nhan_su"].apply(remove_string_accents)
+                    vietnamese_map = {
+                        'á': 'a', 'à': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a',
+                        'ă': 'a', 'ắ': 'a', 'ằ': 'a', 'ẳ': 'a', 'ẵ': 'a', 'ặ': 'a',
+                        'â': 'a', 'ấ': 'a', 'ầ': 'a', 'ẩ': 'a', 'ẫ': 'a', 'ậ': 'a',
+                        'đ': 'd',
+                        'é': 'e', 'è': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ẹ': 'e',
+                        'ê': 'e', 'ế': 'e', 'ề': 'e', 'ể': 'e', 'ễ': 'e', 'ệ': 'e',
+                        'í': 'i', 'ì': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ị': 'i',
+                        'ó': 'o', 'ò': 'o', 'ỏ': 'o', 'õ': 'o', 'ọ': 'o',
+                        'ô': 'o', 'ố': 'o', 'ồ': 'o', 'ổ': 'o', 'ỗ': 'o', 'ộ': 'o',
+                        'ơ': 'o', 'ớ': 'o', 'ờ': 'o', 'ở': 'o', 'ỡ': 'o', 'ợ': 'o',
+                        'ú': 'u', 'ù': 'u', 'ủ': 'u', 'ũ': 'u', 'ụ': 'u',
+                        'ư': 'u', 'ứ': 'u', 'ừ': 'u', 'ử': 'u', 'ữ': 'u', 'ự': 'u',
+                        'ý': 'y', 'ỳ': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
+                    }
+                    vietnamese_map_upper = {k.upper(): v.upper() for k, v in vietnamese_map.items()}
+                    full_map = {**vietnamese_map, **vietnamese_map_upper}
+
+                    staging_df_enriched["nhan_su"] = staging_df_enriched["nhan_su"].apply(
+                        lambda x: ''.join(full_map.get(c, c) for c in x) if isinstance(x, str) else x
+                    )
+
                 staging_df_renamed = staging_df_enriched.rename(columns={
                     "advertiser_id": "account_id",
                     "objective": "result_type",
                     "advertiser_name": "account_name",
                     "operation_status": "delivery_status"
-                })                           
+                })
+
                 staging_df_combined.append(staging_df_renamed)
+
             except Exception as e:
                 print(f"❌ [STAGING] Failed to trigger enrichment for staging TikTok Ads campaign insights due to {e}.")
-                logging.warning(f"❌ [STAGING] Failed to trigger enrichment for staging TikTok Ads campaign insights due to {e}.") 
+                logging.warning(f"❌ [STAGING] Failed to trigger enrichment for staging TikTok Ads campaign insights due to {e}.")
+
         if not staging_df_combined:
             print("⚠️ [STAGING] No data found in any raw TikTok Ads campaign insights table(s).")
             logging.warning("⚠️ [STAGING] No data found in any raw TikTok Ads campaign insights table(s).")
             return
+
         staging_df_concatenated = pd.concat(staging_df_combined, ignore_index=True)
         print(f"✅ [STAGING] Successfully combined {len(staging_df_concatenated)} row(s) from all TikTok Ads raw campaign insights table(s).")
         logging.info(f"✅ [STAGING] Successfully combined {len(staging_df_concatenated)} row(s) from all TikTok Ads raw campaign insights table(s).")
+
 
     # 1.1.6. Enforce schema for TikTok Ads campaign insights
         try:
@@ -393,7 +421,27 @@ def staging_ad_insights() -> None:
                 staging_df_enriched = enrich_ad_fields(staging_df_to_enrich, table_id=raw_ad_table)
 
                 if "nhan_su" in staging_df_enriched.columns:
-                    staging_df_enriched["nhan_su"] = staging_df_enriched["nhan_su"].apply(remove_string_accents)
+                    vietnamese_map = {
+                        'á': 'a', 'à': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a',
+                        'ă': 'a', 'ắ': 'a', 'ằ': 'a', 'ẳ': 'a', 'ẵ': 'a', 'ặ': 'a',
+                        'â': 'a', 'ấ': 'a', 'ầ': 'a', 'ẩ': 'a', 'ẫ': 'a', 'ậ': 'a',
+                        'đ': 'd',
+                        'é': 'e', 'è': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ẹ': 'e',
+                        'ê': 'e', 'ế': 'e', 'ề': 'e', 'ể': 'e', 'ễ': 'e', 'ệ': 'e',
+                        'í': 'i', 'ì': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ị': 'i',
+                        'ó': 'o', 'ò': 'o', 'ỏ': 'o', 'õ': 'o', 'ọ': 'o',
+                        'ô': 'o', 'ố': 'o', 'ồ': 'o', 'ổ': 'o', 'ỗ': 'o', 'ộ': 'o',
+                        'ơ': 'o', 'ớ': 'o', 'ờ': 'o', 'ở': 'o', 'ỡ': 'o', 'ợ': 'o',
+                        'ú': 'u', 'ù': 'u', 'ủ': 'u', 'ũ': 'u', 'ụ': 'u',
+                        'ư': 'u', 'ứ': 'u', 'ừ': 'u', 'ử': 'u', 'ữ': 'u', 'ự': 'u',
+                        'ý': 'y', 'ỳ': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
+                    }
+                    vietnamese_map_upper = {k.upper(): v.upper() for k, v in vietnamese_map.items()}
+                    full_map = {**vietnamese_map, **vietnamese_map_upper}
+
+                    staging_df_enriched["nhan_su"] = staging_df_enriched["nhan_su"].apply(
+                        lambda text: ''.join(full_map.get(c, c) for c in text) if isinstance(text, str) else text
+                    )
 
                 staging_df_combined.append(staging_df_enriched)
 
@@ -409,6 +457,7 @@ def staging_ad_insights() -> None:
         staging_df_concatenated = pd.concat(staging_df_combined, ignore_index=True)
         print(f"✅ [STAGING] Successfully combined {len(staging_df_concatenated)} row(s) from all TikTok Ads raw ad insights table(s).")
         logging.info(f"✅ [STAGING] Successfully combined {len(staging_df_concatenated)} row(s) from all TikTok Ads raw ad insights table(s).")
+
 
 
     # 1.2.6. Enforce schema for TikTok Ads ad insights
