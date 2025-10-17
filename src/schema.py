@@ -1,4 +1,3 @@
-
 """
 ===================================================================
 TIKTOK SCHEMA MODULE
@@ -10,21 +9,24 @@ for all required fields across different data layers.
 It plays a key role in ensuring schema alignment and preventing  
 data inconsistency between raw → staging → mart layers.
 
-✔️ Declares expected column names for each entity type   
-✔️ Supports schema enforcement in validation and ETL stages  
-✔️ Prevents schema mismatch when handling dynamic Facebook API fields  
+✔️ Declares expected column names for each TikTok Ads entity type  
+✔️ Supports schema validation and enforcement during ETL execution  
+✔️ Prevents mismatch caused by dynamic or missing API fields  
+✔️ Centralizes schema versioning for consistent updates  
+✔️ Enables easy schema reference and debugging across modules  
 
 ⚠️ This module does *not* fetch or transform data.  
 It only provides schema utilities to support other pipeline components.
 ===================================================================
 """
-# Add external logging libraries for integration
+
+# Add Python logging ultilities for integration
 import logging
 
-# Add external Python Pandas libraries for integration
+# Add Python Pandas libraries for integration
 import pandas as pd
 
-# Add external Python NumPy libraries for integration
+# Add Python NumPy libraries for integration
 import numpy as np
 
 # 1. ENSURE SCHEMA FOR GIVEN PYTHON DATAFRAME
