@@ -55,7 +55,9 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "operation_status": str,
             "create_time": "datetime64[ns, UTC]",
             "ad_format": str,
-            "optimization_event": str
+            "optimization_event": str,
+            "video_id": str,
+            "image_ids": list
         },
         "fetch_ad_creative": {
             "ad_id": str,
