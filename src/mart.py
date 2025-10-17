@@ -9,23 +9,26 @@ raw layer ingestion process.
 It focuses on preparing final analytical tables for cost tracking 
 and campaign performance reporting at a daily granularity.
 
-✔️ Dynamically detects all campaign staging tables for the target year  
-✔️ Applies transformation and standardization (type cast, parsing)  
-✔️ Writes partitioned & clustered materialized tables to Google BigQuery
+✔️ Dynamically detects all TikTok Ads staging tables for the target year  
+✔️ Applies transformation and type standardization for analytical consistency  
+✔️ Aggregates campaign metrics at daily and program dimensions  
+✔️ Writes partitioned, clustered tables optimized for BigQuery queries  
+✔️ Logs processing summary and materialization status for monitoring  
 
 ⚠️ This module is strictly responsible for *MART layer construction*.  
 It does not handle raw data ingestion, API fetching, or enrichment logic.
 ==================================================================
 """
+
 # Add root directory to sys.path for absolute imports of internal modules
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
-# Add logging ultilities for integration
+# Add Python logging ultilities for integration
 import logging
 
-# Add Google Authentication libraries for integration
+# Add Google Authentication modules for integration
 from google.api_core.exceptions import (
     Forbidden,
     GoogleAPICallError
@@ -56,9 +59,9 @@ LAYER = os.getenv("LAYER")
 # Get environment variable for Mode
 MODE = os.getenv("MODE")
 
-# 1. BUILD MONTHLY MATERIALIZED TABLE FOR TIKTOK ADS CAMPAIGN PERFORMANCE FROM STAGING TABLE(S)
+# 1. BUILD MONTHLY MATERIALIZED TABLE FOR TIKTOK ADS CAMPAIGN PERFORMANCE
 
-# 1.1. Build materialzed table for TikTok Ads campaign performance by union all staging tables
+# 1.1. Build materialzed table for TikTok Ads campaign performance by union all staging table(s)
 def mart_campaign_all() -> None:
     print(f"🚀 [MART] Starting to build materialized table for TikTok Ads campaign performance...")
     logging.info(f"🚀 [MART] Starting to build materialized table TikTok Ads campaign performance...")
@@ -133,12 +136,12 @@ def mart_campaign_all() -> None:
         print(f"❌ [MART] Failed to build materialized table for TikTok Ads campaign performance due to {e}.")
         logging.error(f"❌ [MART] Failed to build materialized table for TikTok Ads campaign performance due to {e}.")
 
-# 2. MONTHLY MATERIALIZED TABLE FOR CREATIVE PERFORMANCE FROM STAGING TABLE(S)
+# 2. MONTHLY MATERIALIZED TABLE FOR TIKTOK ADS CREATIVE PERFORMANCE
 
-# 2.1. Build materialized table for Facebook creative performance by union all staging tables
+# 2.1. Build materialized table for TikTok creative performance by union all staging tables
 def mart_creative_all() -> None:
-    print("🚀 [MART] Starting to build materialized table for Facebook creative performance (All)...")
-    logging.info("🚀 [MART] Starting to build materialized table for Facebook creative performance (All)...")
+    print("🚀 [MART] Starting to build materialized table for TikTok Ads creative performance...")
+    logging.info("🚀 [MART] Starting to build materialized table for TikTok Ads creative performance...")
 
     # 2.1.1. Prepare table_id for TikTok Ads ad creative
     try:
