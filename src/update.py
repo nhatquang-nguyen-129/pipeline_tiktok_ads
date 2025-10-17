@@ -217,7 +217,7 @@ def update_ad_insights(start_date: str, end_date: str):
             print(f"🔄 [UPDATE] Triggering to ingest TikTok Ads ad creative for {len(updated_ad_ids)} ad_id(s)...")
             logging.info(f"🔄 [UPDATE] Triggering to ingest TikTok Ads ad creative for {len(updated_ad_ids)} ad_id(s)...")
             try:
-                ingest_ad_creative(ad_id_list=list(updated_ad_ids))
+                ingest_ad_creative()
             except Exception as e:
                 print(f"❌ [UPDATE] Failed to trigger TikTok Ads ad creative ingestion for {len(updated_ad_ids)} ad_id(s) due to {e}.")
                 logging.error(f"❌ [UPDATE] Failed to trigger TikTok Ads ad creative ingestion for {len(updated_ad_ids)} ad_id(s) due to {e}.")
@@ -258,3 +258,12 @@ def update_ad_insights(start_date: str, end_date: str):
     elapsed = round(time.time() - start_time, 2)
     print(f"🏆 [UPDATE] Successfully completed TikTok Ads ad insights update from {start_date} to {end_date} in {elapsed}s.")
     logging.info(f"🏆 [UPDATE] Successfully completed TikTok Ads ad insights update from {start_date} to {end_date} in {elapsed}s.")
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description="Run Facebook Campaign Backfill")
+    parser.add_argument("--start_date", type=str, required=True, help="Start date (YYYY-MM-DD)")
+    parser.add_argument("--end_date", type=str, required=True, help="End date (YYYY-MM-DD)")
+    args = parser.parse_args()
+
+    update_ad_insights(start_date=args.start_date, end_date=args.end_date)

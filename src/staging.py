@@ -322,7 +322,7 @@ def staging_ad_insights() -> None:
         raw_ad_metadata = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_metadata"
         print(f"🔍 [STAGING] Using raw TikTok Ads ad metadata table from Google BigQuery table {raw_ad_metadata} to build staging table...")
         logging.info(f"🔍 [STAGING] Using raw TikTok Ads ad metadata table from Google BigQuery table {raw_ad_metadata} to build staging table...")        
-        raw_ad_creative = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_creative_metadata"
+        raw_ad_creative = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_creative"
         print(f"🔍 [STAGING] Using raw TikTok Ads ad creative table from Google BigQuery table {raw_ad_creative} to build staging table...")
         logging.info(f"🔍 [STAGING] Using raw TikTok Ads ad creative table from Google BigQuery table {raw_ad_creative} to build staging table...")   
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
@@ -383,11 +383,9 @@ def staging_ad_insights() -> None:
                     ad.ad_format,
                     ad.optimization_event,
                     ad.video_id,
-                    ad.image_ids,
                     creative.video_cover_url,
                     creative.preview_url,
-                    creative.create_time AS creative_create_time,
-                    creative.fetched_at AS creative_fetched_at
+                    creative.create_time AS creative_create_time
                 FROM `{raw_ad_table}` AS raw
                 LEFT JOIN `{raw_ad_metadata}` AS ad
                     ON CAST(raw.ad_id AS STRING) = CAST(ad.ad_id AS STRING)

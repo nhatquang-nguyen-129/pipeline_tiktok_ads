@@ -43,15 +43,6 @@ import requests
 # Add Python time ultilities for integration
 import time
 
-# Add Google Authentication libraries for integration
-from google.api_core.exceptions import (
-    GoogleAPICallError,
-    NotFound,
-    PermissionDenied, 
-)
-from google.auth import default
-from google.auth.exceptions import DefaultCredentialsError
-
 # Add Google Secret Manager modules for integration
 from google.cloud import secretmanager
 
@@ -297,8 +288,7 @@ def fetch_ad_metadata(ad_id_list: list[str]) -> pd.DataFrame:
         "create_time",
         "ad_format",
         "optimization_event",
-        "video_id",
-        "image_ids"
+        "video_id"
     ]
     all_records = []
     print(f"🔍 [FETCH] Preparing to fetch TikTok ad metadata with {fetch_fields_default} field(s)...")
@@ -873,10 +863,16 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
                         f"❌ [FETCH] Failed to retrieve TikTok Ads ad-level insights with BASIC report_type due to API error {resp_json.get('message')}."
                     )
                 data_list = resp_json["data"].get("list", [])
-                ad_report_records
+                if not data_list:
+                    break
+
+                ad_report_records.extend(data_list)
+
+                # Nếu ít hơn page_size nghĩa là hết trang
                 if len(data_list) < ad_report_params["page_size"]:
                     break
-                ad_report_records["page"] += 1
+
+                ad_report_params["page"] += 1
             ad_records_flattened = []
             for record in ad_report_records:
                 row = {}

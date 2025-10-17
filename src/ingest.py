@@ -389,23 +389,17 @@ def ingest_ad_metadata(ad_id_list: list) -> pd.DataFrame:
         return pd.DataFrame()
 
 # 1.3. Ingest ad creative for TikTok Ads
-def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
-    print(f"🚀 [INGEST] Starting to ingest TikTok Ads ad creative for {len(ad_id_list)} ad_id(s)...")
-    logging.info(f"🚀 [INGEST] Starting to ingest TikTok Ads ad creative for {len(ad_id_list)} ad_id(s)...")
-
-    # 1.3.1. Validate input for TikTok Ads ad creative ingestion
-    if not ad_id_list:
-        print("⚠️ [INGEST] Empty TikTok Ads ad_id_list provided then ingestion is suspended.")
-        logging.warning("⚠️ [INGEST] Empty TikTok Ads ad_id_list provided then ingestion is suspended.")
-        raise ValueError("⚠️ [INGEST] Empty TikTok Ads ad_id_list provided then ingestion is suspended.")
+def ingest_ad_creative() -> pd.DataFrame:
+    print(f"🚀 [INGEST] Starting to ingest TikTok Ads ad creative ...")
+    logging.info(f"🚀 [INGEST] Starting to ingest TikTok Ads ad creative...")
 
     try:
     
     # 1.3.2. Trigger to fetch TikTok Ads ad creative
         try:
-            print(f"🔁 [INGEST] Triggering to fetch TikTok Ads ad creative for {len(ad_id_list)} ad_id(s)...")
-            logging.info(f"🔁 [INGEST] Triggering to fetch TikTok Ads ad creative for {len(ad_id_list)} ad_id(s)...")
-            ingest_df_fetched = fetch_ad_creative(ad_id_list=ad_id_list)
+            print(f"🔁 [INGEST] Triggering to fetch TikTok Ads ad creative...")
+            logging.info(f"🔁 [INGEST] Triggering to fetch TikTok Ads ad creative...")
+            ingest_df_fetched = fetch_ad_creative()
             if ingest_df_fetched.empty:
                 print("⚠️ [INGEST] Empty TikTok Ads ad creative returned then ingestion is suspended.")
                 logging.warning("⚠️ [INGEST] Empty TikTok Ads ad creative returned then ingestion is suspended.")
@@ -417,9 +411,9 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
 
     # 1.3.3. Prepare table_id for TikTok Ads ad creative ingestion
         raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
-        table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_creative_metadata"
-        print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad creative for {len(ad_id_list)} ad_id(s) with Google BigQuery table {table_id}...")
-        logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad creative for {len(ad_id_list)} ad_id(s) with Google BigQuery table {table_id}...")
+        table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_creative"
+        print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad creative with Google BigQuery table {table_id}...")
+        logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad creative with Google BigQuery table {table_id}...")
 
     # 1.3.4 Enforce schema for TikTok Ads ad creative
         try:
@@ -478,7 +472,7 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
                         type_=bigquery.TimePartitioningType.DAY,
                         field=effective_partition
                     )
-                clustering_fields = ["ad_id", "advertiser_id"]
+                clustering_fields = ["video_id", "advertiser_id"]
                 filtered_clusters = [f for f in clustering_fields if f in ingest_df_deduplicated.columns]
                 if filtered_clusters:
                     table.clustering_fields = filtered_clusters
@@ -490,14 +484,14 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
             else:
                 print(f"🔄 [INGEST] TikTok Ads ad creative table {table_id} exists then existing row(s) deletion will be proceeding...")
                 logging.info(f"🔄 [INGEST] TikTok Ads ad creative table {table_id} exists then existing row(s) deletion will be proceeding...")
-                unique_keys = ingest_df_deduplicated[["ad_id", "advertiser_id"]].dropna().drop_duplicates()
+                unique_keys = ingest_df_deduplicated[["video_id", "advertiser_id"]].dropna().drop_duplicates()
                 if not unique_keys.empty:
                     temp_table_id = f"{PROJECT}.{raw_dataset}.temp_table_ad_creative_delete_keys_{uuid.uuid4().hex[:8]}"
                     job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
                     google_bigquery_client.load_table_from_dataframe(unique_keys, temp_table_id, job_config=job_config).result()
                     join_condition = " AND ".join([
                         f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
-                        for col in ["ad_id", "advertiser_id"]
+                        for col in ["video_id", "advertiser_id"]
                     ])
                     delete_query = f"""
                         DELETE FROM `{table_id}` AS main
@@ -512,8 +506,8 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
                     print(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of TikTok Ads ad creative table {table_id}.")
                     logging.info(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of TikTok Ads ad creative table {table_id}.")
                 else:
-                    print(f"⚠️ [INGEST] No unique (ad_id and advertisier_id) keys found in TikTok Ads ad creative table {table_id} then existing row(s) deletion is skipped.")
-                    logging.warning(f"⚠️ [INGEST] No unique (ad_id and advertiser_id) keys found in TikTok Ads ad creative table {table_id} then existing row(s) deletion is skipped.")
+                    print(f"⚠️ [INGEST] No unique video_id and advertisier_id keys found in TikTok Ads ad creative table {table_id} then existing row(s) deletion is skipped.")
+                    logging.warning(f"⚠️ [INGEST] No unique video_id and advertiser_id keys found in TikTok Ads ad creative table {table_id} then existing row(s) deletion is skipped.")
         except Exception as e:
             print(f"❌ [INGEST] Failed to create new table or delete existing row(s) of TikTok Ads ad creative ingestion due to {e}.")
             logging.error(f"❌ [INGEST] Failed to create new table or delete existing row(s) of TikTok Ads ad creative ingestion due to {e}.")

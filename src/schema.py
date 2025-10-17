@@ -56,8 +56,7 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "create_time": "datetime64[ns, UTC]",
             "ad_format": str,
             "optimization_event": str,
-            "video_id": str,
-            "image_ids": list
+            "video_id": str
         },
         "fetch_ad_creative": {
             "advertiser_id": str,
@@ -120,8 +119,7 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "create_time": "datetime64[ns, UTC]",
             "ad_format": str,
             "optimization_event": str,
-            "video_id": str,
-            "image_ids": list
+            "video_id": str
         },
         "ingest_ad_creative": {
             "advertiser_id": str,
