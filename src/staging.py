@@ -10,21 +10,24 @@ It combines raw ad/campaign/creative data, applies business logic
 (e.g., parsing naming conventions, standardizing fields), and  
 prepares clean, query-ready datasets for downstream consumption.
 
-✔️ Joins raw ad insights with creative & campaign metadata  
-✔️ Enriches fields like owner, program code, placement, format...  
-✔️ Normalizes and writes standardized tables into staging dataset  
+✔️ Joins raw ad insights with creative and campaign metadata  
+✔️ Enriches fields such as owner, program code, placement, format  
+✔️ Normalizes and writes standardized tables into the staging dataset  
+✔️ Validates data integrity and ensures field completeness  
+✔️ Supports modular extension for new TikTok Ads entities  
 
 ⚠️ This module is strictly responsible for *data transformation*  
 into staging format. It does **not** handle API ingestion or final  
 MART aggregations.
 ==================================================================
 """
+
 # Add root directory to sys.path for absolute imports of internal modules
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
-# Add logging ultilities for integration
+# Add Python logging ultilities for integration
 import logging
 
 # Add Python Pandas libraries for integration
