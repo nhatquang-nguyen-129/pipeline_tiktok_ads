@@ -382,23 +382,26 @@ def staging_ad_insights() -> None:
                     ad.operation_status,
                     ad.ad_format,
                     ad.optimization_event,
-                    creative.video_id,
+                    ad.video_id,
+                    ad.image_ids,
                     creative.video_cover_url,
-                    creative.preview_url
+                    creative.preview_url,
+                    creative.create_time AS creative_create_time,
+                    creative.fetched_at AS creative_fetched_at
                 FROM `{raw_ad_table}` AS raw
                 LEFT JOIN `{raw_ad_metadata}` AS ad
                     ON CAST(raw.ad_id AS STRING) = CAST(ad.ad_id AS STRING)
                     AND CAST(raw.advertiser_id AS STRING) = CAST(ad.advertiser_id AS STRING)
                 LEFT JOIN `{raw_ad_creative}` AS creative
-                    ON CAST(raw.ad_id AS STRING) = CAST(creative.ad_id AS STRING)
-                    AND CAST(raw.advertiser_id AS STRING) = CAST(creative.advertiser_id AS STRING)
+                    ON CAST(ad.video_id AS STRING) = CAST(creative.video_id AS STRING)
+                    AND CAST(ad.advertiser_id AS STRING) = CAST(creative.advertiser_id AS STRING)
             """
             try:
                 print(f"🔄 [STAGING] Querying raw TikTok Ads ad insights table {raw_ad_table}...")
                 logging.info(f"🔄 [STAGING] Querying raw TikTok Ads ad insights table {raw_ad_table}...")
                 staging_df_queried = google_bigquery_client.query(query_ad_staging).to_dataframe()
-                print(f"✅ [STAGING] Successfully queried {len(staging_df_queried)} row(s of TikTok Ads ad insights from {raw_ad_table}.")
-                logging.info(f"✅ [STAGING] Successfully queried {len(staging_df_queried)} row(s of TikTok Ads ad insights from {raw_ad_table}.")
+                print(f"✅ [STAGING] Successfully queried {len(staging_df_queried)} row(s) of TikTok Ads ad insights from {raw_ad_table}.")
+                logging.info(f"✅ [STAGING] Successfully queried {len(staging_df_queried)} row(s) of TikTok Ads ad insights from {raw_ad_table}.")
             except Exception as e:
                 print(f"❌ [STAGING] Failed to query raw TikTok Ads ad insights table {raw_ad_table} due to {e}.")
                 logging.warning(f"❌ [STAGING] Failed to query raw TikTok Ads ad insights table {raw_ad_table} due to {e}.")
