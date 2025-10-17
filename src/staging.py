@@ -407,6 +407,7 @@ def staging_ad_insights() -> None:
                 logging.warning(f"❌ [STAGING] Failed to query raw TikTok Ads ad insights table {raw_ad_table} due to {e}.")
                 continue
 
+
     # 1.2.5. Enrich TikTok Ads ad insights
         if not staging_df_queried.empty:
             try:
