@@ -528,6 +528,7 @@ def fetch_ad_creative() -> pd.DataFrame:
         logging.info(f"🔍 [FETCH] Retrieving TikTok Ads video creative(s) for advertiser_id {advertiser_id}...")
         page = 1
         has_more = True
+
         while has_more:
             payload = {
                 "advertiser_id": advertiser_id,
@@ -542,20 +543,21 @@ def fetch_ad_creative() -> pd.DataFrame:
                     video_search_records.append({
                         "advertiser_id": advertiser_id,
                         "video_id": record.get("video_id"),
-                        "video_cover_url": record.get("cover_url"),
+                        "video_cover_url": record.get("video_cover_url"),
                         "preview_url": record.get("preview_url"),
                         "create_time": record.get("create_time")
                     })
-                has_more = data["data"].get("page_info", {}).get("total_page", 1) > page
+                page_info = data["data"].get("page_info", {})
+                total_page = page_info.get("total_page", 1)
+                has_more = page < total_page
                 page += 1
             else:
                 has_more = False
         if not video_search_records:
-            print(f"❌ [FETCH] No TikTok Ads video creative record retrieved then fetching is suspended.")
-            logging.error(f"❌ [FETCH] No TikTok Ads video creative record retrieved then fetching is suspended.")
             raise RuntimeError("❌ [FETCH] No TikTok Ads video creative record retrieved then fetching is suspended.")
         fetch_section_succeeded["1.3.5. Make TikTok Ads API call for file/video/ad/search endpoint"] = True
         print(f"✅ [FETCH] Successfully retrieved {len(video_search_records)} TikTok Ads video creative record(s).")
+        logging.info(f"✅ [FETCH] Successfully retrieved {len(video_search_records)} TikTok Ads video creative record(s).")
     except Exception as e:
         fetch_section_succeeded["1.3.5. Make TikTok Ads API call for file/video/ad/search endpoint"] = False
         fetch_section_failed.append("1.3.5. Make TikTok Ads API call for file/video/ad/search endpoint")
