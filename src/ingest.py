@@ -838,7 +838,7 @@ def ingest_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
             ingest_df_enriched["last_updated_at"] = datetime.utcnow().replace(tzinfo=pytz.UTC)
         except Exception as e:
             print(f"❌ [INGEST] Failed to trigger enrichment TikTok Ads ad insights for {ingest_date_separated} due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to trigger enrichment TikTok Ads ad insights ingest_date_separated due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to trigger enrichment TikTok Ads ad insights for {ingest_date_separated} due to {e}.")
             continue
 
     # 2.2.6. Enforce schema for TikTok Ads ad insights
