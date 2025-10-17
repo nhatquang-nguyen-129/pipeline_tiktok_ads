@@ -99,7 +99,6 @@ def fetch_campaign_metadata(campaign_id_list: list[str]) -> pd.DataFrame:
         "campaign_name",
         "operation_status",
         "objective_type",
-        "objective",
         "create_time"
     ]
     all_records = []
@@ -667,7 +666,6 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
         "data_level": "AUCTION_CAMPAIGN",
         "dimensions": ["campaign_id", "stat_time_day"],
         "metrics": [
-            "objective_type",
             "result",
             "spend",
             "impressions",

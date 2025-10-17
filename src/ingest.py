@@ -589,15 +589,7 @@ def ingest_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
     print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 2.1.2. Prepare table_id for TikTok Ads campaign insights ingestion
-    first_date = pd.to_datetime(ingest_df_fetched["stat_time_day"].dropna().iloc[0])
-    y, m = first_date.year, first_date.month
-    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
-    table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_campaign_m{m:02d}{y}"
-    print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads campaign insights from {start_date} to {end_date} with Google BigQuery table {table_id}...")
-    logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads campaign insights from {start_date} to {end_date} with Google BigQuery table {table_id}...")
-
-    # 2.1.3. Trigger to fetch TikTok Ads campaign insights
+    # 2.1.2. Trigger to fetch TikTok Ads campaign insights
     try:
         print(f"🔁 [INGEST] Triggering to fetch TikTok Ads campaign insights from {start_date} to {end_date}...")
         logging.info(f"🔁 [INGEST] Triggering to fetch TikTok Ads campaign insights from {start_date} to {end_date}...")
@@ -613,7 +605,7 @@ def ingest_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
         logging.error(f"❌ [INGEST] Failed to trigger TikTok Ads campaign insights fetching from {start_date} to {end_date} due to {e}.")
         return pd.DataFrame()
 
-    # 2.1.4. Enrich TikTok Ads campaign insights
+    # 2.1.3. Enrich TikTok Ads campaign insights
     try:
         print(f"🔁 [INGEST] Trigger to enrich TikTok Ads campaign insights from {start_date} to {end_date} with {len(ingest_df_fetched)} row(s)...")
         logging.info(f"🔁 [INGEST] Trigger to enrich TikTok Ads campaign insights from {start_date} to {end_date} with {len(ingest_df_fetched)} row(s)...")
@@ -625,7 +617,7 @@ def ingest_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
         logging.error(f"❌ [INGEST] Failed to trigger enrichment TikTok Ads campaign insights from {start_date} to {end_date} due to {e}.")
         raise RuntimeError(f"❌ [INGEST] Failed to trigger enrichment TikTok Ads campaign insights from {start_date} to {end_date} due to {e}.")
 
-    # 2.1.5. Enforce schema for TikTok Ads campaign insights
+    # 2.1.4. Enforce schema for TikTok Ads campaign insights
     try:
         print(f"🔁 [INGEST] Trigger to enforce schema for {len(ingest_df_enriched)} row(s) of TikTok Ads campaign insights...")
         logging.info(f"🔁 [INGEST] Trigger to enforce schema for {len(ingest_df_enriched)} row(s) of TikTok Ads campaign insights...")
@@ -640,6 +632,14 @@ def ingest_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
         print(f"❌ [INGEST] Failed to enforce schema for TikTok Ads campaign insights due to {e}.")
         logging.error(f"❌ [INGEST] Failed to enforce schema for TikTok Ads campaign insights due to {e}.")
         raise RuntimeError(f"❌ [INGEST] Failed to enforce schema for TikTok Ads campaign insights due to {e}.")
+
+    # 2.1.5. Prepare table_id for TikTok Ads campaign insights ingestion
+    first_date = pd.to_datetime(ingest_df_fetched["stat_time_day"].dropna().iloc[0])
+    y, m = first_date.year, first_date.month
+    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
+    table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_campaign_m{m:02d}{y}"
+    print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads campaign insights from {start_date} to {end_date} with Google BigQuery table {table_id}...")
+    logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads campaign insights from {start_date} to {end_date} with Google BigQuery table {table_id}...")
 
     # 2.1.6. Initialize Google BigQuery client
     try:
@@ -778,15 +778,7 @@ def ingest_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
     print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...") 
 
-    # 2.2.2. Prepare table_id for TikTok Ads ad insights ingestion process
-    first_date = pd.to_datetime(ingest_df_fetched["stat_time_day"].dropna().iloc[0])
-    y, m = first_date.year, first_date.month
-    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
-    table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_m{m:02d}{y}"
-    print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad insights from {start_date} to {end_date} with Google BigQuery table {table_id}...")
-    logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad insights from {start_date} to {end_date} with Google BigQuery table {table_id}...")
-
-    # 2.2.3. Trigger to fetch ad insights for TikTok Ads
+    # 2.2.2. Trigger to fetch ad insights for TikTok Ads
     try:
         print(f"🔁 [INGEST] Triggering to fetch TikTok Ads ad insights from {start_date} to {end_date}...")
         logging.info(f"🔁 [INGEST] Triggering to fetch TikTok Ads ad insights from {start_date} to {end_date}...")
@@ -802,7 +794,7 @@ def ingest_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
         logging.error(f"❌ [INGEST] Failed to trigger TikTok Ads ad insights fetching from {start_date} to {end_date} due to {e}.")
         return pd.DataFrame()
 
-    # 2.2.4. Enrich TikTok Ads ad insights
+    # 2.2.3. Enrich TikTok Ads ad insights
     try:
         print(f"🔁 [INGEST] Trigger to enrich TikTok Ads ad insights from {start_date} to {end_date} with {len(ingest_df_fetched)} row(s)...")
         logging.info(f"🔁 [INGEST] Trigger to enrich TikTok Ads ad insights from {start_date} to {end_date} with {len(ingest_df_fetched)} row(s)...")
@@ -814,7 +806,7 @@ def ingest_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
         logging.error(f"❌ [INGEST] Failed to trigger enrichment TikTok Ads ad insights from {start_date} to {end_date} due to {e}.")
         raise RuntimeError(f"❌ [INGEST] Failed to trigger enrichment TikTok Ads ad insights from {start_date} to {end_date} due to {e}.")
 
-    # 2.2.5. Enforce schema for TikTok Ads ad insights
+    # 2.2.4. Enforce schema for TikTok Ads ad insights
     try:
         print(f"🔁 [INGEST] Trigger to enforce schema for {len(ingest_df_enriched)} row(s) of TikTok Ads ad insights...")
         logging.info(f"🔁 [INGEST] Trigger to enforce schema for {len(ingest_df_enriched)} row(s) of TikTok Ads ad insights...")
@@ -829,6 +821,14 @@ def ingest_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
         print(f"❌ [INGEST] Failed to enforce schema for TikTok Ads ad insights due to {e}.")
         logging.error(f"❌ [INGEST] Failed to enforce schema for TikTok Ads ad insights due to {e}.")
         raise RuntimeError(f"❌ [INGEST] Failed to enforce schema for TikTok Ads ad insights due to {e}.")
+
+    # 2.2.5. Prepare table_id for TikTok Ads ad insights ingestion process
+    first_date = pd.to_datetime(ingest_df_fetched["stat_time_day"].dropna().iloc[0])
+    y, m = first_date.year, first_date.month
+    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
+    table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_m{m:02d}{y}"
+    print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad insights from {start_date} to {end_date} with Google BigQuery table {table_id}...")
+    logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad insights from {start_date} to {end_date} with Google BigQuery table {table_id}...")
 
     # 2.2.6. Initialize Google BigQuery client
     try:

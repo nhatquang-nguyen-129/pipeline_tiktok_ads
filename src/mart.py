@@ -109,7 +109,7 @@ def mart_campaign_all() -> None:
                 CAST(`date` AS DATE) AS ngay,
                 SAFE_CAST(spend AS FLOAT64) AS spend,
                 SAFE_CAST(result AS INT64) AS result,
-                SAFE_CAST(result_type AS STRING) AS result_type,
+                SAFE_CAST(objective_type AS STRING) AS objective_type,
                 SAFE_CAST(impressions AS INT64) AS impressions,
                 SAFE_CAST(clicks AS INT64) AS clicks,
                 SAFE_CAST(engaged_view_15s AS INT64) AS engaged_view_15s,
@@ -187,11 +187,14 @@ def mart_creative_all() -> None:
                 SAFE_CAST(vi_tri AS STRING) AS vi_tri,
                 SAFE_CAST(doi_tuong AS STRING) AS doi_tuong,
                 SAFE_CAST(dinh_dang AS STRING) AS dinh_dang,
+                SAFE_CAST(optimization_event AS STRING) AS optimization_event,
                 CAST(date AS DATE) AS ngay,
                 SAFE_CAST(spend AS FLOAT64) AS spend,
                 SAFE_CAST(result AS INT64) AS result,
                 SAFE_CAST(impressions AS INT64) AS impressions,
                 SAFE_CAST(clicks AS INT64) AS clicks,
+                SAFE_CAST(engaged_view_15s AS INT64) AS engaged_view_15s,
+                SAFE_CAST(purchase AS INT64) AS purchase,
                 CASE
                     WHEN REGEXP_CONTAINS(delivery_status, r"ENABLE") THEN "🟢"
                     WHEN REGEXP_CONTAINS(delivery_status, r"DISABLE") THEN "⚪"

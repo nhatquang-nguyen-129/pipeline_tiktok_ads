@@ -40,8 +40,7 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "campaign_id": str,
             "campaign_name": str,
             "operation_status": str,
-            "objective_type": str,
-            "objective": str,            
+            "objective_type": str,       
             "create_time": "datetime64[ns, UTC]"
         },
         "fetch_ad_metadata": {
@@ -103,8 +102,7 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "campaign_id": str,
             "campaign_name": str,
             "operation_status": str,
-            "objective_type": str,
-            "objective": str,            
+            "objective_type": str,        
             "create_time": "datetime64[ns, UTC]"
         },
         "ingest_ad_metadata": {
@@ -168,7 +166,7 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "campaign_id": str,
             "campaign_name": str,
             "delivery_status": str,
-            "result_type": str,
+            "objective_type": str,
             "result": str,
             "date_start": str,
             "spend": float,
