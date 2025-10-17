@@ -95,8 +95,8 @@ def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
     start_time = time.time()
     ingest_section_succeeded = {}
     ingest_section_failed = [] 
-    print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads campaign medata for {len(campaign_id_list)} campaign_id(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads campaign medata for {len(campaign_id_list)} campaign_id(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads campaign metadata for {len(campaign_id_list)} campaign_id(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads campaign metadata for {len(campaign_id_list)} campaign_id(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
     # 1.1.2. Validate input for TikTok Ads campaign metadata ingestion
     if not campaign_id_list:
@@ -141,10 +141,10 @@ def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
         google_bigquery_client = bigquery.Client(project=PROJECT)
         print(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
         logging.info(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-        ingest_section_succeeded["1.1.5. Initialize Google BigQuery client"] = True
+        ingest_section_succeeded["1.1.6. Initialize Google BigQuery client"] = True
     except Exception as e:
-        ingest_section_succeeded["1.1.5. Initialize Google BigQuery client"] = False
-        ingest_section_failed.append("1.1.5. Initialize Google BigQuery client")
+        ingest_section_succeeded["1.1.6. Initialize Google BigQuery client"] = False
+        ingest_section_failed.append("1.1.6. Initialize Google BigQuery client")
         print(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
         logging.error(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
         raise RuntimeError(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.") from e
@@ -253,8 +253,8 @@ def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
 
 # 1.2. Ingest ad metadata for TikTok Ads
 def ingest_ad_metadata(ad_id_list: list) -> pd.DataFrame:
-    print(f"🚀 [INGEST] Starting to ingest TikTok Ads ad metadat for {len(ad_id_list)} ad_id(s)...")
-    logging.info(f"🚀 [INGEST] Starting to ingest TikTok Ads ad metadat for {len(ad_id_list)} ad_id(s)...")
+    print(f"🚀 [INGEST] Starting to ingest TikTok Ads ad metadata for {len(ad_id_list)} ad_id(s)...")
+    logging.info(f"🚀 [INGEST] Starting to ingest TikTok Ads ad metadata for {len(ad_id_list)} ad_id(s)...")
 
     # 1.2.1. Start timing the TikTok Ads ad metadata ingestion process
     start_time = time.time()
@@ -421,148 +421,159 @@ def ingest_ad_creative() -> pd.DataFrame:
     print(f"🚀 [INGEST] Starting to ingest TikTok Ads ad creative ...")
     logging.info(f"🚀 [INGEST] Starting to ingest TikTok Ads ad creative...")
 
-    try:
-    
-    # 1.3.2. Trigger to fetch TikTok Ads ad creative
-        try:
-            print(f"🔁 [INGEST] Triggering to fetch TikTok Ads ad creative...")
-            logging.info(f"🔁 [INGEST] Triggering to fetch TikTok Ads ad creative...")
-            ingest_df_fetched = fetch_ad_creative()
-            if ingest_df_fetched.empty:
-                print("⚠️ [INGEST] Empty TikTok Ads ad creative returned then ingestion is suspended.")
-                logging.warning("⚠️ [INGEST] Empty TikTok Ads ad creative returned then ingestion is suspended.")
-                return pd.DataFrame()
-        except Exception as e:
-            print(f"❌ [INGEST] Failed to trigger TikTok Ads ad creative fetching due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to trigger TikTok Ads ad creative fetching due to {e}.")
-            return pd.DataFrame()
+    # 1.3.1. Start timing the TikTok Ads campaign metadata ingestion process
+    start_time = time.time()
+    ingest_section_succeeded = {}
+    ingest_section_failed = [] 
+    print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad creative at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad creative {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 1.3.3. Prepare table_id for TikTok Ads ad creative ingestion
-        raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
-        table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_creative"
-        print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad creative with Google BigQuery table {table_id}...")
-        logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad creative with Google BigQuery table {table_id}...")
+    # 1.3.2. Prepare table_id for TikTok Ads ad creative ingestion
+    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
+    table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_creative"
+    print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad creative with Google BigQuery table {table_id}...")
+    logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad creative with Google BigQuery table {table_id}...")
+
+    # 1.3.3. Trigger to fetch TikTok Ads ad creative
+    try:
+        print(f"🔁 [INGEST] Triggering to fetch TikTok Ads ad creative...")
+        logging.info(f"🔁 [INGEST] Triggering to fetch TikTok Ads ad creative...")
+        ingest_df_fetched = fetch_ad_creative()
+        if ingest_df_fetched.empty:
+            print("⚠️ [INGEST] Empty TikTok Ads ad creative returned then ingestion is suspended.")
+            logging.warning("⚠️ [INGEST] Empty TikTok Ads ad creative returned then ingestion is suspended.")
+            return pd.DataFrame()
+    except Exception as e:
+        print(f"❌ [INGEST] Failed to trigger TikTok Ads ad creative fetching due to {e}.")
+        logging.error(f"❌ [INGEST] Failed to trigger TikTok Ads ad creative fetching due to {e}.")
+        return pd.DataFrame()
 
     # 1.3.4 Enforce schema for TikTok Ads ad creative
-        try:
-            print(f"🔄 [INGEST] Triggering to enforce schema for {len(ingest_df_fetched)} row(s) of TikTok Ads ad creative...")
-            logging.info(f"🔄 [INGEST] Triggering to enforce schema for {len(ingest_df_fetched)} row(s) of TikTok Ads ad creative...")
-            ingest_df_enforced = ensure_table_schema(ingest_df_fetched, "ingest_ad_creative")
-        except Exception as e:
-            print(f"❌ [INGEST] Failed to trigger schema enforcement for TikTok Ads ad creative metadata due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to trigger schema enforcement for TikTok Ads ad creative metadata due to {e}.")
-            raise 
-
-    # 1.3.5. Delete existing row(s) or create new table if it not exist
-        try:
-            ingest_df_deduplicated = ingest_df_enforced.drop_duplicates()            
-            try:
-                print(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
-                logging.info(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
-                google_bigquery_client = bigquery.Client(project=PROJECT)
-                print(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-                logging.info(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-            except DefaultCredentialsError as e:
-                raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to credentials error.") from e
-            except Forbidden as e:
-                raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to permission denial.") from e
-            except GoogleAPICallError as e:
-                raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to API call error.") from e
-            except Exception as e:
-                raise RuntimeError(f"❌ [INGEST] Failed to initialize Google BigQuery client due to {e}.") from e           
-            try:
-                print(f"🔍 [INGEST] Checking TikTok ad creative table {table_id} existence...")
-                logging.info(f"🔍 [INGEST] Checking TikTok ad creative table {table_id} existence...")
-                google_bigquery_client.get_table(table_id)
-                table_exists = True
-            except Exception:
-                table_exists = False
-            if not table_exists:
-                print(f"⚠️ [INGEST] TikTok Ads ad creative table {table_id} not found then table creation will be proceeding...")
-                logging.info(f"⚠️ [INGEST] TikTok Ads ad creative table {table_id} not found then table creation will be proceeding...")
-                schema = []
-                for col, dtype in ingest_df_deduplicated.dtypes.items():
-                    if dtype.name.startswith("int"):
-                        bq_type = "INT64"
-                    elif dtype.name.startswith("float"):
-                        bq_type = "FLOAT64"
-                    elif dtype.name == "bool":
-                        bq_type = "BOOL"
-                    elif "datetime" in dtype.name:
-                        bq_type = "TIMESTAMP"
-                    else:
-                        bq_type = "STRING"
-                    schema.append(bigquery.SchemaField(col, bq_type))
-                table = bigquery.Table(table_id, schema=schema)
-                effective_partition = "date" if "date" in ingest_df_deduplicated.columns else None
-                if effective_partition:
-                    table.time_partitioning = bigquery.TimePartitioning(
-                        type_=bigquery.TimePartitioningType.DAY,
-                        field=effective_partition
-                    )
-                clustering_fields = ["video_id", "advertiser_id"]
-                filtered_clusters = [f for f in clustering_fields if f in ingest_df_deduplicated.columns]
-                if filtered_clusters:
-                    table.clustering_fields = filtered_clusters
-                    print(f"🔍 [INGEST] Creating TikTok Ads ad creative table {table_id} using clustering on {filtered_clusters} field(s) and partition on {effective_partition})...")
-                    logging.info(f" [INGEST] Creating TikTok Ads ad creative table {table_id} using clustering on {filtered_clusters} field(s) and partition on {effective_partition}...")
-                table = google_bigquery_client.create_table(table)
-                print(f"✅ [INGEST] Successfully created TikTok Ads ad creative table {table_id} with clustering on {filtered_clusters} field(s) and partition on {effective_partition}.")
-                logging.info(f"✅ [INGEST] Successfully created TikTok Ads ad creative table {table_id} with clustering on {filtered_clusters} field(s) and partition on {effective_partition}.")
-            else:
-                print(f"🔄 [INGEST] TikTok Ads ad creative table {table_id} exists then existing row(s) deletion will be proceeding...")
-                logging.info(f"🔄 [INGEST] TikTok Ads ad creative table {table_id} exists then existing row(s) deletion will be proceeding...")
-                unique_keys = ingest_df_deduplicated[["video_id", "advertiser_id"]].dropna().drop_duplicates()
-                if not unique_keys.empty:
-                    temp_table_id = f"{PROJECT}.{raw_dataset}.temp_table_ad_creative_delete_keys_{uuid.uuid4().hex[:8]}"
-                    job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
-                    google_bigquery_client.load_table_from_dataframe(unique_keys, temp_table_id, job_config=job_config).result()
-                    join_condition = " AND ".join([
-                        f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
-                        for col in ["video_id", "advertiser_id"]
-                    ])
-                    delete_query = f"""
-                        DELETE FROM `{table_id}` AS main
-                        WHERE EXISTS (
-                            SELECT 1 FROM `{temp_table_id}` AS temp
-                            WHERE {join_condition}
-                        )
-                    """
-                    result = google_bigquery_client.query(delete_query).result()
-                    google_bigquery_client.delete_table(temp_table_id, not_found_ok=True)
-                    deleted_rows = result.num_dml_affected_rows
-                    print(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of TikTok Ads ad creative table {table_id}.")
-                    logging.info(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of TikTok Ads ad creative table {table_id}.")
-                else:
-                    print(f"⚠️ [INGEST] No unique video_id and advertisier_id keys found in TikTok Ads ad creative table {table_id} then existing row(s) deletion is skipped.")
-                    logging.warning(f"⚠️ [INGEST] No unique video_id and advertiser_id keys found in TikTok Ads ad creative table {table_id} then existing row(s) deletion is skipped.")
-        except Exception as e:
-            print(f"❌ [INGEST] Failed to create new table or delete existing row(s) of TikTok Ads ad creative ingestion due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to create new table or delete existing row(s) of TikTok Ads ad creative ingestion due to {e}.")
-            raise
-
-    # 1.3.6. Upload TikTok Ads ad creative to Google BigQuery
-        try:
-            print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of TikTok Ads ad creative to Google BigQuery table {table_id}...")
-            logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of TikTok Ads ad creative to Google BigQuery table {table_id}...")
-            job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
-            google_bigquery_client.load_table_from_dataframe(ingest_df_deduplicated, table_id, job_config=job_config).result()
-            print(f"✅ [INGEST] Successfully uploaded {len(ingest_df_deduplicated)} row(s) of TikTok Ads campaign metadata table {table_id}.")
-            logging.info(f"✅ [INGEST] Successfully uploaded {len(ingest_df_deduplicated)} row(s) of TikTok Ads campaign metadata table {table_id}.")
-        except Exception as e:
-            print(f"❌ [INGEST] Failed to upload TikTok Ads campaign metadata due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to upload TikTok Ads campaign metadata due to {e}.")
-            raise
-
-    # 1.3.7. Summarize ingestion result(s)
-        ingest_df_final = ingest_df_deduplicated
-        print(f"🏆 [INGEST] Successfully completed TikTok Ads ad creative ingestion with {len(ingest_df_final)} row(s).")
-        logging.info(f"🏆 [INGEST] Successfully completed TikTok Ads ad creative ingestion with {len(ingest_df_final)} row(s).")
-        return ingest_df_final
+    try:
+        print(f"🔄 [INGEST] Triggering to enforce schema for {len(ingest_df_fetched)} row(s) of TikTok Ads ad creative...")
+        logging.info(f"🔄 [INGEST] Triggering to enforce schema for {len(ingest_df_fetched)} row(s) of TikTok Ads ad creative...")
+        ingest_df_enforced = ensure_table_schema(ingest_df_fetched, "ingest_ad_creative")
     except Exception as e:
-        print(f"❌ [INGEST] Failed to ingest TikTok Ads ad creative due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to ingest TikTok Ads ad creative due to {e}.")
-        return pd.DataFrame()
+        print(f"❌ [INGEST] Failed to trigger schema enforcement for TikTok Ads ad creative metadata due to {e}.")
+        logging.error(f"❌ [INGEST] Failed to trigger schema enforcement for TikTok Ads ad creative metadata due to {e}.")
+        raise RuntimeError(f"❌ [INGEST] Failed to trigger schema enforcement for TikTok Ads ad creative metadata due to {e}.")
+
+    # 1.3.5. Initialize Google BigQuery client
+    try:
+        print(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+        logging.info(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+        google_bigquery_client = bigquery.Client(project=PROJECT)
+        print(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+        logging.info(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+        ingest_section_succeeded["1.3.5. Initialize Google BigQuery client"] = True
+    except Exception as e:
+        ingest_section_succeeded["1.3.5. Initialize Google BigQuery client"] = False
+        ingest_section_failed.append("1.3.5. Initialize Google BigQuery client")
+        print(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+        logging.error(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+        raise RuntimeError(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.") from e
+
+    # 1.3.6. Delete existing row(s) or create new table if it not exist
+    try:
+        ingest_df_deduplicated = ingest_df_enforced.drop_duplicates()                   
+        try:
+            print(f"🔍 [INGEST] Checking TikTok ad creative table {table_id} existence...")
+            logging.info(f"🔍 [INGEST] Checking TikTok ad creative table {table_id} existence...")
+            google_bigquery_client.get_table(table_id)
+            table_exists = True
+        except Exception:
+            table_exists = False
+        if not table_exists:
+            print(f"⚠️ [INGEST] TikTok Ads ad creative table {table_id} not found then table creation will be proceeding...")
+            logging.info(f"⚠️ [INGEST] TikTok Ads ad creative table {table_id} not found then table creation will be proceeding...")
+            schema = []
+            for col, dtype in ingest_df_deduplicated.dtypes.items():
+                if dtype.name.startswith("int"):
+                    bq_type = "INT64"
+                elif dtype.name.startswith("float"):
+                    bq_type = "FLOAT64"
+                elif dtype.name == "bool":
+                    bq_type = "BOOL"
+                elif "datetime" in dtype.name:
+                    bq_type = "TIMESTAMP"
+                else:
+                    bq_type = "STRING"
+                schema.append(bigquery.SchemaField(col, bq_type))
+            table = bigquery.Table(table_id, schema=schema)
+            effective_partition = "date" if "date" in ingest_df_deduplicated.columns else None
+            if effective_partition:
+                table.time_partitioning = bigquery.TimePartitioning(
+                    type_=bigquery.TimePartitioningType.DAY,
+                    field=effective_partition
+                )
+            clustering_fields = ["video_id", "advertiser_id"]
+            filtered_clusters = [f for f in clustering_fields if f in ingest_df_deduplicated.columns]
+            if filtered_clusters:
+                table.clustering_fields = filtered_clusters
+                print(f"🔍 [INGEST] Creating TikTok Ads ad creative table {table_id} using clustering on {filtered_clusters} field(s) and partition on {effective_partition})...")
+                logging.info(f" [INGEST] Creating TikTok Ads ad creative table {table_id} using clustering on {filtered_clusters} field(s) and partition on {effective_partition}...")
+            table = google_bigquery_client.create_table(table)
+            print(f"✅ [INGEST] Successfully created TikTok Ads ad creative table {table_id} with clustering on {filtered_clusters} field(s) and partition on {effective_partition}.")
+            logging.info(f"✅ [INGEST] Successfully created TikTok Ads ad creative table {table_id} with clustering on {filtered_clusters} field(s) and partition on {effective_partition}.")
+        else:
+            print(f"🔄 [INGEST] TikTok Ads ad creative table {table_id} exists then existing row(s) deletion will be proceeding...")
+            logging.info(f"🔄 [INGEST] TikTok Ads ad creative table {table_id} exists then existing row(s) deletion will be proceeding...")
+            unique_keys = ingest_df_deduplicated[["video_id", "advertiser_id"]].dropna().drop_duplicates()
+            if not unique_keys.empty:
+                temp_table_id = f"{PROJECT}.{raw_dataset}.temp_table_ad_creative_delete_keys_{uuid.uuid4().hex[:8]}"
+                job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
+                google_bigquery_client.load_table_from_dataframe(unique_keys, temp_table_id, job_config=job_config).result()
+                join_condition = " AND ".join([
+                    f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
+                    for col in ["video_id", "advertiser_id"]
+                ])
+                delete_query = f"""
+                    DELETE FROM `{table_id}` AS main
+                    WHERE EXISTS (
+                        SELECT 1 FROM `{temp_table_id}` AS temp
+                        WHERE {join_condition}
+                    )
+                """
+                result = google_bigquery_client.query(delete_query).result()
+                google_bigquery_client.delete_table(temp_table_id, not_found_ok=True)
+                deleted_rows = result.num_dml_affected_rows
+                print(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of TikTok Ads ad creative table {table_id}.")
+                logging.info(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of TikTok Ads ad creative table {table_id}.")
+            else:
+                print(f"⚠️ [INGEST] No unique video_id and advertisier_id keys found in TikTok Ads ad creative table {table_id} then existing row(s) deletion is skipped.")
+                logging.warning(f"⚠️ [INGEST] No unique video_id and advertiser_id keys found in TikTok Ads ad creative table {table_id} then existing row(s) deletion is skipped.")
+    except Exception as e:
+        print(f"❌ [INGEST] Failed to create new table or delete existing row(s) of TikTok Ads ad creative ingestion due to {e}.")
+        logging.error(f"❌ [INGEST] Failed to create new table or delete existing row(s) of TikTok Ads ad creative ingestion due to {e}.")
+        raise RuntimeError(f"❌ [INGEST] Failed to create new table or delete existing row(s) of TikTok Ads ad creative ingestion due to {e}.")
+
+    # 1.3.7. Upload TikTok Ads ad creative to Google BigQuery
+    try:
+        print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of TikTok Ads ad creative to Google BigQuery table {table_id}...")
+        logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of TikTok Ads ad creative to Google BigQuery table {table_id}...")
+        job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
+        google_bigquery_client.load_table_from_dataframe(ingest_df_deduplicated, table_id, job_config=job_config).result()
+        print(f"✅ [INGEST] Successfully uploaded {len(ingest_df_deduplicated)} row(s) of TikTok Ads campaign metadata table {table_id}.")
+        logging.info(f"✅ [INGEST] Successfully uploaded {len(ingest_df_deduplicated)} row(s) of TikTok Ads campaign metadata table {table_id}.")
+    except Exception as e:
+        print(f"❌ [INGEST] Failed to upload TikTok Ads campaign metadata due to {e}.")
+        logging.error(f"❌ [INGEST] Failed to upload TikTok Ads campaign metadata due to {e}.")
+        raise RuntimeError(f"❌ [INGEST] Failed to upload TikTok Ads campaign metadata due to {e}.")
+
+    # 1.3.8. Summarize ingestion result(s)
+    finally:
+        elapsed = round(time.time() - start_time, 2)
+        if ingest_section_failed:
+            print(f"❌ [INGEST] Failed to complete TikTok Ads ad creative ingestion due to unsuccesfull section(s) {', '.join(ingest_section_failed)}.")
+            logging.error(f"❌ [INGEST] Failed to complete TikTok Ads ad creative ingestion due to unsuccesfull section(s) {', '.join(ingest_section_failed)}.")
+            ingest_status_def = "failed"
+        else:
+            ingest_df_final = ingest_df_deduplicated
+            print(f"🏆 [INGEST] Successfully completed TikTok Ads ad creative ingestion with {len(ingest_df_final)} row(s) in {elapsed}s.")
+            logging.info(f"🏆 [INGEST] Successfully completed TikTok Ads ad creative ingestion with {len(ingest_df_final)} row(s) in {elapsed}s.")
+            ingest_status_def = "success"
+            return ingest_df_final
+        return {"ingest_status_def": ingest_status_def, "ingest_seconds_elapsed": elapsed, "ingest_sections_failed": ingest_section_failed}
 
 # 2. INGEST TIKTOK ADS INSIGHTS
 
