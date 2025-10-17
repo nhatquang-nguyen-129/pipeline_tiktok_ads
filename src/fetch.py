@@ -239,25 +239,28 @@ def fetch_campaign_metadata(campaign_id_list: list[str]) -> pd.DataFrame:
 
     # 1.1.10. Enforce schema for Python DataFrame
     try:
-        print(f"🔄 [FETCH] Enforcing schema for {len(fetch_df_flattened)} row(s) of TikTok Ads campaign metadata...")
-        logging.info(f"🔄 [FETCH] Enforcing schema for {len(fetch_df_flattened)} row(s) of TikTok Ads campaign metadata...")
+        print(f"🔄 [FETCH] Trigger to enforce schema for {len(fetch_df_flattened)} row(s) of TikTok Ads campaign metadata...")
+        logging.info(f"🔄 [FETCH] Trigger to enforce schema for {len(fetch_df_flattened)} row(s) of TikTok Ads campaign metadata....")
         fetch_df_enforced = ensure_table_schema(fetch_df_flattened, "fetch_campaign_metadata")
-        print(f"✅ [FETCH] Successfully enforced schema for TikTok campaign metadata with {len(fetch_df_enforced)} row(s).")
-        logging.info(f"✅ [FETCH] Successfully enforced schema for TikTok campaign metadata with {len(fetch_df_enforced)} row(s).")
     except Exception as e:
-        print(f"❌ [FETCH] Failed to enforce schema for TikTok Ads campaign metadata due to {e}.")
-        logging.error(f"❌ [FETCH] Failed to enforce schema for TikTok Ads campaign metadata due to {e}.")
+        print(f"❌ [FETCH] Failed to trigger schema enforcement for TikTok Ads campaign metadata due to {e}.")
+        logging.error(f"❌ [FETCH] Failed to trigger schema enforcement for TikTok Ads campaign metadata due to {e}.")
         return pd.DataFrame()
 
-    # 1.1.10. Summarize fetch result(s)
-        fetch_df_final = fetch_df_enforced
-        print(f"✅ [FETCH] Successfully fetched TikTok Ads campaign metadata with {len(fetch_df_final)} row(s).")
-        logging.info(f"✅ [FETCH] Successfully fetched TikTok Ads campaign metadata with {len(fetch_df_final)} row(s).")
-        return fetch_df_final
-    except Exception as e:
-        print(f"❌ [FETCH] Failed to fetch TikTok Ads campaign metadata due to {e}.")
-        logging.error(f"❌ [FETCH] Failed to fetch TikTok Ads campaign metadata due to {e}.")
-        return pd.DataFrame()
+    # 1.2.11. Summarize ingestion result(s)
+    finally:
+        elapsed = round(time.time() - start_time, 2)
+        if fetch_section_failed:
+            print(f"❌ [MART] Failed to completed Facebook Ads supplier campaign performance materialization due to unsuccesfull section(s) {', '.join(mart_section_failed)}.")
+            logging.error(f"❌ [MART] Failed to completed Facebook Ads supplier campaign performance materialization due to unsuccesfull section(s) {', '.join(mart_section_failed)}.")
+            mart_status_def = "failed"
+        else:
+            fetch_df_final = fetch_df_enforced
+            print(f"🏆 [MART] Successfully completed Facebook Ads supplier campaign performance materialization in {elapsed}s.")
+            logging.info(f"🏆 [MART] Successfully completed Facebook Ads supplier campaign performance materialization in {elapsed}s.")
+            mart_status_def = "success"
+            return fetch_df_final
+        return {"status": mart_status_def, "elapsed_seconds": elapsed, "failed_sections": mart_section_failed}
 
 # 1.2. Fetch ad metadata for TikTok Ads
 def fetch_ad_metadata(ad_id_list: list[str]) -> pd.DataFrame:
