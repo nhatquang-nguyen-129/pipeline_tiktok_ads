@@ -25,13 +25,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.
 # Add logging ultilities for integration
 import logging
 
-# Add Python 'datetime' libraries for integration
-from datetime import (
-    datetime,
-    timedelta,
-    timezone
-)
-
 # Add Python Pandas libraries for integration
 import pandas as pd
 
@@ -40,14 +33,6 @@ import re
 
 # Add Python 'time' libraries for integration
 import time
-
-# Add Google Authentication libraries for integration
-from google.api_core.exceptions import (
-    Forbidden,
-    GoogleAPICallError
-)
-from google.auth.exceptions import DefaultCredentialsError
-
 
 # Add Google API Core modules for integration
 from google.api_core.exceptions import NotFound
