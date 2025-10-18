@@ -99,10 +99,11 @@ def update_campaign_insights(start_date: str, end_date: str):
         try:
             print(f"🔄 [UPDATE] Triggering to ingest TikTok Ads campaign insights from {start_date} to {end_date}...")
             logging.info(f"🔄 [UPDATE] Triggering to ingest TikTok Ads campaign insights from {start_date} to {end_date}...")
-            update_df_ingested = ingest_campaign_insights(
+            update_result_ingested = ingest_campaign_insights(
                 start_date=start_date,
                 end_date=end_date
             )
+            update_df_ingested = update_result_ingested["ingest_df_final"]
             updated_campaign_ids = set()
             if "campaign_id" in update_df_ingested.columns:
                 updated_campaign_ids.update(update_df_ingested["campaign_id"].dropna().unique())
@@ -173,11 +174,11 @@ def update_ad_insights(start_date: str, end_date: str):
         try:
             print(f"🔄 [UPDATE] Triggering to ingest TikTok Ads ad insights from {start_date} to {end_date}...")
             logging.info(f"🔄 [UPDATE] Triggering to ingest TikTok Ads campaign ad from {start_date} to {end_date}...")
-            ingest_result = ingest_ad_insights(
+            update_result_ingested = ingest_ad_insights(
                 start_date=start_date,
                 end_date=end_date
             )
-            update_df_ingested = ingest_result["data"]
+            update_df_ingested = update_result_ingested["ingest_df_final"]
             updated_ad_ids = set()
             if "ad_id" in update_df_ingested.columns:
                 updated_ad_ids.update(update_df_ingested["ad_id"].dropna().unique())
