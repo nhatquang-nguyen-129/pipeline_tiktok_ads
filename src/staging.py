@@ -139,7 +139,7 @@ def staging_campaign_insights() -> None:
                     metadata.campaign_name,
                     metadata.advertiser_name,
                     metadata.operation_status,
-                    metadata.objective_type,
+                    metadata.objective_type
                 FROM `{raw_campaign_table}` AS raw
                 LEFT JOIN `{raw_campaign_metadata}` AS metadata
                     ON CAST(raw.campaign_id AS STRING) = CAST(metadata.campaign_id AS STRING)
