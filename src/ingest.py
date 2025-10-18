@@ -765,23 +765,23 @@ def ingest_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
     if total_days_succeeded == 0:
         print(f"❌ [INGEST] Failed to complete TikTok Ads campaign insights ingestion from {start_date} to {end_date} with all {total_days_failed} day(s) and 0 rows uploaded in {elapsed}s.")
         logging.error(f"❌ [INGEST] Failed to complete TikTok Ads campaign insights ingestion from {start_date} to {end_date} with all {total_days_failed} day(s) and 0 rows uploaded in {elapsed}s.")
-        ingest_status_def = "failed_all"
+        ingest_status_final = "failed_all"
     elif total_days_failed > 0:
         print(f"⚠️ [INGEST] Completed TikTok Ads campaign insights ingestion from {start_date} to {end_date} with partial failure {total_days_failed} day(s) failed and {total_rows_uploaded} row(s) uploaded in {elapsed}s.")
         logging.warning(f"⚠️ [INGEST] Completed TikTok Ads campaign insights ingestion from {start_date} to {end_date} with partial failure {total_days_failed} day(s) failed and {total_rows_uploaded} row(s) uploaded in {elapsed}s.")
-        ingest_status_def = "partial_failed"
+        ingest_status_final = "partial_failed"
     else:
         print(f"🏆 [INGEST] Successfully completed TikTok Ads campaign insights ingestion from {start_date} to {end_date} with all {total_days_succeeded} day(s) and {total_rows_uploaded} row(s) uploaded in {elapsed}s.")
         logging.info(f"🏆 [INGEST] Successfully completed TikTok Ads campaign insights ingestion from {start_date} to {end_date} with all {total_days_succeeded} day(s) and {total_rows_uploaded} row(s) uploaded in {elapsed}s.")
-        ingest_status_def = "success"
+        ingest_status_final = "success"
     return {
-        "data": ingest_df_final,
-        "status": ingest_status_def,
-        "results": {
-            "elapsed_seconds": elapsed,
-            "rows_uploaded": total_rows_uploaded,
-            "days_succeeded": total_days_succeeded,
-            "days_failed": total_days_failed,
+        "ingest_df_final": ingest_df_final,
+        "ingest_status_final": ingest_status_final,
+        "ingest_result_final": {
+            "ingest_second_elapsed": elapsed,
+            "ingest_row_uploaded": total_rows_uploaded,
+            "ingest_day_succeeded": total_days_succeeded,
+            "ingest_days_failed": total_days_failed,
         }
     }
 
@@ -974,22 +974,22 @@ def ingest_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
     if total_days_succeeded == 0:
         print(f"❌ [INGEST] Failed to complete TikTok Ads ad insights ingestion from {start_date} to {end_date} with all {total_days_failed} day(s) and 0 rows uploaded in {elapsed}s.")
         logging.error(f"❌ [INGEST] Failed to complete TikTok Ads ad insights ingestion from {start_date} to {end_date} with all {total_days_failed} day(s) and 0 rows uploaded in {elapsed}s.")
-        ingest_status_def = "failed_all"
+        ingest_status_final = "failed_all"
     elif total_days_failed > 0:
         print(f"⚠️ [INGEST] Completed TikTok Ads ad insights ingestion from {start_date} to {end_date} with partial failure {total_days_failed} day(s) failed and {total_rows_uploaded} row(s) uploaded in {elapsed}s.")
         logging.warning(f"⚠️ [INGEST] Completed TikTok Ads ad insights ingestion from {start_date} to {end_date} with partial failure {total_days_failed} day(s) failed and {total_rows_uploaded} row(s) uploaded in {elapsed}s.")
-        ingest_status_def = "partial_failed"
+        ingest_status_final = "partial_failed"
     else:
         print(f"🏆 [INGEST] Successfully completed TikTok Ads ad insights ingestion from {start_date} to {end_date} with all {total_days_succeeded} day(s) and {total_rows_uploaded} row(s) uploaded in {elapsed}s.")
         logging.info(f"🏆 [INGEST] Successfully completed TikTok Ads ad insights ingestion from {start_date} to {end_date} with all {total_days_succeeded} day(s) and {total_rows_uploaded} row(s) uploaded in {elapsed}s.")
-        ingest_status_def = "success"
+        ingest_status_final = "success"
     return {
-        "data": ingest_df_final,
-        "status": ingest_status_def,
-        "results": {
-            "elapsed_seconds": elapsed,
-            "rows_uploaded": total_rows_uploaded,
-            "days_succeeded": total_days_succeeded,
-            "days_failed": total_days_failed,
+        "ingest_df_final": ingest_df_final,
+        "ingest_status_final": ingest_status_final,
+        "ingest_result_final": {
+            "ingest_second_elapsed": elapsed,
+            "ingest_row_uploaded": total_rows_uploaded,
+            "ingest_day_succeeded": total_days_succeeded,
+            "ingest_days_failed": total_days_failed,
         }
     }
