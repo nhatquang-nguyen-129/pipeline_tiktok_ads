@@ -757,6 +757,7 @@ def ingest_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
             continue
 
     # 2.1.10. Summarize ingestion result(s)
+    ingest_df_final = ingest_df_deduplicated
     elapsed = round(time.time() - start_time, 2)
     total_rows_uploaded = sum(len(df) for df in ingest_results_concatenated)
     total_days_succeeded = len(ingest_results_concatenated)
@@ -774,11 +775,14 @@ def ingest_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
         logging.info(f"🏆 [INGEST] Successfully completed TikTok Ads campaign insights ingestion from {start_date} to {end_date} with all {total_days_succeeded} day(s) and {total_rows_uploaded} row(s) uploaded in {elapsed}s.")
         ingest_status_def = "success"
     return {
-        "ingest_status_def": ingest_status_def,
-        "ingest_seconds_elapsed": elapsed,
-        "total_uploaded_rows": total_rows_uploaded,
-        "total_days_succeeded": total_days_succeeded,
-        "total_days_failed": total_days_failed,
+        "data": ingest_df_final,
+        "status": ingest_status_def,
+        "results": {
+            "elapsed_seconds": elapsed,
+            "rows_uploaded": total_rows_uploaded,
+            "days_succeeded": total_days_succeeded,
+            "days_failed": total_days_failed,
+        }
     }
 
 # 2.2. Ingest ad insights for TikTok Ads
@@ -790,7 +794,7 @@ def ingest_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
     start_time = time.time()
     ingest_section_succeeded = {}
     ingest_section_failed = [] 
-    ingest_results_concatenated = []
+    ingest_date_uploaded = []
     print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
@@ -953,6 +957,7 @@ def ingest_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
                 job_config=job_config
             )
             load_job.result()
+            ingest_date_uploaded.append(ingest_df_deduplicated.copy())
             print(f"✅ [INGEST] Successfully uploaded {len(ingest_df_deduplicated)} row(s) of TikTok Ads ad insights to Google BigQuery table {table_id}.")
             logging.info(f"✅ [INGEST] Successfully uploaded {len(ingest_df_deduplicated)} row(s) of TikTok Ads ad insights to Google BigQuery table {table_id}.")
         except Exception as e:
@@ -961,9 +966,10 @@ def ingest_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
             continue
 
     # 2.2.10. Summarize ingestion result(s)
+    ingest_df_final = pd.concat(ingest_date_uploaded, ignore_index=True) if ingest_date_uploaded else pd.DataFrame()
     elapsed = round(time.time() - start_time, 2)
-    total_rows_uploaded = sum(len(df) for df in ingest_results_concatenated)
-    total_days_succeeded = len(ingest_results_concatenated)
+    total_rows_uploaded = len(ingest_df_final)
+    total_days_succeeded = len(ingest_date_uploaded)
     total_days_failed = len(ingest_date_list) - total_days_succeeded
     if total_days_succeeded == 0:
         print(f"❌ [INGEST] Failed to complete TikTok Ads ad insights ingestion from {start_date} to {end_date} with all {total_days_failed} day(s) and 0 rows uploaded in {elapsed}s.")
@@ -978,9 +984,12 @@ def ingest_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
         logging.info(f"🏆 [INGEST] Successfully completed TikTok Ads ad insights ingestion from {start_date} to {end_date} with all {total_days_succeeded} day(s) and {total_rows_uploaded} row(s) uploaded in {elapsed}s.")
         ingest_status_def = "success"
     return {
-        "ingest_status_def": ingest_status_def,
-        "ingest_seconds_elapsed": elapsed,
-        "total_uploaded_rows": total_rows_uploaded,
-        "total_days_succeeded": total_days_succeeded,
-        "total_days_failed": total_days_failed,
+        "data": ingest_df_final,
+        "status": ingest_status_def,
+        "results": {
+            "elapsed_seconds": elapsed,
+            "rows_uploaded": total_rows_uploaded,
+            "days_succeeded": total_days_succeeded,
+            "days_failed": total_days_failed,
+        }
     }
