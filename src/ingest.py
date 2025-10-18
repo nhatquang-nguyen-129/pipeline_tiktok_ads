@@ -777,7 +777,7 @@ def ingest_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
     return {
         "ingest_df_final": ingest_df_final,
         "ingest_status_final": ingest_status_final,
-        "ingest_result_final": {
+        "ingest_summary_final": {
             "ingest_second_elapsed": elapsed,
             "ingest_row_uploaded": total_rows_uploaded,
             "ingest_day_succeeded": total_days_succeeded,
@@ -986,7 +986,7 @@ def ingest_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
     return {
         "ingest_df_final": ingest_df_final,
         "ingest_status_final": ingest_status_final,
-        "ingest_result_final": {
+        "ingest_summary_final": {
             "ingest_second_elapsed": elapsed,
             "ingest_row_uploaded": total_rows_uploaded,
             "ingest_day_succeeded": total_days_succeeded,

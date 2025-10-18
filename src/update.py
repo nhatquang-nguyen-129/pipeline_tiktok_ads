@@ -103,7 +103,6 @@ def update_campaign_insights(start_date: str, end_date: str):
                 start_date=start_date,
                 end_date=end_date
             )
-            update_df_ingested = ingest_result["data"]
             updated_campaign_ids = set()
             if "campaign_id" in update_df_ingested.columns:
                 updated_campaign_ids.update(update_df_ingested["campaign_id"].dropna().unique())
