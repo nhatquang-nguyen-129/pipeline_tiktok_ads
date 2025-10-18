@@ -586,7 +586,7 @@ def ingest_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
     start_time = time.time()
     ingest_section_succeeded = {}
     ingest_section_failed = [] 
-    ingest_results_concatenated = []
+    ingest_date_uploaded = []
     print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     
@@ -597,10 +597,10 @@ def ingest_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
         google_bigquery_client = bigquery.Client(project=PROJECT)
         print(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
         logging.info(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-        ingest_section_succeeded["2.1.6. Initialize Google BigQuery client"] = True
+        ingest_section_succeeded["2.1.2. Initialize Google BigQuery client"] = True
     except Exception as e:
-        ingest_section_succeeded["2.1.6. Initialize Google BigQuery client"] = False
-        ingest_section_failed.append("2.1.6. Initialize Google BigQuery client")
+        ingest_section_succeeded["2.1.2. Initialize Google BigQuery client"] = False
+        ingest_section_failed.append("2.1.2. Initialize Google BigQuery client")
         print(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
         logging.error(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
         raise RuntimeError(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.") from e
@@ -750,17 +750,17 @@ def ingest_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
             load_job.result()
             print(f"✅ [INGEST] Successfully uploaded {len(ingest_df_deduplicated)} row(s) of TikTok Ads campaign insights to Google BigQuery table {table_id}.")
             logging.info(f"✅ [INGEST] Successfully uploaded {len(ingest_df_deduplicated)} row(s) of TikTok Ads campaign insights to Google BigQuery table {table_id}.")
-            ingest_results_concatenated.append(ingest_df_deduplicated)
+            ingest_date_uploaded.append(ingest_df_deduplicated.copy())
         except Exception as e:
             print(f"❌ [INGEST] Failed to upload {len(ingest_df_deduplicated)} row(s) of TikTok Ads campaign insights to Google BigQuery table {table_id} due to {e}.")
             logging.error(f"❌ [INGEST] Failed to upload {len(ingest_df_deduplicated)} row(s) of TikTok Ads campaign insights to Google BigQuery table {table_id} due to {e}.")
             continue
 
     # 2.1.10. Summarize ingestion result(s)
-    ingest_df_final = ingest_df_deduplicated
+    ingest_df_final = pd.concat(ingest_date_uploaded, ignore_index=True) if ingest_date_uploaded else pd.DataFrame()
     elapsed = round(time.time() - start_time, 2)
-    total_rows_uploaded = sum(len(df) for df in ingest_results_concatenated)
-    total_days_succeeded = len(ingest_results_concatenated)
+    total_rows_uploaded = len(ingest_df_final)
+    total_days_succeeded = len(ingest_date_uploaded)
     total_days_failed = len(ingest_date_list) - total_days_succeeded
     if total_days_succeeded == 0:
         print(f"❌ [INGEST] Failed to complete TikTok Ads campaign insights ingestion from {start_date} to {end_date} with all {total_days_failed} day(s) and 0 rows uploaded in {elapsed}s.")
