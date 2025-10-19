@@ -67,33 +67,29 @@ def mart_campaign_all() -> None:
     logging.info(f"🚀 [MART] Starting to build materialized table TikTok Ads campaign performance...")
 
     # 1.1.1. Prepare table_id for TikTok campaign performance
-    try:
-        staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
-        staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
-        print(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for TikTok Ads campaign performance...")
-        logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for TikTok Ads campaign performance...")
-        mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
-        mart_table_performance = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_performance"
-        print(f"🔍 [MART] Preparing to build materialized table {mart_table_performance} for TikTok Ads campaign performance...")
-        logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_performance} for TikTok Ads campaign performance...")
+    staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
+    staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
+    print(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for TikTok Ads campaign performance...")
+    logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for TikTok Ads campaign performance...")
+    mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
+    mart_table_performance = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_performance"
+    print(f"🔍 [MART] Preparing to build materialized table {mart_table_performance} for TikTok Ads campaign performance...")
+    logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_performance} for TikTok Ads campaign performance...")
 
     # 1.1.2. Initialize Google BigQuery client
-        try:
-            print(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
-            logging.info(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
-            google_bigquery_client = bigquery.Client(project=PROJECT)
-            print(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-            logging.info(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-        except DefaultCredentialsError as e:
-            raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to credentials error.") from e
-        except Forbidden as e:
-            raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to permission denial.") from e
-        except GoogleAPICallError as e:
-            raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to API call error.") from e
-        except Exception as e:
-            raise RuntimeError(f"❌ [INGEST] Failed to initialize Google BigQuery client due to {e}.") from e
+    try:
+        print(f"🔍 [STAGING] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+        logging.info(f"🔍 [STAGING] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+        google_bigquery_client = bigquery.Client(project=PROJECT)
+        print(f"✅ [STAGING] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+        logging.info(f"✅ [STAGING] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+    except Exception as e:
+        print(f"❌ [STAGING] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+        logging.error(f"❌ [STAGING] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+        raise RuntimeError(f"❌ [STAGING] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.") from e
     
     # 1.1.3. Query all staging Tiktok Ads campaign table(s)
+    try:
         query = f"""
             CREATE OR REPLACE TABLE `{mart_table_performance}`
             PARTITION BY ngay
@@ -135,6 +131,7 @@ def mart_campaign_all() -> None:
     except Exception as e:
         print(f"❌ [MART] Failed to build materialized table for TikTok Ads campaign performance due to {e}.")
         logging.error(f"❌ [MART] Failed to build materialized table for TikTok Ads campaign performance due to {e}.")
+        raise RuntimeError(f"❌ [MART] Failed to build materialized table for TikTok Ads campaign performance due to {e}.")
 
 # 2. MONTHLY MATERIALIZED TABLE FOR TIKTOK ADS CREATIVE PERFORMANCE
 
@@ -144,31 +141,27 @@ def mart_creative_all() -> None:
     logging.info("🚀 [MART] Starting to build materialized table for TikTok Ads creative performance...")
 
     # 2.1.1. Prepare table_id for TikTok Ads ad creative
-    try:
-        staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
-        staging_table = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"
-        mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
-        mart_table_creative = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_creative_performance"
-        print(f"🔍 [MART] Using staging table {staging_table} for creative performance (All)...")
-        logging.info(f"🔍 [MART] Using staging table {staging_table} for creative performance (All)...")
+    staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
+    staging_table = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"
+    mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
+    mart_table_creative = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_creative_performance"
+    print(f"🔍 [MART] Using staging table {staging_table} for creative performance (All)...")
+    logging.info(f"🔍 [MART] Using staging table {staging_table} for creative performance (All)...")
 
     # 2.1.2. Initialize Google BigQuery client
-        try:
-            print(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
-            logging.info(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
-            google_bigquery_client = bigquery.Client(project=PROJECT)
-            print(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-            logging.info(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-        except DefaultCredentialsError as e:
-            raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to credentials error.") from e
-        except Forbidden as e:
-            raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to permission denial.") from e
-        except GoogleAPICallError as e:
-            raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to API call error.") from e
-        except Exception as e:
-            raise RuntimeError(f"❌ [INGEST] Failed to initialize Google BigQuery client due to {e}.") from e
+    try:
+        print(f"🔍 [STAGING] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+        logging.info(f"🔍 [STAGING] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+        google_bigquery_client = bigquery.Client(project=PROJECT)
+        print(f"✅ [STAGING] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+        logging.info(f"✅ [STAGING] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+    except Exception as e:
+        print(f"❌ [STAGING] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+        logging.error(f"❌ [STAGING] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+        raise RuntimeError(f"❌ [STAGING] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.") from e
 
     # 2.1.3. Query all staging TikTok Ads ad table(s)
+    try:
         query = f"""
             CREATE OR REPLACE TABLE `{mart_table_creative}`
             PARTITION BY ngay
@@ -215,3 +208,4 @@ def mart_creative_all() -> None:
     except Exception as e:
         print(f"❌ [MART] Failed to build materialized table for TikTok Ads creative performance due to {e}.")
         logging.error(f"❌ [MART] Failed to build materialized table for TikTok Ads creative performance due to {e}.")
+        raise RuntimeError(f"❌ [MART] Failed to build materialized table for TikTok Ads creative performance due to {e}.")
