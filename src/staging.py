@@ -11,8 +11,8 @@ It combines raw ad/campaign/creative data, applies business logic
 prepares clean, query-ready datasets for downstream consumption.
 
 ✔️ Joins raw ad insights with creative and campaign metadata  
-✔️ Enriches fields such as owner, program code, placement, format  
-✔️ Normalizes and writes standardized tables into the staging dataset  
+✔️ Enriches fields such as owner, placement, format  
+✔️ Normalizes and writes standardized tables into dataset  
 ✔️ Validates data integrity and ensures field completeness  
 ✔️ Supports modular extension for new TikTok Ads entities  
 
