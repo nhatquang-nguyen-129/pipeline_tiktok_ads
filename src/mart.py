@@ -121,13 +121,13 @@ def mart_campaign_all() -> None:
             FROM `{staging_table_campaign}`
             WHERE date IS NOT NULL
         """
-        print(f"🔍 [MART] Creating materialized table {mart_table_performance} for TikTok Ads campaign performance...")
-        logging.info(f"🔍 [MART] Creating materialized table {mart_table_performance} for TikTok Ads campaign performance...")
+        print(f"🔍 [MART] Creating or replacing materialized table {mart_table_performance} for TikTok Ads campaign performance...")
+        logging.info(f"🔍 [MART] Creating or replacing materialized table {mart_table_performance} for TikTok Ads campaign performance...")
         google_bigquery_client.query(query).result()
         count_query = f"SELECT COUNT(1) AS row_count FROM `{mart_table_performance}`"
         row_count = list(google_bigquery_client.query(count_query).result())[0]["row_count"]
-        print(f"✅ [MART] Successfully created materialized table {mart_table_performance} with {row_count} row(s) for TikTok Ads campaign performance.")
-        logging.info(f"✅ [MART] Successfully created materialized table {mart_table_performance} with {row_count} row(s) for TikTok Ads campaign performance.")
+        print(f"✅ [MART] Successfully created or replaced materialized table {mart_table_performance} with {row_count} row(s) for TikTok Ads campaign performance.")
+        logging.info(f"✅ [MART] Successfully created or replaced materialized table {mart_table_performance} with {row_count} row(s) for TikTok Ads campaign performance.")
     except Exception as e:
         print(f"❌ [MART] Failed to build materialized table for TikTok Ads campaign performance due to {e}.")
         logging.error(f"❌ [MART] Failed to build materialized table for TikTok Ads campaign performance due to {e}.")
@@ -198,13 +198,13 @@ def mart_creative_all() -> None:
                 END AS trang_thai
             FROM `{staging_table}`
         """
-        print(f"🔍 [MART] Creating materialized table {mart_table_creative} for TikTok Ads creative performance...")
-        logging.info(f"🔍 [MART] Creating materialized table {mart_table_creative} for TikTok Ads creative performance...")
+        print(f"🔍 [MART] Creating or replacing materialized table {mart_table_creative} for TikTok Ads creative performance...")
+        logging.info(f"🔍 [MART] Creating or replacing materialized table {mart_table_creative} for TikTok Ads creative performance...")
         google_bigquery_client.query(query).result()
         count_query = f"SELECT COUNT(1) AS row_count FROM `{mart_table_creative}`"
         row_count = list(google_bigquery_client.query(count_query).result())[0]["row_count"]
-        print(f"✅ [MART] Successfully created materialized table {mart_table_creative} with {row_count} row(s) for TikTok Ads creative performance.")
-        logging.info(f"✅ [MART] Successfully created materialized table {mart_table_creative} with {row_count} row(s) for TikTok Ads creative performance.")
+        print(f"✅ [MART] Successfully created or replacing materialized table {mart_table_creative} with {row_count} row(s) for TikTok Ads creative performance.")
+        logging.info(f"✅ [MART] Successfully created or replacing materialized table {mart_table_creative} with {row_count} row(s) for TikTok Ads creative performance.")
     except Exception as e:
         print(f"❌ [MART] Failed to build materialized table for TikTok Ads creative performance due to {e}.")
         logging.error(f"❌ [MART] Failed to build materialized table for TikTok Ads creative performance due to {e}.")
