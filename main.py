@@ -1,6 +1,6 @@
 """
 ==================================================================
-MAIN ENTRYPOINT FOR PLATFORM-AGNOSTIC DATA UPDATES
+TIKTOK MAIN ENTRYPOINT
 ------------------------------------------------------------------
 This script serves as the unified CLI **controller** for triggering  
 ads data updates across multiple platforms (e.g., Facebook, Google),  
@@ -13,27 +13,29 @@ It supports **incremental daily ingestion** for selected data layers
 ✔️ CLI flags to select data layers and date range mode  
 ✔️ Shared logging and error handling across update jobs  
 ✔️ Supports scheduled jobs or manual on-demand executions  
+✔️ Ensure consistent output structure and status reporting
 
 ⚠️ This script does *not* contain data processing logic itself.  
 It simply delegates update tasks to platform-specific modules  
 (e.g., services.facebook.update, services.budget.update).
 ==================================================================
 """
-# Add project root to sys.path to enable absolute imports
+
+# Add root directory to sys.path for absolute imports of internal modules
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
-# Add argparse to parse comman-line arguments
-import argparse
-
-# Add dynamic platform-specific modules
+# Add Python dynamic platform-specific ultilities for integration
 import importlib
 
-# Import datetime to calculate time
-from datetime import datetime, timedelta
+# Import Python datetime ultilities for integration
+from datetime import (
+    datetime, 
+    timedelta
+)
 
-# Add logging capability for tracking process execution and errors
+# Add Python logging ultilities for integration
 import logging
 
 # Get environment variable for Company
