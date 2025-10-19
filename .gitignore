@@ -1,4 +1,14 @@
-# Ignore Python cache
+# Byte-compiled/optimized/DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+# C extensions
+*.so
+
+# Virtual environments files
+.env
+.venv
+env/
+venv/
+ENV/
