@@ -508,7 +508,7 @@ def staging_ad_insights() -> dict:
                 staging_df_enriched["nhan_su"] = staging_df_enriched["nhan_su"].apply(
                     lambda text: ''.join(full_map.get(c, c) for c in text) if isinstance(text, str) else text
                 )
-            staging_df_renamed = staging_df_queried.rename(columns={
+            staging_df_renamed = staging_df_enriched.rename(columns={
                 "advertiser_id": "account_id",
                 "adgroup_id": "adset_id",
                 "adgroup_name": "adset_name",

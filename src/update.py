@@ -253,4 +253,4 @@ if __name__ == "__main__":
     parser.add_argument("--end_date", type=str, required=True, help="End date (YYYY-MM-DD)")
     args = parser.parse_args()
 
-    update_campaign_insights(start_date=args.start_date, end_date=args.end_date)
+    update_ad_insights(start_date=args.start_date, end_date=args.end_date)
