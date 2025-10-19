@@ -93,7 +93,7 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, table_id: str) -> pd.D
         logging.error(f"❌ [FETCH] Failed to enrich TikTok Ads campaign insights for {len(enrich_df_input)} row(s) due to {e}.")
         return pd.DataFrame()
 
-# 1.2. Enrich structured ad-level fields from adset_name and campaign_name
+# 1.2. Enrich structured ad-level fields from adgroup_name and campaign_name
 def enrich_ad_fields(enrich_df_input: pd.DataFrame, table_id: str) -> pd.DataFrame:   
     print("🚀 [ENRICH] Starting to enrich TikTok Ads staging ad field(s)...")
     logging.info("🚀 [ENRICH] Starting to enrich TikTok Ads staging ad field(s)...")    
@@ -117,13 +117,13 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, table_id: str) -> pd.DataFra
             enrich_df_processing["phong_ban"] = match.group("department")
             enrich_df_processing["tai_khoan"] = match.group("account")   
 
-    # 1.2.3. Enrich adset-level field(s)
-        if "adset_name" in enrich_df_processing.columns:
-            adset_parts = enrich_df_processing["adset_name"].fillna("").str.split("_")
+    # 1.2.3. Enrich adgroup-level field(s)
+        if "adgroup_name" in enrich_df_processing.columns:
+            adset_parts = enrich_df_processing["adgroup_name"].fillna("").str.split("_")
             enrich_df_processing["vi_tri"] = adset_parts.str[0].fillna("unknown")
             enrich_df_processing["doi_tuong"] = adset_parts.str[1].fillna("unknown")
             enrich_df_processing["dinh_dang"] = adset_parts.str[2].fillna("unknown")
-            enrich_df_processing["adset_name_invalid"] = adset_parts.str.len() < 3
+            enrich_df_processing["adgroup_name_invalid"] = adset_parts.str.len() < 3
 
     # 1.2.4. Enrich campaign-level field(s)
         if "campaign_name" in enrich_df_processing.columns:
