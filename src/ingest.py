@@ -43,13 +43,6 @@ import uuid
 # Add Python Pandas libraries for integration
 import pandas as pd
 
-# Add Google Authentication modules for integration
-from google.api_core.exceptions import (
-    Forbidden,
-    GoogleAPICallError
-)
-from google.auth.exceptions import DefaultCredentialsError
-
 # Add Google Cloud modules for integration
 from google.cloud import bigquery
 
