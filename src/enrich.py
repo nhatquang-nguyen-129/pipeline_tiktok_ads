@@ -6,7 +6,7 @@ This module is responsible for transforming raw TikTok Ads insights
 into a clean, BigQuery-ready dataset optimized for downstream analytics, 
 cross-channel performance comparison, and business intelligence reporting.
 
-By consolidating enrichment logic, it ensures clarity, consistency, and 
+By consolidating enrichment logic, it ensures clarity, consistency and 
 long-term maintainability across the marketing data pipeline while 
 standardizing TikTok-specific metrics and naming conventions.
 
