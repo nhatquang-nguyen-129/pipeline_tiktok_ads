@@ -526,9 +526,9 @@ def staging_ad_insights() -> dict:
 
     # 1.2.7. Enforce schema for TikTok Ads ad insights
         try:
-            print(f"🔄 [STAGING] Triggering to enforce schema for {len(staging_df_concatenated)} row(s) of staging TikTok Ads ad insights...")
-            logging.info(f"🔄 [STAGING] Triggering to enforce schema for {len(staging_df_concatenated)} row(s) of staging TikTok Ads ad insights...")
-            staging_df_enforced = ensure_table_schema(staging_df_concatenated, "staging_ad_insights")
+            print(f"🔄 [STAGING] Triggering to enforce schema for {len(staging_df_renamed)} row(s) of staging TikTok Ads ad insights...")
+            logging.info(f"🔄 [STAGING] Triggering to enforce schema for {len(staging_df_renamed)} row(s) of staging TikTok Ads ad insights...")
+            staging_df_enforced = ensure_table_schema(staging_df_renamed, "staging_ad_insights")
         except Exception as e:
             print(f"❌ [STAGING] Failed to trigger schema enforcement for {len(staging_df_enforced)} row(s) of staging TikTok Ads ad insights due to {e}.")
             logging.error(f"❌ [STAGING] Failed to trigger schema enforcement for {len(staging_df_enforced)} row(s) of staging TikTok Ads ad insights due to {e}.")
