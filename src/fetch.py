@@ -950,165 +950,236 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
 
 # 2.2. Fetch ad insights for TikTok Ads    
 def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
-    print(f"🚀 [FETCH] Starting to fetch TikTok Ads ad insights from {start_date} to {end_date}...")
-    logging.info(f"🚀 [FETCH] Starting to fetch TikTok Ads ad insights from {start_date} to {end_date}...")    
+    print(f"🚀 [FETCH] Starting to fetch raw TikTok Ads ad insights from {start_date} to {end_date}...")
+    logging.info(f"🚀 [FETCH] Starting to fetch raw TikTok Ads ad insights from {start_date} to {end_date}...")       
 
-    # 2.2.1. Start timing the TikTok Ads ad insights fetching process
-    start_time = time.time()
-    fetch_section_succeeded = {}
-    fetch_section_failed = [] 
+    # 2.2.1. Start timing the TikTok Ads ad insights fetching
+    fetch_time_start = time.time()   
+    fetch_sections_status = {}
+    fetch_sections_time = {}
     print(f"🔍 [FETCH] Proceeding to fetch TikTok Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [FETCH] Proceeding to fetch TikTok Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-        
-    # 2.2.2 Initialize Google Secret Manager client
-    try:
-        print(f"🔍 [FETCH] Initializing Google Secret Manager client for Google Cloud Platform project {PROJECT}...")
-        logging.info(f"🔍 [FETCH] Initializing Google Secret Manager client for Google Cloud Platform project {PROJECT}...")
-        google_secret_client = secretmanager.SecretManagerServiceClient()
-        print(f"✅ [FETCH] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
-        logging.info(f"✅ [FETCH] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
-        fetch_section_succeeded["2.2.2 Initialize Google Secret Manager client"] = True
-    except Exception as e:
-        fetch_section_succeeded["2.2.2 Initialize Google Secret Manager client"] = False
-        fetch_section_failed.append("2.2.2 Initialize Google Secret Manager client")
-        print(f"❌ [FETCH] Failed to initialize Google Secret Manager client for Google Cloud Platform project {PROJECT} due to {e}.")
-        logging.error(f"❌ [FETCH] Failed to initialize Google Secret Manager client for Google Cloud Platform project {PROJECT} due to {e}.")
-        raise RuntimeError(f"❌ [FETCH] Failed to initialize Google Secret Manager client for Google Cloud Platform project {PROJECT} due to {e}.") from e
 
-    # 2.2.3. Get TikTok Ads access token from Google Secret Manager
-    try: 
-        token_secret_id = f"{COMPANY}_secret_all_{PLATFORM}_token_access_user"
-        token_secret_name = f"projects/{PROJECT}/secrets/{token_secret_id}/versions/latest"
-        token_secret_response = google_secret_client.access_secret_version(request={"name": token_secret_name})
-        token_access_user = token_secret_response.payload.data.decode("utf-8")
-        print(f"✅ [FETCH] Successfully retrieved TikTok access token for account {ACCOUNT} from Google Secret Manager.")
-        logging.info(f"✅ [FETCH] Successfully retrieved TikTok access token for account {ACCOUNT} from Google Secret Manager.")
-        fetch_section_succeeded["2.2.3. Get TikTok Ads access token from Google Secret Manager"] = True
-    except Exception as e:
-        fetch_section_succeeded["2.2.3. Get TikTok Ads access token from Google Secret Manager"] = False
-        fetch_section_failed.append("2.2.3. Get TikTok Ads access token from Google Secret Manager")
-        print(f"❌ [FETCH] Failed to retrieve TikTok access token for {ACCOUNT} from Google Secret Manager due to {e}.")
-        logging.error(f"❌ [FETCH] Failed to retrieve TikTok access token for {ACCOUNT} from Google Secret Manager due to {e}.")
-        raise RuntimeError(f"❌ [FETCH] Failed to retrieve TikTok access token for {ACCOUNT} from Google Secret Manager due to {e}.")
+    try:
+
+    # 2.2.2. Initialize Google Secret Manager client
+        fetch_section_name = "[FETCH] Initialize Google Secret Manager client"
+        fetch_section_start = time.time()           
+        try:
+            print(f"🔍 [FETCH] Initializing Google Secret Manager client for Google Cloud Platform project {PROJECT}...")
+            logging.info(f"🔍 [FETCH] Initializing Google Secret Manager client for Google Cloud Platform project {PROJECT}...")
+            google_secret_client = secretmanager.SecretManagerServiceClient()
+            print(f"✅ [FETCH] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
+            logging.info(f"✅ [FETCH] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
+            fetch_sections_status[fetch_section_name] = "succeed"
+        except Exception as e:
+            fetch_sections_status[fetch_section_name] = "failed"
+            print(f"❌ [FETCH] Failed to initialize Google Secret Manager client for Google Cloud Platform project {PROJECT} due to {e}.")
+            logging.error(f"❌ [FETCH] Failed to initialize Google Secret Manager client for Google Cloud Platform project {PROJECT} due to {e}.")
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
+
+    # 2.2.3. Get Facebook Ads access token from Google Secret Manager
+        fetch_section_name = "[FETCH] Get Facebook Ads access token from Google Secret Manager"
+        fetch_section_start = time.time()          
+        try: 
+            print(f"🔍 [FETCH] Retrieving Facebook Ads access token for account {ACCOUNT} from Google Secret Manager...")
+            logging.info(f"🔍 [FETCH] Retrieving Facebook Ads access token for account {ACCOUNT} from Google Secret Manager...")
+            token_secret_id = f"{COMPANY}_secret_all_{PLATFORM}_token_access_user"
+            token_secret_name = f"projects/{PROJECT}/secrets/{token_secret_id}/versions/latest"
+            token_secret_response = google_secret_client.access_secret_version(request={"name": token_secret_name})
+            token_access_user = token_secret_response.payload.data.decode("utf-8")
+            print(f"✅ [FETCH] Successfully retrieved Facebook Ads access token for account {ACCOUNT} from Google Secret Manager.")
+            logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads access token for account {ACCOUNT} from Google Secret Manager.")
+            fetch_sections_status[fetch_section_name] = "succeed"
+        except Exception as e:
+            fetch_sections_status[fetch_section_name] = "failed"
+            print(f"❌ [FETCH] Failed to retrieve Facebook Ads access token for {ACCOUNT} from Google Secret Manager due to {e}.")
+            logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads access token for {ACCOUNT} from Google Secret Manager due to {e}.")
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
     # 2.2.4. Get TikTok Ads advertiser_id from Google Secret Manager
-    try:
-        print(f"🔍 [FETCH] Retrieving TikTok Ads access_token for account {ACCOUNT} from Google Secret Manager...")
-        logging.info(f"🔍 [FETCH] Retrieving TikTok Ads access_token for account {ACCOUNT} from Google Secret Manager...")
-        advertiser_secret_id = f"{COMPANY}_secret_{DEPARTMENT}_tiktok_account_id_{ACCOUNT}"
-        advertiser_secret_name = f"projects/{PROJECT}/secrets/{advertiser_secret_id}/versions/latest"
-        advertiser_secret_response = google_secret_client.access_secret_version(request={"name": advertiser_secret_name})
-        advertiser_id = advertiser_secret_response.payload.data.decode("utf-8")
-        print(f"✅ [FETCH] Successfully retrieved TikTok Ads advertiser_id {advertiser_id} from Google Secret Manager.")
-        logging.info(f"✅ [FETCH] Successfully retrieved TikTok Ads advertiser_id {advertiser_id} from Google Secret Manager.")
-        fetch_section_succeeded["2.2.4. Get TikTok Ads advertiser_id from Google Secret Manager"] = True
-    except Exception as e:
-        fetch_section_succeeded["2.2.4. Get TikTok Ads advertiser_id from Google Secret Manager"] = False
-        fetch_section_failed.append("2.2.4. Get TikTok Ads advertiser_id from Google Secret Manager")
-        print(f"❌ [FETCH] Failed to retrieve TikTok Ads access token for {ACCOUNT} from Google Secret Manager due to {e}.")
-        logging.error(f"❌ [FETCH] Failed to retrieve TikTok Ads access token for {ACCOUNT} from Google Secret Manager due to {e}.")
-        raise RuntimeError(f"❌ [FETCH] Failed to retrieve TikTok Ads access token for {ACCOUNT} from Google Secret Manager due to {e}.")
+        fetch_section_name = "[FETCH] Get TikTok Ads advertiser_id from Google Secret Manager"
+        fetch_section_start = time.time()        
+        try:
+            print(f"🔍 [FETCH] Retrieving TikTok Ads advertiser_id for account {ACCOUNT} from Google Secret Manager...")
+            logging.info(f"🔍 [FETCH] Retrieving TikTok Ads advertiser_id for account {ACCOUNT} from Google Secret Manager...")
+            advertiser_secret_id = f"{COMPANY}_secret_{DEPARTMENT}_tiktok_account_id_{ACCOUNT}"
+            advertiser_secret_name = f"projects/{PROJECT}/secrets/{advertiser_secret_id}/versions/latest"
+            advertiser_secret_response = google_secret_client.access_secret_version(request={"name": advertiser_secret_name})
+            advertiser_id = advertiser_secret_response.payload.data.decode("utf-8")
+            print(f"✅ [FETCH] Successfully retrieved TikTok Ads advertiser_id {advertiser_id} from Google Secret Manager.")
+            logging.info(f"✅ [FETCH] Successfully retrieved TikTok Ads advertiser_id {advertiser_id} from Google Secret Manager.")
+            fetch_sections_status[fetch_section_name] = "succeed"
+        except Exception as e:
+            fetch_sections_status[fetch_section_name] = "failed"
+            print(f"❌ [FETCH] Failed to retrieve TikTok Ads advertiser_id for {ACCOUNT} from Google Secret Manager due to {e}.")
+            logging.error(f"❌ [FETCH] Failed to retrieve TikTok Ads advertiser_id for {ACCOUNT} from Google Secret Manager due to {e}.")
 
     # 2.2.5. Make TikTok Ads API call for BASIC report_type at AD level
-    ad_report_records = [] 
-    ad_report_url = "https://business-api.tiktok.com/open_api/v1.3/report/integrated/get/"
-    ad_report_params = {
-        "advertiser_id": advertiser_id,
-        "report_type": "BASIC",
-        "data_level": "AUCTION_AD",
-        "dimensions": ["ad_id", "stat_time_day"],
-        "metrics": [
-            "result",
-            "spend",
-            "impressions",
-            "clicks",
-            "engaged_view_15s",
-            "purchase",
-            "complete_payment",
-            "onsite_total_purchase",
-            "offline_shopping_events",
-            "onsite_shopping",
-            "messaging_total_conversation_tiktok_direct_message"
-        ],
-        "start_date": start_date,
-        "end_date": end_date,
-        "page_size": 1000,
-        "page": 1
-    }       
-    print(f"🔍 [FETCH] Retrieving TikTok Ads ad insights for advertiser_id {advertiser_id} from {start_date} to {end_date}...")
-    logging.info(f"🔍 [FETCH] Retrieving TikTok Ads ad insights for advertiser_id {advertiser_id} from {start_date} to {end_date}...")
-    for attempt in range(2):
+        fetch_section_name = "[FETCH] Make TikTok Ads API call for campaign insights"
+        fetch_section_start = time.time()
+        fetch_insights_ad = []
+        fetch_retries_ad = 2
         try:
-            while True:
-                resp = requests.get(
-                    ad_report_url,
-                    headers={
-                        "Access-Token": token_access_user,
-                        "Content-Type": "application/json",
-                    },
-                    json=ad_report_params,
-                    timeout=60
-                )
-                resp_json = resp.json()
-                if resp_json.get("code") != 0:
-                    raise Exception(
-                        f"❌ [FETCH] Failed to retrieve TikTok Ads ad-level insights with BASIC report_type due to API error {resp_json.get('message')}."
-                    )
-                data_list = resp_json["data"].get("list", [])
-                if not data_list:
+            print(f"🔍 [FETCH] Retrieving TikTok Ads ad insights for advertiser_id {advertiser_id} from {start_date} to {end_date}...")
+            logging.info(f"🔍 [FETCH] Retrieving TikTok Ads ad insights for advertiser_id {advertiser_id} from {start_date} to {end_date}...")        
+            ad_records_json = []
+            ad_report_url = "https://business-api.tiktok.com/open_api/v1.3/report/integrated/get/"
+            ad_report_params = {
+                "advertiser_id": advertiser_id,
+                "report_type": "BASIC",
+                "data_level": "AUCTION_AD",
+                "dimensions": ["ad_id", "stat_time_day"],
+                "metrics": [
+                    "result",
+                    "spend",
+                    "impressions",
+                    "clicks",
+                    "engaged_view_15s",
+                    "purchase",
+                    "complete_payment",
+                    "onsite_total_purchase",
+                    "offline_shopping_events",
+                    "onsite_shopping",
+                    "messaging_total_conversation_tiktok_direct_message"
+                ],
+                "start_date": start_date,
+                "end_date": end_date,
+                "page_size": 1000,
+                "page": 1
+            }       
+            for attempt in range(fetch_retries_ad):
+                try:
+                    while True:
+                        resp = requests.get(
+                            ad_report_url,
+                            headers={
+                                "Access-Token": token_access_user,
+                                "Content-Type": "application/json",
+                            },
+                            json=ad_report_params,
+                            timeout=60
+                        )
+                        resp_json = resp.json()
+                        if resp_json.get("code") != 0:
+                            raise Exception(
+                                f"❌ [FETCH] Failed to retrieve TikTok Ads ad-level insights with BASIC report_type due to API error {resp_json.get('message')}."
+                            )
+                        data_list = resp_json["data"].get("list", [])
+                        ad_records_json.extend(data_list)
+                        if len(data_list) < ad_report_params["page_size"]:
+                            break
+                        ad_report_params["page"] += 1
+                    for ad_record_json in ad_records_json:
+                        fetch_insight_ad = {}
+                        fetch_insight_ad.update(ad_record_json.get("dimensions", {}))
+                        fetch_insight_ad.update(ad_record_json.get("metrics", {}))
+                        fetch_insight_ad["advertiser_id"] = ad_report_params["advertiser_id"]
+                        fetch_insights_ad.append(fetch_insight_ad)
+                    fetch_df_flattened = pd.DataFrame(fetch_insights_ad)
+                    print(f"✅ [FETCH] Successfully retrieved {len(fetch_df_flattened)} rows of TikTok Ads ad insights with BASIC report_type.")
+                    logging.info(f"✅ [FETCH] Successfully retrieved {len(fetch_df_flattened)} rows of TikTok Ads ad insights with BASIC report_type.")
                     break
-
-                ad_report_records.extend(data_list)
-
-                # Nếu ít hơn page_size nghĩa là hết trang
-                if len(data_list) < ad_report_params["page_size"]:
-                    break
-
-                ad_report_params["page"] += 1
-            ad_records_flattened = []
-            for record in ad_report_records:
-                row = {}
-                row.update(record.get("dimensions", {}))
-                row.update(record.get("metrics", {}))
-                row["advertiser_id"] = ad_report_params["advertiser_id"]
-                ad_records_flattened.append(row)
-            fetch_df_flattened = pd.DataFrame(ad_records_flattened)
-            print(f"✅ [FETCH] Successfully retrieved {len(fetch_df_flattened)} rows of TikTok Ads ad-level insights with BASIC report_type.")
-            logging.info(f"✅ [FETCH] Successfully retrieved {len(fetch_df_flattened)} rows of TikTok Ads ad-level insights with BASIC report_type.")
-            break
-        except Exception as e:
-            if attempt < 1:
-                print(f"⚠️ [FETCH] TikTok Ads ad-level insights with BASIC report_type attempt {attempt+1} failed due to {e} then retrying...")
-                logging.warning(f"⚠️ [FETCH] TikTok Ads ad-level insights with BASIC report_type attempt {attempt+1} failed due to {e} then retrying...")
-                time.sleep(1)
-            else:
-                print(f"❌ [FETCH] Failed to retrieve TikTok Ads ad-level insights with BASIC report_type after all attempt(s) due to {e}.")
-                logging.error(f"❌ [FETCH] Failed to retrieve TikTok Ads ad-level insights with BASIC report_type after all attempt(s) due to {e}.")
-                fetch_df_flattened = pd.DataFrame()
+                except Exception as e:
+                    if attempt < 1:
+                        print(f"⚠️ [FETCH] Failed to retrieve TikTok Ads ad insights with BASIC report_type attempt {attempt+1} due to {e} then retrying...")
+                        logging.warning(f"⚠️ [FETCH] Failed to retrieve TikTok Ads ad insights with BASIC report_type attempt {attempt+1} due to {e} then retrying...")
+                        time.sleep(1)
+                    else:
+                        print(f"❌ [FETCH] Failed to retrieve TikTok Ads ad insights with BASIC report_type after all attempt(s) due to {e}.")
+                        logging.error(f"❌ [FETCH] Failed to retrieve TikTok Ads ad insights with BASIC report_type after all attempt(s) due to {e}.")
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)     
     
     # 2.2.6. Trigger to enforce schema for TikTok Ads ad insights
-    try:
-        print(f"🔄 [FETCH] Trigger to enforce schema for {len(fetch_df_flattened)} row(s) of TikTok Ads ad insights...")
-        logging.info(f"🔄 [FETCH] Trigger to enforce schema for {len(fetch_df_flattened)} row(s) of TikTok Ads ad insights....")
-        fetch_df_enforced = ensure_table_schema(fetch_df_flattened, "fetch_ad_insights")
-    except Exception as e:
-        fetch_section_succeeded["2.2.6. Trigger to enforce schema for TikTok Ads ad insights"] = False
-        fetch_section_failed.append("2.2.6. Trigger to enforce schema for TikTok Ads ad insights")
-        print(f"❌ [FETCH] Failed to trigger schema enforcement for TikTok Ads ad insights due to {e}.")
-        logging.error(f"❌ [FETCH] Failed to trigger schema enforcement for TikTok Ads adinsights due to {e}.")
-        return pd.DataFrame()
+        fetch_section_name = "[FETCH] Trigger to enforce schema for TikTok Ads ad insights"
+        fetch_section_start = time.time()        
+        try:            
+            print(f"🔄 [FETCH] Trigger to enforce schema for TiKTok Ads ad insights from {start_date} to {end_date} with {len(fetch_df_flattened)} row(s)...")
+            logging.info(f"🔄 [FETCH] Trigger to enforce schema for TiKTok Ads ad insights from {start_date} to {end_date} with {len(fetch_df_flattened)} row(s)...")
+            fetch_results_schema = enforce_table_schema(fetch_df_flattened, "fetch_ad_insights")            
+            fetch_summary_enforced = fetch_results_schema["schema_summary_final"]
+            fetch_status_enforced = fetch_results_schema["schema_status_final"]
+            fetch_df_enforced = fetch_results_schema["schema_df_final"]    
+            if fetch_status_enforced == "schema_succeed_all":
+                print(f"✅ [FETCH] Successfully triggered to enforce schema for TikTok Ads ad insights from {start_date} to {end_date} with {fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
+                logging.info(f"✅ [FETCH] Successfully triggered to enforce schema for TikTok Ads ad insights from {start_date} to {end_date} with {fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
+                fetch_sections_status[fetch_section_name] = "succeed"
+            else:
+                fetch_sections_status[fetch_section_name] = "failed"
+                print(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for TikTok Ads ad insights from {start_date} to {end_date} with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
+                logging.error(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for TikTok Ads ad insights from {start_date} to {end_date} with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
     # 2.2.7. Summarize ingestion result(s)
+        fetch_section_name = "[FETCH] Trigger to enforce schema for TikTok Ads campaign insights"
+        fetch_section_start = time.time()        
+        try:            
+            print(f"🔄 [FETCH] Trigger to enforce schema for TiKTok Ads campaign insights from {start_date} to {end_date} with {len(fetch_df_flattened)} row(s)...")
+            logging.info(f"🔄 [FETCH] Trigger to enforce schema for TiKTok Ads campaign insights from {start_date} to {end_date} with {len(fetch_df_flattened)} row(s)...")
+            fetch_results_schema = enforce_table_schema(fetch_df_flattened, "fetch_campaign_insights")            
+            fetch_summary_enforced = fetch_results_schema["schema_summary_final"]
+            fetch_status_enforced = fetch_results_schema["schema_status_final"]
+            fetch_df_enforced = fetch_results_schema["schema_df_final"]    
+            if fetch_status_enforced == "schema_succeed_all":
+                print(f"✅ [FETCH] Successfully triggered to enforce schema for TikTok Ads campaign insights from {start_date} to {end_date} with {fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
+                logging.info(f"✅ [FETCH] Successfully triggered to enforce schema for TikTok Ads campaign insights from {start_date} to {end_date} with {fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
+                fetch_sections_status[fetch_section_name] = "succeed"
+            else:
+                fetch_sections_status[fetch_section_name] = "failed"
+                print(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for TikTok Ads campaign insights from {start_date} to {end_date} with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
+                logging.error(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for TikTok Ads campaign insights from {start_date} to {end_date} with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
+
+    # 2.2.8. Summarize fetch result(s) for TikTok Ads ad insights
     finally:
-        elapsed = round(time.time() - start_time, 2)
-        if fetch_section_failed:
-            print(f"❌ [FETCH] Failed to completed TikTok Ads ad insights fetching due to unsuccesfull section(s) {', '.join(fetch_section_failed)}.")
-            logging.error(f"❌ [FETCH] Failed to completed TikTok Ads ad insights fetching due to unsuccesfull section(s) {', '.join(fetch_section_failed)}.")
-            mart_status_def = "failed"
+        fetch_time_elapsed = round(time.time() - fetch_time_start, 2)
+        fetch_df_final = fetch_df_enforced.copy() if "fetch_df_enforced" in locals() and not fetch_df_enforced.empty else pd.DataFrame()
+        fetch_sections_total = len(fetch_sections_status) 
+        fetch_sections_failed = [k for k, v in fetch_sections_status.items() if v == "failed"] 
+        fetch_sections_succeeded = [k for k, v in fetch_sections_status.items() if v == "succeed"]
+        fetch_days_input = ((pd.to_datetime(end_date) - pd.to_datetime(start_date)).days + 1)
+        fetch_days_output = (fetch_df_final["date_start"].nunique() if not fetch_df_final.empty and "date_start" in fetch_df_final.columns else 0)
+        fetch_rows_output = len(fetch_df_final)
+        fetch_sections_summary = list(dict.fromkeys(
+            list(fetch_sections_status.keys()) +
+            list(fetch_sections_time.keys())
+        ))
+        fetch_sections_detail = {
+            fetch_section_summary: {
+                "status": fetch_sections_status.get(fetch_section_summary, "unknown"),
+                "time": fetch_sections_time.get(fetch_section_summary, None),
+            }
+            for fetch_section_summary in fetch_sections_summary
+        }        
+        if fetch_sections_failed:
+            print(f"❌ [FETCH] Failed to complete TikTok Ads ad insights fetching from {start_date} to {end_date} with {fetch_days_output}/{fetch_days_input} fetched days(s) due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
+            logging.error(f"❌ [FETCH] Failed to complete TikTok Ads ad insights fetching from {start_date} to {end_date} with {fetch_days_output}/{fetch_days_input} fetched days(s) due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
+            fetch_status_final = "fetch_failed_all"
+        elif fetch_days_output < fetch_days_input:
+            print(f"⚠️ [FETCH] Partially completed TikTok Ads ad insights fetching from {start_date} to {end_date} with {fetch_days_output}/{fetch_days_input} fetched day(s) in {fetch_time_elapsed}s.")
+            logging.warning(f"⚠️ [FETCH] Partially completed TikTok Ads ad insights fetching from {start_date} to {end_date} with {fetch_days_output}/{fetch_days_input} fetched day(s) in {fetch_time_elapsed}s.")
+            fetch_status_final = "fetch_succeed_partial"
         else:
-            fetch_df_final = fetch_df_enforced
-            print(f"🏆 [FETCH] Successfully completed TikTok Ads ad insights fetching with {len(fetch_df_final)} row(s) in {elapsed}s.")
-            logging.info(f"🏆 [FETCH] Successfully completed TikTok Ads ad insights fetching with {len(fetch_df_final)} row(s) in {elapsed}s.")
-            mart_status_def = "success"
-            return fetch_df_final
-        return {"status": mart_status_def, "elapsed_seconds": elapsed, "failed_sections": fetch_section_failed}
+            print(f"🏆 [FETCH] Successfully completed TikTok Ads ad insights fetching from {start_date} to {end_date} with {fetch_days_output}/{fetch_days_input} fetched day(s) in {fetch_time_elapsed}s.")
+            logging.info(f"🏆 [FETCH] Successfully completed TikTok Ads caadmpaign insights fetching from {start_date} to {end_date} with {fetch_days_output}/{fetch_days_input} fetched day(s) in {fetch_time_elapsed}s.")
+            fetch_status_final = "fetch_succeed_all"                     
+        fetch_results_final = {
+            "fetch_df_final": fetch_df_final,
+            "fetch_status_final": fetch_status_final,
+            "fetch_summary_final": {
+                "fetch_time_elapsed": fetch_time_elapsed,
+                "fetch_days_input": fetch_days_input,
+                "fetch_days_output": fetch_days_output,
+                "fetch_sections_total": fetch_sections_total,
+                "fetch_sections_succeed": fetch_sections_succeeded,
+                "fetch_sections_failed": fetch_sections_failed,
+                "fetch_sections_detail": fetch_sections_detail,
+                "fetch_rows_output": fetch_rows_output,
+            },
+        }
+    return fetch_results_final
