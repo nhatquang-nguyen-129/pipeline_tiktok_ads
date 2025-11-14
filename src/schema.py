@@ -32,7 +32,7 @@ import numpy as np
 # 1. ENSURE SCHEMA FOR GIVEN PYTHON DATAFRAME
 
 # 1.1. Ensure that the given DataFrame contains all required columns with correct datatypes
-def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
+def enforce_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
     
     # 1.1.1. Define schema mapping for Facebook data type
     mapping_tiktok_schema = {
