@@ -2,21 +2,23 @@
 ==================================================================
 TIKTOK MATERIALIZATION MODULE
 ------------------------------------------------------------------
-This module builds the mart layer for TikTok Ads by aggregating 
-and transforming data from staging tables generated during the 
-raw layer ingestion process. 
+This module materializes the final layer for TikTok Ads by 
+aggregating and transforming data sourced from staging tables 
+produced during the raw data ingestion process.
 
-It focuses on preparing final analytical tables for cost tracking 
-and campaign performance reporting at a daily granularity.
+It serves as the final transformation stage, consolidating daily 
+performance and cost metrics into analytics-ready BigQuery tables 
+optimized for reporting, dashboarding, and business analysis.
 
-✔️ Dynamically detects all TikTok Ads staging tables for the target year  
-✔️ Applies transformation and type standardization for analytical consistency  
-✔️ Aggregates campaign metrics at daily and program dimensions  
-✔️ Writes partitioned, clustered tables optimized for BigQuery queries  
-✔️ Logs processing summary and materialization status for monitoring  
+✔️ Dynamically identifies all available TikTok Ads staging tables  
+✔️ Applies data transformation, standardization, and type enforcement  
+✔️ Performs daily-level aggregation of campaign performance metrics  
+✔️ Creates partitioned and clustered MART tables in Google BigQuery  
+✔️ Ensures consistency and traceability across the data pipeline  
 
-⚠️ This module is strictly responsible for *MART layer construction*.  
-It does not handle raw data ingestion, API fetching, or enrichment logic.
+⚠️ This module is exclusively responsible for materialized layer  
+construction*. It does not perform data ingestion, API fetching, 
+or enrichment tasks.
 ==================================================================
 """
 
@@ -25,15 +27,11 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
-# Add Python logging ultilities for integration
+# Add Python logging ultilities for integraton
 import logging
 
-# Add Google Authentication modules for integration
-from google.api_core.exceptions import (
-    Forbidden,
-    GoogleAPICallError
-)
-from google.auth.exceptions import DefaultCredentialsError
+# Add Python time ultilities for integration
+import time
 
 # Add Google Cloud modules for integration
 from google.cloud import bigquery
@@ -62,150 +60,296 @@ MODE = os.getenv("MODE")
 # 1. BUILD MONTHLY MATERIALIZED TABLE FOR TIKTOK ADS CAMPAIGN PERFORMANCE
 
 # 1.1. Build materialzed table for TikTok Ads campaign performance by union all staging table(s)
-def mart_campaign_all() -> None:
+def mart_campaign_all() -> dict:
     print(f"🚀 [MART] Starting to build materialized table for TikTok Ads campaign performance...")
     logging.info(f"🚀 [MART] Starting to build materialized table TikTok Ads campaign performance...")
 
-    # 1.1.1. Prepare table_id for TikTok campaign performance
-    staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
-    staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
-    print(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for TikTok Ads campaign performance...")
-    logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for TikTok Ads campaign performance...")
-    mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
-    mart_table_performance = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_performance"
-    print(f"🔍 [MART] Preparing to build materialized table {mart_table_performance} for TikTok Ads campaign performance...")
-    logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_performance} for TikTok Ads campaign performance...")
+    # 1.1.1. Start timing the TikTok Ads campaign materialization
+    mart_time_start = time.time()
+    mart_sections_status = {}
+    mart_sections_time = {}
+    print(f"🔍 [MART] Proceeding to build materialized table for TikTok Ads campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    logging.info(f"🔍 [MART] Proceeding to build materialized table for TikTok Ads campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 1.1.2. Initialize Google BigQuery client
     try:
-        print(f"🔍 [STAGING] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
-        logging.info(f"🔍 [STAGING] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
-        google_bigquery_client = bigquery.Client(project=PROJECT)
-        print(f"✅ [STAGING] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-        logging.info(f"✅ [STAGING] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-    except Exception as e:
-        print(f"❌ [STAGING] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
-        logging.error(f"❌ [STAGING] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
-        raise RuntimeError(f"❌ [STAGING] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.") from e
+
+    # 1.1.2. Prepare Google BigQuery table_id for materialization
+        try: 
+            mart_section_name = "[MART] Prepare Google BigQuery table_id for materialization"
+            mart_section_start = time.time()
+            staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
+            staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
+            print(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for TikTok Ads campaign performance...")
+            logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for TikTok Ads campaign performance...")
+            mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
+            mart_table_all = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_performance"
+            print(f"🔍 [MART] Preparing to build materialized table {mart_table_all} for TikTok Ads campaign performance...")
+            logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_all} for TikTok Ads campaign performance...")
+            mart_sections_status[mart_section_name] = "succeed"    
+            mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
+        finally:
+            mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
+
+    # 1.1.3. Initialize Google BigQuery client
+        mart_section_name = "[MART] Initialize Google BigQuery client"
+        mart_section_start = time.time()
+        try:
+            print(f"🔍 [MART] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+            logging.info(f"🔍 [MART] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+            google_bigquery_client = bigquery.Client(project=PROJECT)
+            print(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+            logging.info(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+            mart_sections_status[mart_section_name] = "succeed"
+        except Exception as e:
+            mart_sections_status[mart_section_name] = "failed"
+            print(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+            logging.error(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+        finally:
+            mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
     
-    # 1.1.3. Query all staging Tiktok Ads campaign table(s)
+    # 1.1.4. Query all staging TikTok Ads campaign insights table(s)
+        mart_section_name = "[MART] Query all staging TikTok Ads campaign insights table(s)"
+        mart_section_start = time.time()    
+        try:
+            query = f"""
+                CREATE OR REPLACE TABLE `{mart_table_all}`
+                PARTITION BY ngay
+                CLUSTER BY nhan_su, ma_ngan_sach_cap_1, nganh_hang, hang_muc
+                AS
+                SELECT
+                    SAFE_CAST(enrich_account_name AS STRING) AS tai_khoan,
+                    SAFE_CAST(enrich_account_department AS STRING) AS phong_ban,
+                    SAFE_CAST(enrich_account_platform AS STRING) AS nen_tang,
+                    SAFE_CAST(enrich_budget_group AS STRING) AS ma_ngan_sach_cap_1,
+                    SAFE_CAST(enrich_budget_type AS STRING) AS ma_ngan_sach_cap_2,
+                    SAFE_CAST(enrich_program_track AS STRING) AS hang_muc,
+                    SAFE_CAST(enrich_program_group AS STRING) AS chuong_trinh,
+                    SAFE_CAST(enrich_program_type AS STRING) AS noi_dung,
+                    SAFE_CAST(enrich_campaign_objective AS STRING) AS hinh_thuc,
+                    SAFE_CAST(enrich_campaign_region AS STRING) AS khu_vuc,
+                    SAFE_CAST(enrich_campaign_personnel AS STRING) AS nhan_su,
+                    SAFE_CAST(enrich_category_group AS STRING) AS nganh_hang,
+                    SAFE_CAST(campaign_name AS STRING) AS campaign_name,
+                    CAST(date AS DATE) AS ngay,
+                    SAFE_CAST(year AS STRING) AS nam,
+                    SAFE_CAST(month AS STRING) AS thang,
+                    SAFE_CAST(spend AS FLOAT64) AS spend,
+                    SAFE_CAST(result AS INT64) AS result,
+                    SAFE_CAST(objective_type AS STRING) AS result_type,
+                    SAFE_CAST(impressions AS INT64) AS impressions,
+                    SAFE_CAST(clicks AS INT64) AS clicks,
+                    SAFE_CAST(engaged_view_15s AS INT64) AS engaged_view_15s,
+                    SAFE_CAST(purchase AS INT64) AS purchase,
+                    CASE
+                        WHEN REGEXP_CONTAINS(delivery_status, r"ENABLE") THEN "🟢"
+                        WHEN REGEXP_CONTAINS(delivery_status, r"DISABLE") THEN "⚪"
+                        ELSE "❓"
+                    END AS trang_thai
+                FROM `{staging_table_campaign}`
+                WHERE date IS NOT NULL
+            )
+            SELECT *
+            FROM base;
+            """
+            print(f"🔄 [MART] Querying staging TikTok Ads campaign insights table {staging_table_campaign} to create or replace materialized table for campaign performance...")
+            logging.info(f"🔄 [MART] Querying staging TikTok Ads campaign insights table {staging_table_campaign} to create or replace materialized table for campaign performance...")
+            google_bigquery_client.query(query).result()
+            count_query = f"SELECT COUNT(1) AS row_count FROM `{mart_table_all}`"
+            row_count = list(google_bigquery_client.query(count_query).result())[0]["row_count"]
+            print(f"✅ [MART] Successfully created or replace materialized table {mart_table_all} for TikTok Ads campaign performance with {row_count} row(s).")
+            logging.info(f"✅ [MART] Successfully created or replace materialized table {mart_table_all} for TikTok Ads campaign performance with {row_count} row(s).")
+            mart_sections_status[mart_section_name] = "succeed"
+        except Exception as e:
+            mart_sections_status[mart_section_name] = "failed"
+            print(f"❌ [MART] Failed to create or replace materialized table for TikTok Ads campaign performance due to {e}.")
+            logging.error(f"❌ [MART] Failed to create or replace materialized table for TikTok Ads campaign performance due to {e}.")
+        finally:
+            mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
+
+    # 1.1.5. Summarize materialization result(s) for TikTok Ads campaign performance
+    finally:
+        mart_time_elapsed = round(time.time() - mart_time_start, 2)
+        mart_sections_total = len(mart_sections_status) 
+        mart_sections_failed = [k for k, v in mart_sections_status.items() if v == "failed"] 
+        mart_sections_succeeded = [k for k, v in mart_sections_status.items() if v == "succeed"]
+        mart_sections_summary = list(dict.fromkeys(
+            list(mart_sections_status.keys()) +
+            list(mart_sections_time.keys())
+        ))
+        mart_sections_detail = {
+            mart_section_summary: {
+                "status": mart_sections_status.get(mart_section_summary, "unknown"),
+                "time": round(mart_sections_time.get(mart_section_summary, 0.0), 2),
+            }
+            for mart_section_summary in mart_sections_summary
+        }       
+        if len(mart_sections_failed) > 0:
+            print(f"❌ [MART] Failed to complete TikTok Ads campaign performance materialization due to unsuccessful section(s) {', '.join(mart_sections_failed)}.")
+            logging.error(f"❌ [MART] Failed to complete TikTok Ads campaign performance materialization due to unsuccessful section(s) {', '.join(mart_sections_failed)}.")
+            mart_status_final = "mart_failed_all"
+        else:
+            print(f"🏆 [MART] Successfully completed TikTok Ads campaign performance materialization in {mart_time_elapsed}s.")
+            logging.info(f"🏆 [MART] Successfully completed TikTok Ads campaign performance materialization in {mart_time_elapsed}s.")
+            mart_status_final = "mart_succeed_all"
+        mart_results_final = {
+            "mart_df_final": None,
+            "mart_status_final": mart_status_final,
+            "mart_summary_final": {
+                "mart_time_elapsed": mart_time_elapsed,
+                "mart_sections_total": mart_sections_total,
+                "mart_sections_succeed": mart_sections_succeeded,
+                "mart_sections_failed": mart_sections_failed,
+                "mart_sections_detail": mart_sections_detail,
+            },
+        }
+    return mart_results_final
+
+# 2. BUILD MATERIALIZED TABLE FOR TIKTOK ADS CREATIVE PERFORMANCE
+
+# 2.1. Build materialized table for TikTok creative performance by union all staging table(s)
+def mart_creative_all() -> dict:
+    print(f"🚀 [MART] Starting to build materialized table for TikTok Ads creative performance...")
+    logging.info(f"🚀 [MART] Starting to build materialized table for TikTok Ads creative performance...")
+
+    # 2.1.1. Start timing the TikTok Ads creative performance materialization
+    mart_time_start = time.time()
+    mart_sections_status = {}
+    mart_sections_time = {}
+    print(f"🔍 [MART] Proceeding to build materialized table for TikTok Ads creative performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    logging.info(f"🔍 [MART] Proceeding to build materialized table for TikTok Ads creative performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+
     try:
-        query = f"""
-            CREATE OR REPLACE TABLE `{mart_table_performance}`
-            PARTITION BY ngay
-            CLUSTER BY nhan_su, ma_ngan_sach_cap_1, nganh_hang, chuong_trinh
-            AS
-            SELECT
-                SAFE_CAST(nhan_su AS STRING) AS nhan_su,
-                SAFE_CAST(ma_ngan_sach_cap_1 AS STRING) AS ma_ngan_sach_cap_1,
-                SAFE_CAST(khu_vuc AS STRING) AS khu_vuc,
-                SAFE_CAST(chuong_trinh AS STRING) AS chuong_trinh,
-                SAFE_CAST(noi_dung AS STRING) AS noi_dung,
-                SAFE_CAST(nen_tang AS STRING) AS nen_tang,
-                SAFE_CAST(hinh_thuc AS STRING) AS hinh_thuc,
-                SAFE_CAST(nganh_hang AS STRING) AS nganh_hang,
-                SAFE_CAST(campaign_name AS STRING) AS campaign_name,
-                CAST(`date` AS DATE) AS ngay,
-                SAFE_CAST(spend AS FLOAT64) AS spend,
-                SAFE_CAST(result AS INT64) AS result,
-                SAFE_CAST(objective_type AS STRING) AS objective_type,
-                SAFE_CAST(impressions AS INT64) AS impressions,
-                SAFE_CAST(clicks AS INT64) AS clicks,
-                SAFE_CAST(engaged_view_15s AS INT64) AS engaged_view_15s,
-                SAFE_CAST(purchase AS INT64) AS purchase,
-                CASE
-                    WHEN REGEXP_CONTAINS(delivery_status, r"ENABLE") THEN "🟢"
-                    WHEN REGEXP_CONTAINS(delivery_status, r"DISABLE") THEN "⚪"
-                    ELSE "❓"
-                END AS trang_thai
-            FROM `{staging_table_campaign}`
-            WHERE date IS NOT NULL
-        """
-        print(f"🔍 [MART] Creating or replacing materialized table {mart_table_performance} for TikTok Ads campaign performance...")
-        logging.info(f"🔍 [MART] Creating or replacing materialized table {mart_table_performance} for TikTok Ads campaign performance...")
-        google_bigquery_client.query(query).result()
-        count_query = f"SELECT COUNT(1) AS row_count FROM `{mart_table_performance}`"
-        row_count = list(google_bigquery_client.query(count_query).result())[0]["row_count"]
-        print(f"✅ [MART] Successfully created or replaced materialized table {mart_table_performance} with {row_count} row(s) for TikTok Ads campaign performance.")
-        logging.info(f"✅ [MART] Successfully created or replaced materialized table {mart_table_performance} with {row_count} row(s) for TikTok Ads campaign performance.")
-    except Exception as e:
-        print(f"❌ [MART] Failed to build materialized table for TikTok Ads campaign performance due to {e}.")
-        logging.error(f"❌ [MART] Failed to build materialized table for TikTok Ads campaign performance due to {e}.")
-        raise RuntimeError(f"❌ [MART] Failed to build materialized table for TikTok Ads campaign performance due to {e}.")
 
-# 2. MONTHLY MATERIALIZED TABLE FOR TIKTOK ADS CREATIVE PERFORMANCE
+    # 2.1.2. Prepare Google BigQuery table_id for materialization
+        try:
+            mart_section_name = "[MART] Prepare Google BigQuery table_id for materialization"
+            mart_section_start = time.time()    
+            staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
+            staging_table_ad = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"
+            print(f"🔍 [MART] Using staging table {staging_table_ad} to build materialized table for TikTok Ads creative performance...")
+            logging.info(f"🔍 [MART] Using staging table {staging_table_ad} to build materialized table for TikTok Ads creative performance...")
+            mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
+            mart_table_all = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_creative_performance"
+            print(f"🔍 [MART] Preparing to build materialized table {mart_table_all} for TikTok Ads creative performance...")
+            logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_all} for TikTok Ads creative performance...") 
+            mart_sections_status[mart_section_name] = "succeed"    
+            mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
+        finally:
+            mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
 
-# 2.1. Build materialized table for TikTok creative performance by union all staging tables
-def mart_creative_all() -> None:
-    print("🚀 [MART] Starting to build materialized table for TikTok Ads creative performance...")
-    logging.info("🚀 [MART] Starting to build materialized table for TikTok Ads creative performance...")
+    # 2.1.3. Initialize Google BigQuery client
+        mart_section_name = "[MART] Initialize Google BigQuery client"
+        mart_section_start = time.time()    
+        try:
+            print(f"🔍 [MART] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+            logging.info(f"🔍 [MART] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+            google_bigquery_client = bigquery.Client(project=PROJECT)
+            print(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+            logging.info(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+            mart_sections_status[mart_section_name] = "succeed"
+        except Exception as e:
+            mart_sections_status[mart_section_name] = "failed"
+            print(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+            logging.error(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+        finally:
+            mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
 
-    # 2.1.1. Prepare table_id for TikTok Ads ad creative
-    staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
-    staging_table = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"
-    mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
-    mart_table_creative = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_creative_performance"
-    print(f"🔍 [MART] Using staging table {staging_table} for creative performance (All)...")
-    logging.info(f"🔍 [MART] Using staging table {staging_table} for creative performance (All)...")
+    # 2.1.4. Query all staging table(s) for materialization
+        mart_section_name = "[MART] Query all staging table(s) for materialization"
+        mart_section_start = time.time()  
+        try:
+            query = f"""
+                CREATE OR REPLACE TABLE `{mart_table_all}`
+                PARTITION BY ngay
+                CLUSTER BY nhan_su, ma_ngan_sach_cap_1, nganh_hang, hang_muc
+                AS
+                SELECT
+                    SAFE_CAST(enrich_account_name AS STRING) AS tai_khoan,
+                    SAFE_CAST(enrich_account_department AS STRING) AS phong_ban,
+                    SAFE_CAST(enrich_account_platform AS STRING) AS nen_tang,
+                    SAFE_CAST(enrich_budget_group AS STRING) AS ma_ngan_sach_cap_1,
+                    SAFE_CAST(enrich_budget_type AS STRING) AS ma_ngan_sach_cap_2,
+                    SAFE_CAST(enrich_program_track AS STRING) AS hang_muc,
+                    SAFE_CAST(enrich_program_group AS STRING) AS chuong_trinh,
+                    SAFE_CAST(enrich_program_type AS STRING) AS noi_dung,
+                    SAFE_CAST(enrich_campaign_objective AS STRING) AS hinh_thuc,
+                    SAFE_CAST(enrich_campaign_region AS STRING) AS khu_vuc,
+                    SAFE_CAST(enrich_campaign_personnel AS STRING) AS nhan_su,
+                    SAFE_CAST(enrich_category_group AS STRING) AS nganh_hang,
+                    SAFE_CAST(enrich_adset_location AS STRING) AS vi_tri,
+                    SAFE_CAST(enrich_adset_audience AS STRING) AS doi_tuong,
+                    SAFE_CAST(enrich_adset_format AS STRING) AS dinh_dang,
+                    SAFE_CAST(enrich_adset_strategy AS STRING) AS hoat_dong,
+                    SAFE_CAST(campaign_name AS STRING) AS campaign_name,
+                    SAFE_CAST(adset_name AS STRING) AS adset_name,
+                    SAFE_CAST(ad_name AS STRING) AS ad_name,
+                    SAFE_CAST(video_cover_url AS STRING) AS video_cover_url,
+                    SAFE_CAST(optimization_event AS STRING) AS optimization_event,
+                    CAST(date AS DATE) AS ngay,
+                    SAFE_CAST(year AS STRING) AS nam,
+                    SAFE_CAST(month AS STRING) AS thang,
+                    SAFE_CAST(spend AS FLOAT64) AS spend,
+                    SAFE_CAST(result AS INT64) AS result,
+                    SAFE_CAST(impressions AS INT64) AS impressions,
+                    SAFE_CAST(clicks AS INT64) AS clicks,
+                    SAFE_CAST(engaged_view_15s AS INT64) AS engaged_view_15s,
+                    SAFE_CAST(purchase AS INT64) AS purchase,
+                    CASE
+                        WHEN REGEXP_CONTAINS(delivery_status, r"ENABLE") THEN "🟢"
+                        WHEN REGEXP_CONTAINS(delivery_status, r"DISABLE") THEN "⚪"
+                        ELSE "❓"
+                    END AS trang_thai
+                FROM `{staging_table_ad}`
+            """
+            print(f"🔄 [MART] Querying staging TikTok Ads ad insights table {staging_table_ad} to create or replace materialized table for creative performance...")
+            logging.info(f"🔄 [MART] Querying staging FaceTikTokbook Ads ad insights table {staging_table_ad} to create or replace materialized table for creative performance...")       
+            google_bigquery_client.query(query).result()
+            count_query = f"SELECT COUNT(1) AS row_count FROM `{mart_table_all}`"
+            row_count = list(google_bigquery_client.query(count_query).result())[0]["row_count"]
+            print(f"✅ [MART] Successfully created or replaced materialized table {mart_table_all} for TikTok Ads creative performance with {row_count} row(s).")
+            logging.info(f"✅ [MART] Successfully created or replaced materialized table {mart_table_all} for TikTok Ads creative performance with {row_count} row(s).")
+            mart_sections_status[mart_section_name] = "succeed"
+        except Exception as e:
+            mart_sections_status[mart_section_name] = "failed"
+            print(f"❌ [MART] Failed to create or replace materialized table for TikTok Ads creative performance due to {e}.")
+            logging.error(f"❌ [MART] Failed to create or replace materialized table for TikTok Ads creative performance due to {e}.")
+        finally:
+            mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
 
-    # 2.1.2. Initialize Google BigQuery client
-    try:
-        print(f"🔍 [STAGING] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
-        logging.info(f"🔍 [STAGING] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
-        google_bigquery_client = bigquery.Client(project=PROJECT)
-        print(f"✅ [STAGING] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-        logging.info(f"✅ [STAGING] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-    except Exception as e:
-        print(f"❌ [STAGING] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
-        logging.error(f"❌ [STAGING] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
-        raise RuntimeError(f"❌ [STAGING] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.") from e
-
-    # 2.1.3. Query all staging TikTok Ads ad table(s)
-    try:
-        query = f"""
-            CREATE OR REPLACE TABLE `{mart_table_creative}`
-            PARTITION BY ngay
-            CLUSTER BY nhan_su, ma_ngan_sach_cap_1, nganh_hang, chuong_trinh
-            AS
-            SELECT
-                SAFE_CAST(nhan_su AS STRING) AS nhan_su,
-                SAFE_CAST(ma_ngan_sach_cap_1 AS STRING) AS ma_ngan_sach_cap_1,
-                SAFE_CAST(khu_vuc AS STRING) AS khu_vuc,
-                SAFE_CAST(chuong_trinh AS STRING) AS chuong_trinh,
-                SAFE_CAST(noi_dung AS STRING) AS noi_dung,
-                SAFE_CAST(nen_tang AS STRING) AS nen_tang,
-                SAFE_CAST(hinh_thuc AS STRING) AS hinh_thuc,
-                SAFE_CAST(nganh_hang AS STRING) AS nganh_hang,
-                SAFE_CAST(campaign_name AS STRING) AS campaign_name,
-                SAFE_CAST(adset_name AS STRING) AS adset_name,
-                SAFE_CAST(ad_name AS STRING) AS ad_name,
-                SAFE_CAST(video_cover_url AS STRING) AS video_cover_url,
-                SAFE_CAST(vi_tri AS STRING) AS vi_tri,
-                SAFE_CAST(doi_tuong AS STRING) AS doi_tuong,
-                SAFE_CAST(dinh_dang AS STRING) AS dinh_dang,
-                SAFE_CAST(optimization_event AS STRING) AS optimization_event,
-                CAST(date AS DATE) AS ngay,
-                SAFE_CAST(spend AS FLOAT64) AS spend,
-                SAFE_CAST(result AS INT64) AS result,
-                SAFE_CAST(impressions AS INT64) AS impressions,
-                SAFE_CAST(clicks AS INT64) AS clicks,
-                SAFE_CAST(engaged_view_15s AS INT64) AS engaged_view_15s,
-                SAFE_CAST(purchase AS INT64) AS purchase,
-                CASE
-                    WHEN REGEXP_CONTAINS(delivery_status, r"ENABLE") THEN "🟢"
-                    WHEN REGEXP_CONTAINS(delivery_status, r"DISABLE") THEN "⚪"
-                    ELSE "❓"
-                END AS trang_thai
-            FROM `{staging_table}`
-        """
-        print(f"🔍 [MART] Creating or replacing materialized table {mart_table_creative} for TikTok Ads creative performance...")
-        logging.info(f"🔍 [MART] Creating or replacing materialized table {mart_table_creative} for TikTok Ads creative performance...")
-        google_bigquery_client.query(query).result()
-        count_query = f"SELECT COUNT(1) AS row_count FROM `{mart_table_creative}`"
-        row_count = list(google_bigquery_client.query(count_query).result())[0]["row_count"]
-        print(f"✅ [MART] Successfully created or replacing materialized table {mart_table_creative} with {row_count} row(s) for TikTok Ads creative performance.")
-        logging.info(f"✅ [MART] Successfully created or replacing materialized table {mart_table_creative} with {row_count} row(s) for TikTok Ads creative performance.")
-    except Exception as e:
-        print(f"❌ [MART] Failed to build materialized table for TikTok Ads creative performance due to {e}.")
-        logging.error(f"❌ [MART] Failed to build materialized table for TikTok Ads creative performance due to {e}.")
-        raise RuntimeError(f"❌ [MART] Failed to build materialized table for TikTok Ads creative performance due to {e}.")
+    # 2.1.5. Summarize materialization result(s) for TikTok Ads creative performance
+    finally:
+        mart_time_elapsed = round(time.time() - mart_time_start, 2)
+        mart_sections_total = len(mart_sections_status) 
+        mart_sections_failed = [k for k, v in mart_sections_status.items() if v == "failed"] 
+        mart_sections_succeeded = [k for k, v in mart_sections_status.items() if v == "succeed"]
+        mart_sections_summary = list(dict.fromkeys(
+            list(mart_sections_status.keys()) +
+            list(mart_sections_time.keys())
+        ))
+        mart_sections_detail = {
+            mart_section_summary: {
+                "status": mart_sections_status.get(mart_section_summary, "unknown"),
+                "time": round(mart_sections_time.get(mart_section_summary, 0.0), 2),
+            }
+            for mart_section_summary in mart_sections_summary
+        }          
+        if len(mart_sections_failed) > 0:
+            print(f"❌ [MART] Failed to complete TikTok Ads creative performance materialization due to unsuccessful section(s) {', '.join(mart_sections_failed)}.")
+            logging.error(f"❌ [MART] Failed to complete TikTok Ads creative performance materialization due to unsuccessful section(s) {', '.join(mart_sections_failed)}.")
+            mart_status_final = "mart_failed_all"
+        else:
+            print(f"🏆 [MART] Successfully completed TikTok Ads creative performance materialization in {mart_time_elapsed}s.")
+            logging.info(f"🏆 [MART] Successfully completed TikTok Ads creative performance materialization in {mart_time_elapsed}s.")
+            mart_status_final = "mart_succeed_all"
+        mart_results_final = {
+            "mart_df_final": None,
+            "mart_status_final": mart_status_final,
+            "mart_summary_final": {
+                "mart_time_elapsed": mart_time_elapsed,
+                "mart_sections_total": mart_sections_total,
+                "mart_sections_succeed": mart_sections_succeeded,
+                "mart_sections_failed": mart_sections_failed,
+                "mart_sections_detail": mart_sections_detail,
+            },
+        }
+    return mart_results_final
