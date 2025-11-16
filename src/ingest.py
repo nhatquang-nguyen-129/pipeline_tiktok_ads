@@ -188,7 +188,7 @@ def ingest_campaign_metadata(ingest_ids_campaign: list) -> pd.DataFrame:
         ingest_section_start = time.time()
         try:
             ingest_df_deduplicated = ingest_df_enforced.drop_duplicates()           
-            table_clusters_defined = ["account_id", "campaign_id"]
+            table_clusters_defined = ["advertiser_id", "campaign_id"]
             table_clusters_filtered = []
             table_schemas_defined = []
             try:
@@ -240,14 +240,14 @@ def ingest_campaign_metadata(ingest_ids_campaign: list) -> pd.DataFrame:
             else:
                 print(f"🔄 [INGEST] Found TikTok Ads campaign metadata table {raw_table_campaign} then existing row(s) deletion will be proceeding...")
                 logging.info(f"🔄 [INGEST] Found TikTok Ads campaign metadata table {raw_table_campaign} then existing row(s) deletion will be proceeding...")
-                unique_keys = ingest_df_deduplicated[["campaign_id", "account_id"]].dropna().drop_duplicates()
+                unique_keys = ingest_df_deduplicated[["campaign_id", "advertiser_id"]].dropna().drop_duplicates()
                 if not unique_keys.empty:
                     temp_table_id = f"{PROJECT}.{raw_dataset}.temp_table_campaign_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
                     job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
                     google_bigquery_client.load_table_from_dataframe(unique_keys, temp_table_id, job_config=job_config).result()
                     join_condition = " AND ".join([
                         f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
-                        for col in ["campaign_id", "account_id"]
+                        for col in ["campaign_id", "advertiser_id"]
                     ])
                     delete_query = f"""
                         DELETE FROM `{raw_table_campaign}` AS main
@@ -262,8 +262,8 @@ def ingest_campaign_metadata(ingest_ids_campaign: list) -> pd.DataFrame:
                     print(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of TikTok Ads campaign metadata table {raw_table_campaign}.")
                     logging.info(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of TikTok Ads campaign metadata table {raw_table_campaign}.")
                 else:
-                    print(f"⚠️ [INGEST] No unique campaign_id and account_id keys found in TikTok Ads campaign metadata table {raw_table_campaign} then existing row(s) deletion is skipped.")
-                    logging.warning(f"⚠️ [INGEST] No unique campaign_id and account_id keys found in TikTok Ads campaign metadata table {raw_table_campaign} then existing row(s) deletion is skipped.")
+                    print(f"⚠️ [INGEST] No unique campaign_id and advertiser_id keys found in TikTok Ads campaign metadata table {raw_table_campaign} then existing row(s) deletion is skipped.")
+                    logging.warning(f"⚠️ [INGEST] No unique campaign_id and advertiser_id keys found in TikTok Ads campaign metadata table {raw_table_campaign} then existing row(s) deletion is skipped.")
             ingest_sections_status[ingest_section_name] = "succeed"
         except Exception as e:
             ingest_sections_status[ingest_section_name] = "failed"
@@ -482,7 +482,7 @@ def ingest_ad_metadata(ingest_ids_ad: list) -> pd.DataFrame:
                         type_=bigquery.TimePartitioningType.DAY,
                         field=table_partition_effective
                     )
-                table_clusters_defined = ["ad_id", "account_id"]
+                table_clusters_defined = ["ad_id", "advertiser_id"]
                 table_clusters_filtered = [f for f in table_clusters_defined if f in ingest_df_deduplicated.columns]
                 if table_clusters_filtered:
                     table_configuration_defined.clustering_fields = table_clusters_filtered
@@ -499,14 +499,14 @@ def ingest_ad_metadata(ingest_ids_ad: list) -> pd.DataFrame:
             else:
                 print(f"🔄 [INGEST] Found TikTok Ads ad metadata table {raw_table_ad} then existing row(s) deletion will be proceeding...")
                 logging.info(f"🔄 [INGEST] Found TikTok Ads ad metadata table {raw_table_ad} then existing row(s) deletion will be proceeding...")
-                unique_keys = ingest_df_deduplicated[["ad_id", "account_id"]].dropna().drop_duplicates()
+                unique_keys = ingest_df_deduplicated[["ad_id", "advertiser_id"]].dropna().drop_duplicates()
                 if not unique_keys.empty:
                     temp_table_id = f"{PROJECT}.{raw_dataset}.temp_table_ad_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
                     job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
                     google_bigquery_client.load_table_from_dataframe(unique_keys, temp_table_id, job_config=job_config).result()
                     join_condition = " AND ".join([
                         f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
-                        for col in ["ad_id", "account_id"]
+                        for col in ["ad_id", "advertiser_id"]
                     ])
                     delete_query = f"""
                         DELETE FROM `{raw_table_ad}` AS main
@@ -521,8 +521,8 @@ def ingest_ad_metadata(ingest_ids_ad: list) -> pd.DataFrame:
                     print(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of TikTok Ads ad metadata table {raw_table_ad}.")
                     logging.info(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of TikTok Ads ad metadata table {raw_table_ad}.")
                 else:
-                    print(f"⚠️ [INGEST] No unique ad_id and account_id keys found in TikTok ad metadata table {raw_table_ad} then existing row(s) deletion is skipped.")
-                    logging.warning(f"⚠️ [INGEST] No unique ad_id and account_id keys found in TikTok ad metadata table {raw_table_ad} then existing row(s) deletion is skipped.")
+                    print(f"⚠️ [INGEST] No unique ad_id and advertiser_id keys found in TikTok ad metadata table {raw_table_ad} then existing row(s) deletion is skipped.")
+                    logging.warning(f"⚠️ [INGEST] No unique ad_id and advertiser_id keys found in TikTok ad metadata table {raw_table_ad} then existing row(s) deletion is skipped.")
             ingest_sections_status[ingest_section_name] = "succeed"
         except Exception as e:
             ingest_sections_status[ingest_section_name] = "failed"
@@ -746,7 +746,7 @@ def ingest_ad_creative() -> pd.DataFrame:
                     google_bigquery_client.load_table_from_dataframe(unique_keys, temp_table_id, job_config=job_config).result()
                     join_condition = " AND ".join([
                         f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
-                        for col in ["ad_id", "account_id"]
+                        for col in ["ad_id", "advertiser_id"]
                     ])
                     delete_query = f"""
                         DELETE FROM `{raw_table_creative}` AS main
@@ -761,8 +761,8 @@ def ingest_ad_creative() -> pd.DataFrame:
                     print(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of TikTok Ads ad creative table {raw_table_creative}.")
                     logging.info(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of TikTok Ads ad creative table {raw_table_creative}.")
                 else:
-                    print(f"⚠️ [INGEST] No unique ad_id and account_id keys found in TikTok Ads ad creative table {raw_table_creative} then existing row(s) deletion is skipped.")
-                    logging.warning(f"⚠️ [INGEST] No unique ad_id and account_id keys found in TikTok Ads ad creative table {raw_table_creative} then existing row(s) deletion is skipped.")
+                    print(f"⚠️ [INGEST] No unique ad_id and advertiser_id keys found in TikTok Ads ad creative table {raw_table_creative} then existing row(s) deletion is skipped.")
+                    logging.warning(f"⚠️ [INGEST] No unique ad_id and advertiser_id keys found in TikTok Ads ad creative table {raw_table_creative} then existing row(s) deletion is skipped.")
             ingest_sections_status[ingest_section_name] = "succeed"
         except Exception as e:
             ingest_sections_status[ingest_section_name] = "failed"
