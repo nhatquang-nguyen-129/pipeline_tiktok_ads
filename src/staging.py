@@ -222,21 +222,19 @@ def staging_campaign_insights() -> dict:
         staging_section_start = time.time()
         try:        
             if staging_dfs_enriched:
-                staging_df_concatenated = (
-                    pd.concat(staging_dfs_enriched, ignore_index=True)
-                    .rename(columns={
+                staging_df_concatenated =pd.concat(staging_dfs_enriched, ignore_index=True).rename(columns={
                         "advertiser_id": "account_id",
                         "objective": "result_type",
                         "advertiser_name": "account_name",
                         "operation_status": "delivery_status"
                     })
-                )
                 print(f"✅ [STAGING] Successully concatenated TikTok Ads campaign insights with {len(staging_df_concatenated)} enriched rows from {len(staging_dfs_enriched)} DataFrame(s).")
                 logging.info(f"✅ [STAGING] Successully concatenated TikTok Ads campaign insights with {len(staging_df_concatenated)} enriched rows from {len(staging_dfs_enriched)} DataFrame(s).")
                 staging_sections_status[staging_section_name] = "succeed"
             else:
                 print("⚠️ [STAGING] No enriched DataFrame found for TikTok Ads campaign insights then concatenation is failed.")
                 logging.warning("⚠️ [STAGING] No enriched DataFrame found for TikTok Ads campaign insights then concatenation is failed.")
+                staging_df_concatenated = pd.DataFrame()
                 staging_sections_status[staging_section_name] = "failed"
         finally:
             staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)  

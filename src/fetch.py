@@ -906,7 +906,7 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
         fetch_sections_failed = [k for k, v in fetch_sections_status.items() if v == "failed"] 
         fetch_sections_succeeded = [k for k, v in fetch_sections_status.items() if v == "succeed"]
         fetch_days_input = ((pd.to_datetime(end_date) - pd.to_datetime(start_date)).days + 1)
-        fetch_days_output = (fetch_df_final["date_start"].nunique() if not fetch_df_final.empty and "date_start" in fetch_df_final.columns else 0)
+        fetch_days_output = (fetch_df_final["stat_time_day"].nunique() if not fetch_df_final.empty and "stat_time_day" in fetch_df_final.columns else 0)
         fetch_rows_output = len(fetch_df_final)
         fetch_sections_summary = list(dict.fromkeys(
             list(fetch_sections_status.keys()) +
@@ -1142,7 +1142,7 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
         fetch_sections_failed = [k for k, v in fetch_sections_status.items() if v == "failed"] 
         fetch_sections_succeeded = [k for k, v in fetch_sections_status.items() if v == "succeed"]
         fetch_days_input = ((pd.to_datetime(end_date) - pd.to_datetime(start_date)).days + 1)
-        fetch_days_output = (fetch_df_final["date_start"].nunique() if not fetch_df_final.empty and "date_start" in fetch_df_final.columns else 0)
+        fetch_days_output = (fetch_df_final["stat_time_day"].nunique() if not fetch_df_final.empty and "stat_time_day" in fetch_df_final.columns else 0)
         fetch_rows_output = len(fetch_df_final)
         fetch_sections_summary = list(dict.fromkeys(
             list(fetch_sections_status.keys()) +
