@@ -924,7 +924,7 @@ def ingest_campaign_insights(start_date: str, end_date: str,) -> pd.DataFrame:
             ingest_section_name = "[INGEST] Prepare Google BigQuery table_id for ingestion"
             ingest_section_start = time.time()
             try:
-                first_date = pd.to_datetime(ingest_df_fetched["date_start"].dropna().iloc[0])
+                first_date = pd.to_datetime(ingest_df_fetched["stat_time_day"].dropna().iloc[0])
                 y, m = first_date.year, first_date.month
                 raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
                 raw_table_campaign = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_campaign_m{m:02d}{y}"
@@ -1193,7 +1193,7 @@ def ingest_ad_insights(start_date: str, end_date: str,) -> pd.DataFrame:
             ingest_section_name = "[INGEST] Prepare Google BigQuery table_id for ingestion"
             ingest_section_start = time.time()
             try:
-                first_date = pd.to_datetime(ingest_df_fetched["date_start"].dropna().iloc[0])
+                first_date = pd.to_datetime(ingest_df_fetched["stat_time_day"].dropna().iloc[0])
                 y, m = first_date.year, first_date.month
                 raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
                 raw_table_ad = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_m{m:02d}{y}"
