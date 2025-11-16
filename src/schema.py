@@ -2,26 +2,31 @@
 ===================================================================
 TIKTOK SCHEMA MODULE
 -------------------------------------------------------------------
-This module defines and manages **schema-related logic** for the  
-TikTok Ads data pipeline, acting as a single source of truth  
-for all required fields across different data layers.
+This module provides a centralized definition and management of  
+schema structures used throughout the TikTok Ads data pipeline.  
+It shares a consistent structure and data type alignment.  
 
-It plays a key role in ensuring schema alignment and preventing  
-data inconsistency between raw → staging → mart layers.
+Its main purpose is to validate, enforce, and standardize field 
+structures across every pipeline stage to support reliable ETL
+execution and seamless data integration.
 
-✔️ Declares expected column names for each TikTok Ads entity type  
-✔️ Supports schema validation and enforcement during ETL execution  
-✔️ Prevents mismatch caused by dynamic or missing API fields  
-✔️ Centralizes schema versioning for consistent updates  
-✔️ Enables easy schema reference and debugging across modules  
+✔️ Define and store expected field names and data types
+✔️ Validate schema integrity before ingestion or transformation  
+✔️ Enforce data type consistency across different processing layers  
+✔️ Automatically handle missing or mismatched columns  
+✔️ Provide schema utilities for debugging and audit logging  
 
-⚠️ This module does *not* fetch or transform data.  
-It only provides schema utilities to support other pipeline components.
+⚠️ This module does *not* perform data fetching or transformation.  
+It serves purely as a utility layer to support schema consistency  
+throughout the TikTok Ads ETL process.
 ===================================================================
 """
 
 # Add Python logging ultilities for integration
 import logging
+
+# Add Python time ultilities for integration
+import time
 
 # Add Python Pandas libraries for integration
 import pandas as pd
@@ -31,11 +36,20 @@ import numpy as np
 
 # 1. ENSURE SCHEMA FOR GIVEN PYTHON DATAFRAME
 
-# 1.1. Ensure that the given DataFrame contains all required columns with correct datatypes
-def enforce_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
+# 1.1. Enforce that the given DataFrame contains all required columns with correct datatypes
+def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str) -> pd.DataFrame:
     
-    # 1.1.1. Define schema mapping for Facebook data type
-    mapping_tiktok_schema = {
+    # 1.1.1. Start timing the raw TikTok Ads enrichment
+    schema_time_start = time.time()
+    schema_sections_status = {}
+    schema_sections_time = {}
+    print(f"🔍 [SCHEMA] Proceeding to enforce schema for TikTok Ads with {len(schema_df_input)} given row(s) for mapping type {schema_type_mapping} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    logging.info(f"🔍 [SCHEMA] Proceeding to enforce schema for TikTok Ads with {len(schema_df_input)} given row(s) for mapping type {schema_type_mapping} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+
+    # 1.1.2. Define schema mapping for TikTk Ads data type
+    schema_section_name = "[SCHEMA] Define schema mapping for TikTk Ads data type"
+    schema_section_start = time.time()    
+    schema_types_mapping = {
         "fetch_campaign_metadata": {
             "advertiser_id": str,
             "advertiser_name": str,
@@ -156,13 +170,14 @@ def enforce_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "engaged_view_15s": int,
             "purchase": int,
             "complete_payment": int,
-            "onsite_total_purchase": int,                     # Purchases (TikTok)
-            "offline_shopping_events": int,                   # Purchases (offline)
-            "onsite_shopping": int,                           # Purchases (TikTok Shop)
-            "messaging_total_conversation_tiktok_direct_message": int,  # Conversations (TikTok direct message)
+            "onsite_total_purchase": int,
+            "offline_shopping_events": int,
+            "onsite_shopping": int,
+            "messaging_total_conversation_tiktok_direct_message": int,
             "last_updated_at": "datetime64[ns, UTC]"
         },
         "staging_campaign_insights": {
+            # Original staging ad fields
             "account_id": str,
             "account_name": str,
             "campaign_id": str,
@@ -175,33 +190,38 @@ def enforce_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "impressions": int,
             "clicks": int,
             "engaged_view_15s": int,
-            "purchase": int,                                  # Unique purchases (app)
-            "complete_payment": int,                          # Purchases (website)
-            "onsite_total_purchase": int,                     # Purchases (TikTok)
-            "offline_shopping_events": int,                   # Purchases (offline)
-            "onsite_shopping": int,                           # Purchases (TikTok Shop)
-            "messaging_total_conversation_tiktok_direct_message": int,  # Conversations (TikTok direct message)
-            "last_updated_at": "datetime64[ns, UTC]",
-            "invalid_campaign_name": str,
-
-            # Các field mapping nội bộ
-            "hinh_thuc": str,
-            "ma_ngan_sach_cap_1": str,
-            "ma_ngan_sach_cap_2": str,
-            "khu_vuc": str,
-            "nhan_su": str,
-            "nganh_hang": str,
-            "chuong_trinh": str,
-            "noi_dung": str,
-            "thang": str,
-            "nen_tang": str,
-            "phong_ban": str,
-            "tai_khoan": str,
-            "date": "datetime64[ns, UTC]"
+            "purchase": int,
+            "complete_payment": int,
+            "onsite_total_purchase": int,
+            "offline_shopping_events": int,
+            "onsite_shopping": int,
+            "messaging_total_conversation_tiktok_direct_message": int,
+            # Enriched dimensions from campaign_name and specific to campaign settings
+            "enrich_campaign_objective": str,
+            "enrich_campaign_region": str,
+            "enrich_campaign_personnel": str,            
+            # Enriched dimensions from campaign_name and specific to budget classfication
+            "enrich_budget_group": str,
+            "enrich_budget_type": str,            
+            # Enriched dimensions from campaign_name and specific to category classification
+            "enrich_category_group": str,            
+            # Enriched dimensions from campaign_name and specific to advertising strategy
+            "enrich_program_track": str,
+            "enrich_program_group": str,
+            "enrich_program_type": str,            
+            # Standardized time columns
+            "date": "datetime64[ns, UTC]",
+            "year": str,
+            "month": str,
+            "last_updated_at": "datetime64[ns, UTC]",            
+            # Enriched dimensions from table_id and specific to internal company structure
+            "enrich_account_platform": str,
+            "enrich_account_department": str,
+            "enrich_account_name": str
         },
         "staging_ad_insights": {
-            # Join keys & metadata
-            "account_id": str,               # từ advertiser_id
+            # Original staging ad fields            
+            "account_id": str,
             "ad_id": str,
             "ad_name": str,
             "adset_id": str,
@@ -209,14 +229,12 @@ def enforce_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "campaign_id": str,
             "campaign_name": str,
             "date_start": str,
-            "delivery_status": str,          # từ operation_status
+            "delivery_status": str,
             "ad_format": str,
             "video_id": str,
             "video_cover_url": str,
             "preview_url": str,
             "optimization_event": str,
-
-            # TikTok metrics gốc
             "result": str,
             "stat_time_day": str,
             "spend": float,
@@ -229,68 +247,136 @@ def enforce_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "offline_shopping_events": int,
             "onsite_shopping": int,
             "messaging_total_conversation_tiktok_direct_message": int,
-            "last_updated_at": "datetime64[ns, UTC]",
+            # Enriched dimensions from campaign_name and specific to campaign settings
+            "enrich_campaign_objective": str,
+            "enrich_campaign_region": str,
+            "enrich_campaign_personnel": str,            
+            # Enriched dimensions from campaign_name and specific to budget classfication
+            "enrich_budget_group": str,
+            "enrich_budget_type": str,            
+            # Enriched dimensions from campaign_name and specific to category classification
+            "enrich_category_group": str,            
+            # Enriched dimensions from campaign_name and specific to advertising strategy
+            "enrich_program_track": str,
+            "enrich_program_group": str,
+            "enrich_program_type": str,            
+            # Enriched dimensions from adset_name and specific to advertising strategy
+            "enrich_adset_strategy": str,
+            "enrich_adset_subtype": str,            
+            # Enriched dimensions from adset_name and specific to targeting
+            "enrich_adset_location": str,
+            "enrich_adset_audience": str,
+            "enrich_adset_format": str,            
+            # Enriched dimensions from table_id and specific to internal company structure
+            "enrich_account_platform": str,
+            "enrich_account_department": str,
+            "enrich_account_name": str,            
+            # Standardized time columns
             "date": "datetime64[ns, UTC]",
-            "year": int,
-            "month": int,
-
-            # Enriched fields (giữ nguyên tiếng Việt, áp dụng cho mọi platform)
-            "hinh_thuc": str,
-            "ma_ngan_sach_cap_1": str,
-            "ma_ngan_sach_cap_2": str,
-            "khu_vuc": str,
-            "nhan_su": str,
-            "nganh_hang": str,
-            "chuong_trinh": str,
-            "noi_dung": str,
-            "thang": str,
-            "campaign_name_invalid": bool,
-            "vi_tri": str,
-            "doi_tuong": str,
-            "dinh_dang": str,
-            "adset_name_invalid": bool,
-            "nen_tang": str,
-            "phong_ban": str,
-            "tai_khoan": str,
+            "year": str,
+            "month": str,
+            "last_updated_at": "datetime64[ns, UTC]"
         }
     }
+    schema_sections_status[schema_section_name] = "succeed"
+    schema_sections_time[schema_section_name] = round(time.time() - schema_section_start, 2)
     
-    # 1.1.2. Validate that the given schema_type exists
-    if schema_type not in mapping_tiktok_schema:
-        raise ValueError(f"❌ [SCHEMA] Unknown schema_type {schema_type}.")
+    try:
 
-    # 1.1.3. Retrieve the expected schema definition
-    expected_columns = mapping_tiktok_schema[schema_type]
-    
-    # 1.1.4. Iterate through each expected column
-    for col, dtype in expected_columns.items():
-        if col not in df.columns:
-            df[col] = pd.NA
-
-    # 1.1.5. Handle numeric type
+    # 1.1.3. Validate that the given schema_type_mapping exists
+        schema_section_name = "[SCHEMA] Validate that the given schema_type_mapping exists"
+        schema_section_start = time.time()            
         try:
-            if dtype in [int, float]:
-                df[col] = df[col].apply(
-                    lambda x: x if isinstance(x, (int, float, np.number, type(None))) 
-                    else (float(x.replace(",", "")) if isinstance(x, str) and x.replace(",", "").replace(".", "").isdigit() else np.nan)
-                )
-                df[col] = df[col].fillna(0).astype(dtype)
-
-    # 1.1.6. Handle datetime type
-            elif dtype == "datetime64[ns, UTC]":
-                df[col] = pd.to_datetime(df[col], errors="coerce")
-                if df[col].dt.tz is None:
-                    df[col] = df[col].dt.tz_localize("UTC")
-                else:
-                    df[col] = df[col].dt.tz_convert("UTC")
-
-    # 1.1.7. Handle string or other object types
+            if schema_type_mapping not in schema_types_mapping:
+                schema_sections_status[schema_section_name] = "failed"
+                print(f"❌ [SCHEMA] Failed to validate schema type {schema_type_mapping} for TikTok Ads then enforcement is suspended.")
+                logging.error(f"❌ [SCHEMA] Failed to validate schema type {schema_type_mapping} for TikTok Ads then enforcement is suspended.")
             else:
-                df[col] = df[col].astype(dtype, errors="ignore")
-    
-    # 1.1.8. Reorder columns
+                schema_columns_expected = schema_types_mapping[schema_type_mapping]
+                schema_sections_status[schema_section_name] = "succeed"
+                print(f"✅ [SCHEMA] Successfully validated schema type {schema_type_mapping} for TikTok Ads.")
+                logging.info(f"✅ [SCHEMA] Successfully validated schema type {schema_type_mapping} for TikTok Ads.")
+        finally:
+            schema_sections_time[schema_section_name] = round(time.time() - schema_section_start, 2)
+
+    # 1.1.4. Enforce schema columns for TikTok Ads
+        schema_section_name = "[SCHEMA] Enforce schema columns for TikTok Ads"
+        schema_section_start = time.time()              
+        try:
+            print(f"🔄 [SCHEMA] Enforcing schema for TikTok Ads with schema type {schema_type_mapping}...")
+            logging.info(f"🔄 [SCHEMA] Enforcing schema for TikTok Ads with schema type {schema_type_mapping}...")
+            schema_df_enforced = schema_df_input.copy()                      
+            for schema_column_expected, schema_data_type in schema_columns_expected.items():
+                if schema_column_expected not in schema_df_enforced.columns: 
+                    schema_df_enforced[schema_column_expected] = pd.NA
+                try:
+                    if schema_data_type in [int, float]:
+                        schema_df_enforced[schema_column_expected] = schema_df_enforced[schema_column_expected].apply(
+                            lambda x: x if isinstance(x, (int, float, np.number, type(None))) 
+                            else (float(x.replace(",", "")) if isinstance(x, str) and x.replace(",", "").replace(".", "").isdigit() else np.nan)
+                        )
+                        schema_df_enforced[schema_column_expected] = schema_df_enforced[schema_column_expected].fillna(0).astype(schema_data_type)
+                    elif schema_data_type == "datetime64[ns, UTC]":
+                        schema_df_enforced[schema_column_expected] = pd.to_datetime(schema_df_enforced[schema_column_expected], errors="coerce")
+                        if schema_df_enforced[schema_column_expected].dt.tz is None:
+                            schema_df_enforced[schema_column_expected] = schema_df_enforced[schema_column_expected].dt.tz_localize("UTC")
+                        else:
+                            schema_df_enforced[schema_column_expected] = schema_df_enforced[schema_column_expected].dt.tz_convert("UTC")
+                    else:
+                        schema_df_enforced[schema_column_expected] = schema_df_enforced[schema_column_expected].astype(schema_data_type, errors="ignore")
+                except Exception as e:
+                    print(f"⚠️ [SCHEMA] Failed to coerce column {schema_column_expected} to {schema_data_type} due to {e}.")
+                    logging.warning(f"⚠️ [SCHEMA] Failed to coerce column {schema_column_expected} to {schema_data_type} due to {e}.")
+            schema_df_enforced = schema_df_enforced[list(schema_columns_expected.keys())]       
+            print(f"✅ [SCHEMA] Successfully enforced schema for TikTok Ads with {len(schema_df_enforced)} row(s) and schema type {schema_type_mapping}.")
+            logging.info(f"✅ [SCHEMA] Successfully enforced schema for TikTok Ads with {len(schema_df_enforced)} row(s) and schema type {schema_type_mapping}.")
+            schema_sections_status[schema_section_name] = "succeed"        
         except Exception as e:
-            print(f"❌ [SCHEMA] Failed to coerce column {col} to {dtype} due to {e}.")
-            logging.warning(f"❌ [SCHEMA] Failed to coerce column {col} to {dtype} due to {e}.")
-    df = df[[col for col in expected_columns]]
-    return df
+            schema_sections_status[schema_section_name] = "failed"
+            print(f"❌ [SCHEMA] Failed to enforce schema for TikTok Ads with schema type {schema_type_mapping} due to {e}.")
+            logging.error(f"❌ [SCHEMA] Failed to enforce schema for TikTok Ads with schema type {schema_type_mapping} due to {e}.")
+        finally:
+            schema_sections_time[schema_section_name] = round(time.time() - schema_section_start, 2)
+
+    # 1.1.5. Summarize schema enforcement result(s) for Facebook Ads
+    finally:
+        schema_time_elapsed = round(time.time() - schema_time_start, 2)
+        schema_df_final = schema_df_enforced.copy() if "schema_df_enforced" in locals() and not schema_df_enforced.empty else pd.DataFrame()        
+        schema_sections_total = len(schema_sections_status)
+        schema_sections_succeed = [k for k, v in schema_sections_status.items() if v == "succeed"]
+        schema_sections_failed = [k for k, v in schema_sections_status.items() if v == "failed"]        
+        schema_rows_input = len(schema_df_input)
+        schema_rows_output = len(schema_df_final)        
+        schema_sections_summary = list(dict.fromkeys(
+            list(schema_sections_status.keys()) +
+            list(schema_sections_time.keys())
+        ))
+        schema_sections_detail = {
+            schema_section_summary: {
+                "status": schema_sections_status.get(schema_section_summary, "unknown"),
+                "time": round(schema_sections_time.get(schema_section_summary, 0.0), 2),
+            }
+            for schema_section_summary in schema_sections_summary
+        }         
+        if any(v == "failed" for v in schema_sections_status.values()):
+            print(f"❌ [SCHEMA] Failed to complete schema enforcement for TikTok Ads due to section(s): {', '.join(schema_sections_failed)} in {schema_time_elapsed}s.")
+            logging.error(f"❌ [SCHEMA] Failed to complete schema enforcement for TikTok Ads due to section(s): {', '.join(schema_sections_failed)} in {schema_time_elapsed}s.")
+            schema_status_final = "schema_failed_all"
+        else:
+            print(f"🏆 [SCHEMA] Successfully completed schema enforcement for TikTok Ads with {schema_rows_output} enforced row(s) output in {schema_time_elapsed}s.")
+            logging.info(f"🏆 [SCHEMA] Successfully completed schema enforcement for TikTok Ads with {schema_rows_output} enforced row(s) output in {schema_time_elapsed}s.")
+            schema_status_final = "schema_succeed_all"        
+        schema_results_final = {
+            "schema_df_final": schema_df_final,
+            "schema_status_final": schema_status_final,
+            "schema_summary_final": {
+                "schema_time_elapsed": schema_time_elapsed,
+                "schema_sections_total": schema_sections_total,
+                "schema_sections_succeed": schema_sections_succeed,
+                "schema_sections_failed": schema_sections_failed,
+                "schema_sections_detail": schema_sections_detail,
+                "schema_rows_input": schema_rows_input,
+                "schema_rows_output": schema_rows_output,
+            },
+        }    
+    return schema_results_final            
