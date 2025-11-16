@@ -116,40 +116,41 @@ def mart_campaign_all() -> dict:
                 PARTITION BY ngay
                 CLUSTER BY nhan_su, ma_ngan_sach_cap_1, nganh_hang, hang_muc
                 AS
-                SELECT
-                    SAFE_CAST(enrich_account_name AS STRING) AS tai_khoan,
-                    SAFE_CAST(enrich_account_department AS STRING) AS phong_ban,
-                    SAFE_CAST(enrich_account_platform AS STRING) AS nen_tang,
-                    SAFE_CAST(enrich_budget_group AS STRING) AS ma_ngan_sach_cap_1,
-                    SAFE_CAST(enrich_budget_type AS STRING) AS ma_ngan_sach_cap_2,
-                    SAFE_CAST(enrich_program_track AS STRING) AS hang_muc,
-                    SAFE_CAST(enrich_program_group AS STRING) AS chuong_trinh,
-                    SAFE_CAST(enrich_program_type AS STRING) AS noi_dung,
-                    SAFE_CAST(enrich_campaign_objective AS STRING) AS hinh_thuc,
-                    SAFE_CAST(enrich_campaign_region AS STRING) AS khu_vuc,
-                    SAFE_CAST(enrich_campaign_personnel AS STRING) AS nhan_su,
-                    SAFE_CAST(enrich_category_group AS STRING) AS nganh_hang,
-                    SAFE_CAST(campaign_name AS STRING) AS campaign_name,
-                    CAST(date AS DATE) AS ngay,
-                    SAFE_CAST(year AS STRING) AS nam,
-                    SAFE_CAST(month AS STRING) AS thang,
-                    SAFE_CAST(spend AS FLOAT64) AS spend,
-                    SAFE_CAST(result AS INT64) AS result,
-                    SAFE_CAST(objective_type AS STRING) AS result_type,
-                    SAFE_CAST(impressions AS INT64) AS impressions,
-                    SAFE_CAST(clicks AS INT64) AS clicks,
-                    SAFE_CAST(engaged_view_15s AS INT64) AS engaged_view_15s,
-                    SAFE_CAST(purchase AS INT64) AS purchase,
-                    CASE
-                        WHEN REGEXP_CONTAINS(delivery_status, r"ENABLE") THEN "🟢"
-                        WHEN REGEXP_CONTAINS(delivery_status, r"DISABLE") THEN "⚪"
-                        ELSE "❓"
-                    END AS trang_thai
-                FROM `{staging_table_campaign}`
-                WHERE date IS NOT NULL
-            )
-            SELECT *
-            FROM base;
+                WITH base AS (
+                    SELECT
+                        SAFE_CAST(enrich_account_name AS STRING) AS tai_khoan,
+                        SAFE_CAST(enrich_account_department AS STRING) AS phong_ban,
+                        SAFE_CAST(enrich_account_platform AS STRING) AS nen_tang,
+                        SAFE_CAST(enrich_budget_group AS STRING) AS ma_ngan_sach_cap_1,
+                        SAFE_CAST(enrich_budget_type AS STRING) AS ma_ngan_sach_cap_2,
+                        SAFE_CAST(enrich_program_track AS STRING) AS hang_muc,
+                        SAFE_CAST(enrich_program_group AS STRING) AS chuong_trinh,
+                        SAFE_CAST(enrich_program_type AS STRING) AS noi_dung,
+                        SAFE_CAST(enrich_campaign_objective AS STRING) AS hinh_thuc,
+                        SAFE_CAST(enrich_campaign_region AS STRING) AS khu_vuc,
+                        SAFE_CAST(enrich_campaign_personnel AS STRING) AS nhan_su,
+                        SAFE_CAST(enrich_category_group AS STRING) AS nganh_hang,
+                        SAFE_CAST(campaign_name AS STRING) AS campaign_name,
+                        CAST(date AS DATE) AS ngay,
+                        SAFE_CAST(year AS STRING) AS nam,
+                        SAFE_CAST(month AS STRING) AS thang,
+                        SAFE_CAST(spend AS FLOAT64) AS spend,
+                        SAFE_CAST(result AS INT64) AS result,
+                        SAFE_CAST(objective_type AS STRING) AS result_type,
+                        SAFE_CAST(impressions AS INT64) AS impressions,
+                        SAFE_CAST(clicks AS INT64) AS clicks,
+                        SAFE_CAST(engaged_view_15s AS INT64) AS engaged_view_15s,
+                        SAFE_CAST(purchase AS INT64) AS purchase,
+                        CASE
+                            WHEN REGEXP_CONTAINS(delivery_status, r"ENABLE") THEN "🟢"
+                            WHEN REGEXP_CONTAINS(delivery_status, r"DISABLE") THEN "⚪"
+                            ELSE "❓"
+                        END AS trang_thai
+                    FROM `{staging_table_campaign}`
+                    WHERE date IS NOT NULL
+                )
+                SELECT *
+                FROM base;
             """
             print(f"🔄 [MART] Querying staging TikTok Ads campaign insights table {staging_table_campaign} to create or replace materialized table for campaign performance...")
             logging.info(f"🔄 [MART] Querying staging TikTok Ads campaign insights table {staging_table_campaign} to create or replace materialized table for campaign performance...")
