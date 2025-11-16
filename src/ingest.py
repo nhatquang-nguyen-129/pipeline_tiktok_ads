@@ -986,9 +986,9 @@ def ingest_campaign_insights(start_date: str, end_date: str,) -> pd.DataFrame:
                         print(f"❌ [INGEST] Failed to create TikTok Ads campaign insights table {raw_table_campaign} due to {e}.")
                         logging.error(f"❌ [INGEST] Failed to create TikTok Ads campaign insights table {raw_table_campaign} due to {e}.")
                 else:
-                    ingest_dates_new = ingest_df_deduplicated["date_start"].dropna().unique().tolist()
-                    ingest_query_existed = f"SELECT DISTINCT date_start FROM `{raw_table_campaign}`"
-                    ingest_dates_existed = [row.date_start for row in google_bigquery_client.query(ingest_query_existed).result()]
+                    ingest_dates_new = ingest_df_deduplicated["stat_time_day"].dropna().unique().tolist()
+                    ingest_query_existed = f"SELECT DISTINCT stat_time_day FROM `{raw_table_campaign}`"
+                    ingest_dates_existed = [row.stat_time_day for row in google_bigquery_client.query(ingest_query_existed).result()]
                     ingest_dates_overlapped = set(ingest_dates_new) & set(ingest_dates_existed)
                     if ingest_dates_overlapped:
                         print(f"⚠️ [INGEST] Found {len(ingest_dates_overlapped)} overlapping date(s) in TikTok Ads campaign insights {raw_table_campaign} table then deletion will be proceeding...")
@@ -996,7 +996,7 @@ def ingest_campaign_insights(start_date: str, end_date: str,) -> pd.DataFrame:
                         for ingest_date_overlapped in ingest_dates_overlapped:
                             query = f"""
                                 DELETE FROM `{raw_table_campaign}`
-                                WHERE date_start = @date_value
+                                WHERE stat_time_day = @date_value
                             """
                             job_config = bigquery.QueryJobConfig(
                                 query_parameters=[bigquery.ScalarQueryParameter("date_value", "STRING", ingest_date_overlapped)]
@@ -1255,9 +1255,9 @@ def ingest_ad_insights(start_date: str, end_date: str,) -> pd.DataFrame:
                         print(f"❌ [INGEST] Failed to create TikTok Ads ad insights table {raw_table_ad} due to {e}.")
                         logging.error(f"❌ [INGEST] Failed to create TikTok Ads ad insights table {raw_table_ad} due to {e}.")
                 else:
-                    ingest_dates_new = ingest_df_deduplicated["date_start"].dropna().unique().tolist()
-                    ingest_query_existed = f"SELECT DISTINCT date_start FROM `{raw_table_ad}`"
-                    ingest_dates_existed = [row.date_start for row in google_bigquery_client.query(ingest_query_existed).result()]
+                    ingest_dates_new = ingest_df_deduplicated["stat_time_day"].dropna().unique().tolist()
+                    ingest_query_existed = f"SELECT DISTINCT stat_time_day FROM `{raw_table_ad}`"
+                    ingest_dates_existed = [row.stat_time_day for row in google_bigquery_client.query(ingest_query_existed).result()]
                     ingest_dates_overlapped = set(ingest_dates_new) & set(ingest_dates_existed)
                     if ingest_dates_overlapped:
                         print(f"⚠️ [INGEST] Found {len(ingest_dates_overlapped)} overlapping date(s) in TikTok Ads ad insights {raw_table_ad} table then deletion will be proceeding...")
@@ -1265,7 +1265,7 @@ def ingest_ad_insights(start_date: str, end_date: str,) -> pd.DataFrame:
                         for ingest_date_overlapped in ingest_dates_overlapped:
                             query = f"""
                                 DELETE FROM `{raw_table_ad}`
-                                WHERE date_start = @date_value
+                                WHERE stat_time_day = @date_value
                             """
                             job_config = bigquery.QueryJobConfig(
                                 query_parameters=[bigquery.ScalarQueryParameter("date_value", "STRING", ingest_date_overlapped)]

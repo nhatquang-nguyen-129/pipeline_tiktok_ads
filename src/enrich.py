@@ -171,6 +171,7 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
             print(f"🔍 [ENRICH] Enriching other field(s) for staging TikTok Ads campaign insights with {len(enrich_df_campaign)} row(s)...")
             logging.info(f"🔍 [ENRICH] Enriching other field(s) for staging TikTok Ads campaign insights with {len(enrich_df_campaign)} row(s)...")
             enrich_df_other = enrich_df_campaign.copy()
+            enrich_df_other = enrich_df_other.rename(columns={"stat_time_day": "date_start"})
             enrich_df_other = enrich_df_other.assign(
                 date=lambda df: pd.to_datetime(df["date_start"], errors="coerce", utc=True).dt.floor("D"),
                 year=lambda df: pd.to_datetime(df["date_start"], errors="coerce", utc=True).dt.strftime("%Y"),
@@ -373,6 +374,7 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
             print(f"🔍 [ENRICH] Enriching other field(s) for staging TikTok Ads ad insights with {len(enrich_df_adgroup)} row(s)...")
             logging.info(f"🔍 [ENRICH] Enriching other field(s) for staging TikTok Ads ad insights with {len(enrich_df_adgroup)} row(s)...")
             enrich_df_other = enrich_df_adgroup.copy()
+            enrich_df_other = enrich_df_other.rename(columns={"stat_time_day": "date_start"})
             enrich_df_other = enrich_df_other.assign(
                 date=lambda df: pd.to_datetime(df["date_start"], errors="coerce", utc=True).dt.floor("D"),
                 year=lambda df: pd.to_datetime(df["date_start"], errors="coerce", utc=True).dt.strftime("%Y"),
