@@ -2,24 +2,23 @@
 ==================================================================
 TIKTOK FETCHING MODULE
 ------------------------------------------------------------------
-This module provides a robust interface for fetching raw advertising 
-data directly from the TikTok Marketing API. It manages authentication, 
-pagination, and error handling to ensure reliable extraction of campaign, 
-ad group, and ad-level insights for downstream analytics.
+This module handles authenticated data retrieval from the TikTok 
+Marketing API, consolidating all campaign, ad, creative, and metadata 
+fetching logic into a unified, maintainable structure for ingestion.
 
-By isolating API-fetching responsibilities, this module ensures 
-clean separation of concerns—making the ingestion layer more maintainable, 
-testable, and resilient within the broader data pipeline architecture.
+It ensures reliable access to TikTok Ads data with controlled rate 
+limits, standardized field mapping, and structured outputs for 
+downstream enrichment and transformation stages.
 
-✔️ Initializes and authenticates a secure TikTok Marketing API client  
-✔️ Retrieves raw campaign, ad group, and ad-level performance data  
-✔️ Handles pagination, retries, and error responses gracefully  
-✔️ Normalizes and structures JSON responses into tabular format  
-✔️ Supports parameterized date range and dimension-based querying  
+✔️ Initializes secure TikTok SDK sessions and retrieves credentials  
+✔️ Fetches campaign, ad, and creative data via authenticated API calls  
+✔️ Handles pagination, rate limiting and error retries automatically  
+✔️ Returns normalized and schema-ready DataFrames for processing  
+✔️ Logs detailed runtime information for monitoring and debugging  
 
-⚠️ This module is strictly limited to *data retrieval operations*.  
-It does **not** perform data transformation, schema validation, or 
-persistence tasks such as loading data into BigQuery or other storage systems.
+⚠️ This module focuses solely on *data retrieval and extraction*.  
+It does **not** perform schema enforcement, data enrichment, or 
+storage operations such as uploading to BigQuery.
 ==================================================================
 """
 
