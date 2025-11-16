@@ -32,9 +32,6 @@ from datetime import datetime
 # Add Python logging ultilities forintegration
 import logging
 
-# Add Python timezone ultilities for integration
-import pytz
-
 # Add Python time ultilities for integration
 import time
 
