@@ -379,4 +379,4 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
                 "schema_rows_output": schema_rows_output,
             },
         }    
-    return schema_results_final            
+    return schema_results_final
