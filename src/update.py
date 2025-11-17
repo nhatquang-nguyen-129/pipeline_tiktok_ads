@@ -30,9 +30,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.
 # Add logging ultilities for integration
 import logging
 
-# Add Python "re" libraries for integration
-import re
-
 # Add Python 'time' libraries for integration
 import time
 
