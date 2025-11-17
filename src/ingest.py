@@ -10,14 +10,15 @@ It manages the complete ingestion flow — from authentication and
 data fetching, to enrichment, schema validation, and loading into 
 BigQuery tables segmented by campaign, ad, creative and metadata.
 
-✔️ Supports append or truncate via configurable `write_disposition`  
-✔️ Applies schema validation through centralized schema utilities  
-✔️ Includes logging and CSV-based error tracking for traceability  
-✔️ Handles multiple ingestion included campaign, ad, creative
-✔️ Ensures data freshness and integrity across daily ingestions  
+✔️ Supports both append and truncate modes via write_disposition
+✔️ Validates data structure using centralized schema utilities  
+✔️ Integrates enrichment routines before loading into BigQuery  
+✔️ Implements granular logging and CSV-based error traceability  
+✔️ Ensures pipeline reliability through retry and checkpoint logic  
 
-⚠️ This module is strictly limited to *raw-layer ingestion*.  
-It does **not** handle data transformation, modeling, or aggregation.
+⚠️ This module is dedicated solely to *raw-layer ingestion*.  
+It does **not** handle advanced transformations, metric modeling, 
+or aggregated data processing beyond the ingestion boundary.
 ==================================================================
 """
 
@@ -25,9 +26,6 @@ It does **not** handle data transformation, modeling, or aggregation.
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
-
-# Add Python datetime utilities for integration
-from datetime import datetime
 
 # Add Python logging ultilities forintegration
 import logging
@@ -762,8 +760,8 @@ def ingest_ad_creative() -> pd.DataFrame:
                     print(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of TikTok Ads ad creative table {raw_table_creative}.")
                     logging.info(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of TikTok Ads ad creative table {raw_table_creative}.")
                 else:
-                    print(f"⚠️ [INGEST] No unique ad_id and advertiser_id keys found in TikTok Ads ad creative table {raw_table_creative} then existing row(s) deletion is skipped.")
-                    logging.warning(f"⚠️ [INGEST] No unique ad_id and advertiser_id keys found in TikTok Ads ad creative table {raw_table_creative} then existing row(s) deletion is skipped.")
+                    print(f"⚠️ [INGEST] No unique video_id and advertiser_id keys found in TikTok Ads ad creative table {raw_table_creative} then existing row(s) deletion is skipped.")
+                    logging.warning(f"⚠️ [INGEST] No unique video_id and advertiser_id keys found in TikTok Ads ad creative table {raw_table_creative} then existing row(s) deletion is skipped.")
             ingest_sections_status[ingest_section_name] = "succeed"
         except Exception as e:
             ingest_sections_status[ingest_section_name] = "failed"
