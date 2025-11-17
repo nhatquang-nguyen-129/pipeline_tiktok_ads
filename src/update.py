@@ -346,16 +346,16 @@ def update_ad_insights(start_date: str, end_date: str):
                 ingest_status_metadata = ingest_results_metadata["ingest_status_final"]
                 ingest_summary_metadata = ingest_results_metadata["ingest_summary_final"]
                 if ingest_status_metadata == "ingest_succeed_all":
-                    print(f"✅ [UPDATE] Successfully triggered TikTok Ads ad creative ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
-                    logging.info(f"✅ [UPDATE] Successfully triggered TikTok Ads ad creative ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
+                    print(f"✅ [UPDATE] Successfully triggered TikTok Ads ad creative ingestion with {ingest_summary_metadata['ingest_rows_output']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
+                    logging.info(f"✅ [UPDATE] Successfully triggered TikTok Ads ad creative ingestion with {ingest_summary_metadata['ingest_rows_output']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
                     update_sections_status[update_section_name] = "succeed"
                 elif ingest_status_metadata == "ingest_success_partial":
-                    print(f"⚠️ [UPDATE] Partially triggered TikTok Ads ad creative ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
-                    logging.warning(f"⚠️ [UPDATE] Partially triggered TikTok Ads ad creative ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
+                    print(f"⚠️ [UPDATE] Partially triggered TikTok Ads ad creative ingestion with {ingest_summary_metadata['ingest_rows_output']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
+                    logging.warning(f"⚠️ [UPDATE] Partially triggered TikTok Ads ad creative ingestion with {ingest_summary_metadata['ingest_rows_output']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
                     update_sections_status[update_section_name] = "partial"
                 else:
-                    print(f"❌ [UPDATE] Failed to trigger TikTok Ads ad creative ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
-                    logging.error(f"❌ [UPDATE] Failed to trigger TikTok Ads ad creative ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
+                    print(f"❌ [UPDATE] Failed to trigger TikTok Ads ad creative ingestion with {ingest_summary_metadata['ingest_rows_output']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
+                    logging.error(f"❌ [UPDATE] Failed to trigger TikTok Ads ad creative ingestion with {ingest_summary_metadata['ingest_rows_output']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
                     update_sections_status[update_section_name] = "failed"
             else:
                 print("⚠️ [UPDATE] No updates for any ad_id then TikTok Ads ad creative ingestion is marked as failed.")
