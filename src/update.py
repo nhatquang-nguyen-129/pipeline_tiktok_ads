@@ -364,68 +364,7 @@ def update_ad_insights(start_date: str, end_date: str):
         finally:
             update_sections_time[update_section_name] = round(time.time() - update_section_start, 2)
 
-    # 1.2.6. Trigger to ingest TikTok Ads campaign metadata
-        update_section_name = "[UPDATE] Trigger to ingest TikTok Ads campaign metadata"
-        update_section_start = time.time()
-        try:
-            if updated_ids_ad:
-                print(f"🔄 [UPDATE] Triggering to ingest TikTok campaign metadata for {len(updated_ids_ad)} ad_id(s)...")
-                logging.info(f"🔄 [UPDATE] Triggering to ingest TikTok campaign metadata for {len(updated_ids_ad)} ad_id(s)...")
-                raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
-                raw_tables_all = google_bigquery_client.list_tables(dataset=raw_dataset)
-                raw_table_pattern = rf"^{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_m\d{{2}}\d{{4}}$"
-                raw_tables_ad = [
-                    f"{PROJECT}.{raw_dataset}.{raw_table_all.table_id}"
-                    for raw_table_all in raw_tables_all if re.match(raw_table_pattern, raw_table_all.table_id)
-                ]
-                if not raw_tables_ad:
-                    raise ValueError("❌ [UPDATE] No matching ad raw tables found for TikTok Ads campaign metadata ingestion.")
-                union_query = " UNION DISTINCT ".join([
-                    f"""
-                    SELECT DISTINCT CAST(campaign_id AS STRING) AS campaign_id
-                    FROM `{tbl}`
-                    WHERE ad_id IN UNNEST(@ad_ids)
-                    AND campaign_id IS NOT NULL
-                    """
-                    for tbl in raw_tables_ad
-                ])
-                job_config = bigquery.QueryJobConfig(
-                    query_parameters=[bigquery.ArrayQueryParameter("ad_ids", "STRING", list(updated_ids_ad))]
-                )
-                update_ids_campaign = google_bigquery_client.query(union_query, job_config=job_config).to_dataframe()
-                ingest_ids_campaign = update_ids_campaign["campaign_id"].dropna().unique().tolist()
-                if ingest_ids_campaign:
-                    ingest_results_metadata = ingest_campaign_metadata(ingest_ids_campaign=ingest_ids_campaign)
-                    ingest_status_metadata = ingest_results_metadata["ingest_status_final"]
-                    ingest_summary_metadata = ingest_results_metadata["ingest_summary_final"]
-                    if ingest_status_metadata == "ingest_succeed_all":
-                        print(f"✅ [UPDATE] Successfully triggered TikTok Ads campaign metadata ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
-                        logging.info(f"✅ [UPDATE] Successfully triggered TikTok Ads campaign metadata ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
-                        update_sections_status[update_section_name] = "succeed"
-                    elif ingest_status_metadata == "ingest_success_partial":
-                        print(f"⚠️ [UPDATE] Partially triggered TikTok Ads campaign metadata ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
-                        logging.warning(f"⚠️ [UPDATE] Partially triggered TikTok Ads campaign metadata ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
-                        update_sections_status[update_section_name] = "partial"
-                    else:
-                        print(f"❌ [UPDATE] Failed to trigger TikTok Ads campaign metadata ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
-                        logging.error(f"❌ [UPDATE] Failed to trigger TikTok Ads campaign metadata ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
-                        update_sections_status[update_section_name] = "failed"
-                else:
-                    print("⚠️ [UPDATE] No adset_id found for given ad_id(s) then TikTok Ads campaign metadata ingestion will be skipped.")
-                    logging.warning("⚠️ [UPDATE] No adset_id found for given ad_id(s) then TikTok Ads campaign metadata ingestion will be skipped.")
-                    update_sections_status[update_section_name] = "failed"
-            else:
-                print("⚠️ [UPDATE] No updates for any ad_id then TikTok Ads campaign metadata ingestion is marked as failed.")
-                logging.warning("⚠️ [UPDATE] No updates for any ad_id then TikTok Ads campaign metadata ingestion is marked as failed.")
-                update_sections_status[update_section_name] = "failed"
-        except Exception as e:
-            print(f"❌ [UPDATE] Failed to trigger TikTok campaign metadata ingestion due to {e}.")
-            logging.error(f"❌ [UPDATE] Failed to trigger TikTok campaign metadata ingestion due to {e}.")
-            update_sections_status[update_section_name] = "failed"
-        finally:
-            update_sections_time[update_section_name] = round(time.time() - update_section_start, 2)
-
-    # 1.2.7. Trigger to build staging TikTok Ads ad insights
+    # 1.2.6. Trigger to build staging TikTok Ads ad insights
         update_section_name = "[UPDATE] Trigger to build staging TikTok Ads ad insights"
         update_section_start = time.time()
         try:
@@ -454,7 +393,7 @@ def update_ad_insights(start_date: str, end_date: str):
         finally:
             update_sections_time[update_section_name] = round(time.time() - update_section_start, 2)
 
-    # 1.2.8. Trigger to materialize TikTok Ads creative performance table
+    # 1.2.7. Trigger to materialize TikTok Ads creative performance table
         update_section_name = "[UPDATE] Trigger to materialize TikTok Ads creative performance table"
         update_section_start = time.time()
         try:
@@ -479,7 +418,7 @@ def update_ad_insights(start_date: str, end_date: str):
         finally:
             update_sections_time[update_section_name] = round(time.time() - update_section_start, 2)
 
-    # 1.2.9. Summarize update result(s) for TikTok Ads ad insights pipeline
+    # 1.2.8. Summarize update result(s) for TikTok Ads ad insights pipeline
     finally:
         update_time_total = round(time.time() - update_time_start, 2)
         print("\n📊 [UPDATE] TIKTOK ADS CREATIVE PERFORMANCE SUMMARY")
@@ -490,7 +429,6 @@ def update_ad_insights(start_date: str, end_date: str):
             "[UPDATE] Trigger to ingest TikTok Ads ad insights": "ingest_results_insights",
             "[UPDATE] Trigger to ingest TikTok Ads ad metadata": "ingest_results_metadata",
             "[UPDATE] Trigger to ingest TikTok Ads ad creative": "ingest_results_metadata",
-            "[UPDATE] Trigger to ingest TikTok Ads campaign metadata": "ingest_results_metadata",
             "[UPDATE] Trigger to build staging TikTok Ads ad insights": "staging_results_ad",
             "[UPDATE] Trigger to materialize TikTok Ads creative performance table": "mart_results_all",
         }
