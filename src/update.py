@@ -91,11 +91,6 @@ def update_campaign_insights(start_date: str, end_date: str):
     print(f"🔍 [UPDATE] Proceeding to update TikTok Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
     logging.info(f"🔍 [UPDATE] Proceeding to update TikTok Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
 
-    # 1.1.1. Start timing the update process
-    start_time = time.time()
-    print(f"🔍 [UPDATE] Proceeding to update TikTok campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
-    logging.info(f"🔍 [UPDATE] Proceeding to update TikTok campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
-
     try:
 
     # 1.1.2. Trigger to ingest TikTok Ads campaign insights
