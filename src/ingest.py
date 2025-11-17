@@ -1153,12 +1153,7 @@ def ingest_ad_insights(start_date: str, end_date: str,) -> pd.DataFrame:
                 ingest_results_fetched = fetch_ad_insights(ingest_date_separated, ingest_date_separated)
                 ingest_df_fetched = ingest_results_fetched["fetch_df_final"]
                 ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
-                ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
-                # DEBUG:
-                print("🔹 Sample rows from fetched ad insights:")
-                print(ingest_df_fetched.head(5))
-                print("🔹 Sample ad_id list:")
-                print(ingest_df_fetched.get("ad_id", pd.Series([])).head(10).tolist())                
+                ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]             
                 if ingest_status_fetched == "fetch_succeed_all":
                     print(f"✅ [INGEST] Successfully triggered TikTok Ads ad insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
                     logging.info(f"✅ [INGEST] Successfully triggered TikTok Ads ad insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
@@ -1183,10 +1178,7 @@ def ingest_ad_insights(start_date: str, end_date: str,) -> pd.DataFrame:
                 ingest_results_enforced = enforce_table_schema(schema_df_input=ingest_df_fetched,schema_type_mapping="ingest_ad_insights")
                 ingest_df_enforced = ingest_results_enforced["schema_df_final"]
                 ingest_status_enforced = ingest_results_enforced["schema_status_final"]
-                ingest_summary_enforced = ingest_results_enforced["schema_summary_final"]
-                # DEBUG:
-                print("🔹 Sample rows before schema enforcement:")
-                print(ingest_df_fetched.head(5))                
+                ingest_summary_enforced = ingest_results_enforced["schema_summary_final"]              
                 if ingest_status_enforced == "schema_succeed_all":
                     print(f"✅ [INGEST] Successfully triggered TikTok Ads ad insights schema enforcement for {ingest_date_separated} with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
                     logging.info(f"✅ [INGEST] Successfully triggered TikTok Ads ad insights schema enforcement for {ingest_date_separated} with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
