@@ -1115,28 +1115,7 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
-    # 2.2.7. Summarize ingestion result(s)
-        fetch_section_name = "[FETCH] Trigger to enforce schema for TikTok Ads campaign insights"
-        fetch_section_start = time.time()        
-        try:            
-            print(f"🔄 [FETCH] Trigger to enforce schema for TiKTok Ads campaign insights from {start_date} to {end_date} with {len(fetch_df_flattened)} row(s)...")
-            logging.info(f"🔄 [FETCH] Trigger to enforce schema for TiKTok Ads campaign insights from {start_date} to {end_date} with {len(fetch_df_flattened)} row(s)...")
-            fetch_results_schema = enforce_table_schema(fetch_df_flattened, "fetch_campaign_insights")            
-            fetch_summary_enforced = fetch_results_schema["schema_summary_final"]
-            fetch_status_enforced = fetch_results_schema["schema_status_final"]
-            fetch_df_enforced = fetch_results_schema["schema_df_final"]    
-            if fetch_status_enforced == "schema_succeed_all":
-                print(f"✅ [FETCH] Successfully triggered to enforce schema for TikTok Ads campaign insights from {start_date} to {end_date} with {fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
-                logging.info(f"✅ [FETCH] Successfully triggered to enforce schema for TikTok Ads campaign insights from {start_date} to {end_date} with {fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
-                fetch_sections_status[fetch_section_name] = "succeed"
-            else:
-                fetch_sections_status[fetch_section_name] = "failed"
-                print(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for TikTok Ads campaign insights from {start_date} to {end_date} with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
-                logging.error(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for TikTok Ads campaign insights from {start_date} to {end_date} with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
-        finally:
-            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
-
-    # 2.2.8. Summarize fetch result(s) for TikTok Ads ad insights
+    # 2.2.7. Summarize fetch result(s) for TikTok Ads ad insights
     finally:
         fetch_time_elapsed = round(time.time() - fetch_time_start, 2)
         fetch_df_final = fetch_df_enforced.copy() if "fetch_df_enforced" in locals() and not fetch_df_enforced.empty else pd.DataFrame()
