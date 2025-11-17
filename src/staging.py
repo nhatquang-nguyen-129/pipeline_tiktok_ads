@@ -513,33 +513,29 @@ def staging_ad_insights() -> dict:
         try:            
             for raw_table_ad in raw_tables_ad:
                 query_ad_staging = f"""
-                    SELECT
-                        raw.*,
-                        ad.advertiser_id,
-                        ad.ad_id,
-                        ad.ad_name,
-                        ad.adgroup_id,
-                        ad.adgroup_name,
-                        ad.campaign_id,
-                        ad.campaign_name,
-                        ad.operation_status,
-                        ad.ad_format,
-                        ad.optimization_event,
-                        ad.video_id,
-                        campaign.campaign_name,                        
-                        creative.video_cover_url,
-                        creative.preview_url,
-                        creative.create_time AS creative_create_time
-                    FROM `{raw_table_ad}` AS raw
-                    LEFT JOIN `{raw_ad_metadata}` AS ad
-                        ON CAST(raw.ad_id AS STRING) = CAST(ad.ad_id AS STRING)
-                        AND CAST(raw.advertiser_id AS STRING) = CAST(ad.advertiser_id AS STRING)
-                    LEFT JOIN `{raw_campaign_metadata}` AS campaign
-                        ON CAST(raw.campaign_id AS STRING) = CAST(campaign.campaign_id AS STRING)
-                        AND CAST(raw.advertiser_id AS STRING) = CAST(ad.advertiser_id AS STRING)
-                    LEFT JOIN `{raw_ad_creative}` AS creative
-                        ON CAST(ad.video_id AS STRING) = CAST(creative.video_id AS STRING)
-                        AND CAST(ad.advertiser_id AS STRING) = CAST(creative.advertiser_id AS STRING)
+                SELECT
+                    raw.*,
+                    ad.advertiser_id,
+                    ad.ad_id,
+                    ad.ad_name,
+                    ad.adgroup_id,
+                    ad.adgroup_name,
+                    ad.campaign_id,
+                    ad.campaign_name,
+                    ad.operation_status,
+                    ad.ad_format,
+                    ad.optimization_event,
+                    ad.video_id,
+                    creative.video_cover_url,
+                    creative.preview_url,
+                    creative.create_time AS creative_create_time
+                FROM `{raw_table_ad}` AS raw
+                LEFT JOIN `{raw_ad_metadata}` AS ad
+                    ON CAST(raw.ad_id AS STRING) = CAST(ad.ad_id AS STRING)
+                    AND CAST(raw.advertiser_id AS STRING) = CAST(ad.advertiser_id AS STRING)
+                LEFT JOIN `{raw_ad_creative}` AS creative
+                    ON CAST(ad.video_id AS STRING) = CAST(creative.video_id AS STRING)
+                    AND CAST(ad.advertiser_id AS STRING) = CAST(creative.advertiser_id AS STRING)
                 """
                 try:
                     print(f"🔄 [STAGING] Querying raw TikTok Ads ad insights table {raw_table_ad}...")
