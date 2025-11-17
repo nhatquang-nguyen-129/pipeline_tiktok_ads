@@ -235,7 +235,6 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "preview_url": str,
             "optimization_event": str,
             "result": str,
-            "stat_time_day": str,
             "spend": float,
             "impressions": int,
             "clicks": int,
