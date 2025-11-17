@@ -1114,7 +1114,6 @@ def ingest_ad_insights(start_date: str, end_date: str,) -> pd.DataFrame:
     ingest_sections_time = {}
     ingest_loops_time = {
         "[INGEST] Trigger to fetch TikTok Ads ad insights": 0.0,
-        "[INGEST] Trigger to enrich TikTok Ads ad insights": 0.0,
         "[INGEST] Trigger to enforce schema for TikTok Ads ad insights": 0.0,
         "[INGEST] Prepare Google BigQuery table_id for ingestion": 0.0,
         "[INGEST] Delete existing row(s) or create new table if not exist": 0.0,
