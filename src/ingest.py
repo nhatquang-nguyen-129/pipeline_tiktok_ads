@@ -747,7 +747,7 @@ def ingest_ad_creative() -> pd.DataFrame:
                     google_bigquery_client.load_table_from_dataframe(unique_keys, temp_table_id, job_config=job_config).result()
                     join_condition = " AND ".join([
                         f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
-                        for col in ["ad_id", "advertiser_id"]
+                        for col in ["video_id", "advertiser_id"]
                     ])
                     delete_query = f"""
                         DELETE FROM `{raw_table_creative}` AS main
