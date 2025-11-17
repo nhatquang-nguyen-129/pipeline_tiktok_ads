@@ -242,7 +242,7 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
     enrich_sections_time = {}
     enrich_df_table = pd.DataFrame()
     enrich_df_campaign = pd.DataFrame()
-    enrich_df_adgroup = pd.DataFrame()
+    enrich_df_adset = pd.DataFrame()
     enrich_df_other = pd.DataFrame()
     print(f"🔍 [ENRICH] Proceeding to enrich staging TikTok Ads ad insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [ENRICH] Proceeding to enrich staging TikTok Ads ad insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
@@ -343,22 +343,22 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
         finally:
             enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)  
 
-    # 1.2.5. Enrich adgroup-level field(s) for TikTok Ads ad insights
-        enrich_section_name = "[ENRICH] Enrich adgroup-level field(s) for TikTok Ads ad insights"
+    # 1.2.5. Enrich adset-level field(s) for TikTok Ads ad insights
+        enrich_section_name = "[ENRICH] Enrich adset-level field(s) for TikTok Ads ad insights"
         enrich_section_start = time.time()         
         try:
             print(f"🔍 [ENRICH] Enriching adgroup-level field(s) for staging TikTok Ads ad insights with {len(enrich_df_campaign)} row(s)...")
             logging.info(f"🔍 [ENRICH] Enriching adgroup-level field(s) for staging TikTok Ads ad insights with {len(enrich_df_campaign)} row(s)...")
-            enrich_df_adgroup = enrich_df_campaign.copy()
-            enrich_df_adgroup = enrich_df_adgroup.assign(
-                enrich_adgroup_location=lambda df: df["adgroup_name"].fillna("").str.split("_").str[0].fillna("unknown"),
-                enrich_adgroup_audience=lambda df: df["adgroup_name"].fillna("").str.split("_").str[1].fillna("unknown"),
-                enrich_adgroup_format=lambda df: df["adgroup_name"].fillna("").str.split("_").str[2].fillna("unknown"),
-                enrich_adgroup_strategy=lambda df: df["adgroup_name"].fillna("").str.split("_").str[3].fillna("unknown"),
-                enrich_adgroup_subtype=lambda df: df["adgroup_name"].fillna("").str.split("_").str[4].fillna("unknown")
+            enrich_df_adset = enrich_df_campaign.copy()
+            enrich_df_adset = enrich_df_adset.assign(
+                enrich_adset_location=lambda df: df["adgroup_name"].fillna("").str.split("_").str[0].fillna("unknown"),
+                enrich_adset_audience=lambda df: df["adgroup_name"].fillna("").str.split("_").str[1].fillna("unknown"),
+                enrich_adset_format=lambda df: df["adgroup_name"].fillna("").str.split("_").str[2].fillna("unknown"),
+                enrich_adset_strategy=lambda df: df["adgroup_name"].fillna("").str.split("_").str[3].fillna("unknown"),
+                enrich_adset_subtype=lambda df: df["adgroup_name"].fillna("").str.split("_").str[4].fillna("unknown")
             )
-            print(f"✅ [ENRICH] Successfully enriched adgroup-level field(s) for staging TikTok Ads ad insights with {len(enrich_df_adgroup)} row(s).")
-            logging.info(f"✅ [ENRICH] Successfully enriched adgroup-level field(s) for staging TikTok Ads ad insights with {len(enrich_df_adgroup)} row(s).")
+            print(f"✅ [ENRICH] Successfully enriched adgroup-level field(s) for staging TikTok Ads ad insights with {len(enrich_df_adset)} row(s).")
+            logging.info(f"✅ [ENRICH] Successfully enriched adgroup-level field(s) for staging TikTok Ads ad insights with {len(enrich_df_adset)} row(s).")
             enrich_sections_status[enrich_section_name] = "succeed"
         except Exception as e:
             enrich_sections_status[enrich_section_name] = "failed"
@@ -371,9 +371,9 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
         enrich_section_name = "[ENRICH] Enrich other field(s) for TikTok Ads ad insights"
         enrich_section_start = time.time()            
         try:
-            print(f"🔍 [ENRICH] Enriching other field(s) for staging TikTok Ads ad insights with {len(enrich_df_adgroup)} row(s)...")
-            logging.info(f"🔍 [ENRICH] Enriching other field(s) for staging TikTok Ads ad insights with {len(enrich_df_adgroup)} row(s)...")
-            enrich_df_other = enrich_df_adgroup.copy()
+            print(f"🔍 [ENRICH] Enriching other field(s) for staging TikTok Ads ad insights with {len(enrich_df_adset)} row(s)...")
+            logging.info(f"🔍 [ENRICH] Enriching other field(s) for staging TikTok Ads ad insights with {len(enrich_df_adset)} row(s)...")
+            enrich_df_other = enrich_df_adset.copy()
             enrich_df_other = enrich_df_other.rename(columns={"stat_time_day": "date_start"})
             enrich_df_other = enrich_df_other.assign(
                 date=lambda df: pd.to_datetime(df["date_start"], errors="coerce", utc=True).dt.floor("D"),
