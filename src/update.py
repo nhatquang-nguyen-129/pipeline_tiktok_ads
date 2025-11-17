@@ -94,7 +94,7 @@ def update_campaign_insights(start_date: str, end_date: str):
     try:
 
     # 1.1.2. Trigger to ingest TikTok Ads campaign insights
-        update_section_name = "[UPDATE] Trigger to ingest TikTok Ads campaign insight"
+        update_section_name = "[UPDATE] Trigger to ingest TikTok Ads campaign insights"
         update_section_start = time.time()
         try:
             print(f"🔄 [UPDATE] Triggering to ingest TikTok Ads campaign insights ingestion from {start_date} to {end_date}...")
