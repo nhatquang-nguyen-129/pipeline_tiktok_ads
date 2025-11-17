@@ -1030,7 +1030,7 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
                 "advertiser_id": advertiser_id,
                 "report_type": "BASIC",
                 "data_level": "AUCTION_AD",
-                "dimensions": ["ad_id", "stat_time_day"],
+                "dimensions": ["ad_id", "adgroup_id", "campaign_id", "stat_time_day"],
                 "metrics": [
                     "result",
                     "spend",
