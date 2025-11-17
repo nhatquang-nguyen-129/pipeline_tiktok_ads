@@ -99,6 +99,8 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
         "fetch_ad_insights": {
             "advertiser_id": str,
             "ad_id": str,
+            "adgroup_id": str,
+            "campaign_id": str,
             "stat_time_day": str,
             "result": str,
             "spend": float,
@@ -162,6 +164,8 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
         "ingest_ad_insights": {
             "advertiser_id": str,
             "ad_id": str,
+            "adgroup_id": str,
+            "campaign_id": str,            
             "result": str,
             "stat_time_day": str,
             "spend": float,
