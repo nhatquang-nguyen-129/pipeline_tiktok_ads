@@ -454,7 +454,7 @@ def fetch_ad_metadata(fetch_ids_ad: list[str]) -> pd.DataFrame:
                 try:
                     payload = {
                         "advertiser_id": advertiser_id,
-                        "filtering": {"ad_ids": [str(fetch_id_ad)]},
+                        "filtering": {"ad_ids": [fetch_id_ad]},
                         "fields": fetch_fields_default
                     }
                     response = requests.get(ad_get_url, headers=ad_get_headers, json=payload)
@@ -1061,7 +1061,7 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
                             json=ad_report_params,
                             timeout=60
                         )
-                        resp_json = resp.json()
+                        resp_json = resp.json()                  
                         if resp_json.get("code") != 0:
                             raise Exception(
                                 f"❌ [FETCH] Failed to retrieve TikTok Ads ad-level insights with BASIC report_type due to API error {resp_json.get('message')}."
@@ -1078,6 +1078,8 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
                         fetch_insight_ad["advertiser_id"] = ad_report_params["advertiser_id"]
                         fetch_insights_ad.append(fetch_insight_ad)
                     fetch_df_flattened = pd.DataFrame(fetch_insights_ad)
+                    print(fetch_df_flattened.head(10).to_string())
+                    print(f"✅ [FETCH] Successfully retrieved {len(fetch_df_flattened)} rows ...")                    
                     print(f"✅ [FETCH] Successfully retrieved {len(fetch_df_flattened)} rows of TikTok Ads ad insights with BASIC report_type.")
                     logging.info(f"✅ [FETCH] Successfully retrieved {len(fetch_df_flattened)} rows of TikTok Ads ad insights with BASIC report_type.")
                     break

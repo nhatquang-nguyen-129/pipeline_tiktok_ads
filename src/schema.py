@@ -174,7 +174,6 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "offline_shopping_events": int,
             "onsite_shopping": int,
             "messaging_total_conversation_tiktok_direct_message": int,
-            "last_updated_at": "datetime64[ns, UTC]"
         },
         "staging_campaign_insights": {
             # Original staging ad fields
