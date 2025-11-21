@@ -2,16 +2,16 @@
 ==================================================================
 TIKTOK STAGING MODULE
 ------------------------------------------------------------------
-This module transforms raw TikTok Ads data into enriched,  
+This module transforms raw TikTok Ads data into enriched, 
 normalized staging tables in BigQuery, acting as the bridge  
-between raw API ingestion and final MART-level analytics.
+between raw API ingestion and final materialized analytics.
 
 It combines raw ad/campaign/creative data, applies business logic  
-(e.g., parsing naming conventions, standardizing fields), and  
+included parsing naming conventions, standardizing fields and  
 prepares clean, query-ready datasets for downstream consumption.
 
 ✔️ Joins raw ad insights with creative and campaign metadata  
-✔️ Enriches fields such as owner, placement, format  
+✔️ Enriches fields such as owner, placement and format  
 ✔️ Normalizes and writes standardized tables into dataset  
 ✔️ Validates data integrity and ensures field completeness  
 ✔️ Supports modular extension for new TikTok Ads entities  
@@ -374,7 +374,7 @@ def staging_campaign_insights() -> dict:
         finally:
             staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)             
 
-    # 1.1.11. Summarize staging result(s) of TikTok Ads campaign insights
+    # 1.1.11. Summarize staging results of TikTok Ads campaign insights
     finally:
         staging_time_elapsed = round(time.time() - staging_time_start, 2)
         staging_df_final = staging_df_uploaded.copy() if not staging_df_uploaded.empty else pd.DataFrame()
@@ -448,12 +448,10 @@ def staging_ad_insights() -> dict:
         staging_section_start = time.time()    
         try:
             raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
-            raw_campaign_metadata = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_campaign_metadata"
-            raw_adset_metadata = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_adset_metadata"
             raw_ad_metadata = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_metadata"
             raw_ad_creative = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_creative"
-            print(f"🔍 [STAGING] Using raw table metadata {raw_dataset} to build staging table for Facebook Ads ad insights...")
-            logging.info(f"🔍 [STAGING] Using raw table metadata {raw_dataset} to build staging table for Facebook Ads ad insights...")
+            print(f"🔍 [STAGING] Using raw table metadata {raw_dataset} to build staging table for TikTok Ads ad insights...")
+            logging.info(f"🔍 [STAGING] Using raw table metadata {raw_dataset} to build staging table for TikTok Ads ad insights...")
             staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
             staging_table_ad = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"
             print(f"🔍 [STAGING] Preparing to build staging table {staging_table_ad} for TikTok Ads ad insights...")
@@ -748,7 +746,7 @@ def staging_ad_insights() -> dict:
         finally:
             staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)     
 
-    # 1.2.11. Summarize staging result(s) of TikTok Ads ad insights
+    # 1.2.11. Summarize staging results of TikTok Ads ad insights
     finally:
         staging_time_elapsed = round(time.time() - staging_time_start, 2)
         staging_df_final = staging_df_uploaded.copy() if not staging_df_uploaded.empty else pd.DataFrame()
