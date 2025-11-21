@@ -884,17 +884,17 @@ def ingest_campaign_insights(start_date: str, end_date: str,) -> pd.DataFrame:
                 ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
                 ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
                 if ingest_status_fetched == "fetch_succeed_all":
-                    print(f"✅ [INGEST] Successfully triggered raw TikTok Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
-                    logging.info(f"✅ [INGEST] Successfully triggered raw TikTok Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                    print(f"✅ [INGEST] Successfully triggered TikTok Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                    logging.info(f"✅ [INGEST] Successfully triggered TikTok Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
                     ingest_sections_status[ingest_section_name] = "succeed"
                 elif ingest_status_fetched == "fetch_succeed_partial":
-                    print(f"⚠️ [INGEST] Partially triggered raw TikTok Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
-                    logging.warning(f"⚠️ [INGEST] Partially triggered raw TikTok Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                    print(f"⚠️ [INGEST] Partially triggered TikTok Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                    logging.warning(f"⚠️ [INGEST] Partially triggered TikTok Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
                     ingest_sections_status[ingest_section_name] = "partial"
                 else:
                     ingest_sections_status[ingest_section_name] = "failed"
-                    print(f"❌ [INGEST] Failed to trigger raw TikTok Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
-                    logging.error(f"❌ [INGEST] Failed to trigger raw TikTok Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                    print(f"❌ [INGEST] Failed to trigger TikTok Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                    logging.error(f"❌ [INGEST] Failed to trigger TikTok Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
             finally:
                 ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2) 
 
@@ -941,15 +941,15 @@ def ingest_campaign_insights(start_date: str, end_date: str,) -> pd.DataFrame:
                 table_clusters_defined = []
                 table_schemas_defined = []
                 try:
-                    print(f"🔍 [INGEST] Checking TikTok Ads campaign insights table {raw_table_campaign} existence...")
-                    logging.info(f"🔍 [INGEST] Checking TikTok Ads campaign insights table {raw_table_campaign} existence...")
+                    print(f"🔍 [INGEST] Checking raw TikTok Ads campaign insights table {raw_table_campaign} existence...")
+                    logging.info(f"🔍 [INGEST] Checking raw TikTok Ads campaign insights table {raw_table_campaign} existence...")
                     google_bigquery_client.get_table(raw_table_campaign)
                     ingest_table_existed = True
                 except NotFound:
                     ingest_table_existed = False
                 except Exception as e:
-                    print(f"❌ [INGEST] Failed to check TikTok Ads campaign insights table {raw_table_campaign} existence due to {e}.")
-                    logging.error(f"❌ [INGEST] Failed to check TikTok Ads campaign insights table {raw_table_campaign} existence due to {e}.")
+                    print(f"❌ [INGEST] Failed to check raw TikTok Ads campaign insights table {raw_table_campaign} existence due to {e}.")
+                    logging.error(f"❌ [INGEST] Failed to check raw TikTok Ads campaign insights table {raw_table_campaign} existence due to {e}.")
                 if not ingest_table_existed:
                     print(f"⚠️ [INGEST] TikTok Ads campaign insights table {raw_table_campaign} not found then table creation will be proceeding...")
                     logging.info(f"⚠️ [INGEST] TikTok Ads campaign insights table {raw_table_campaign} not found then table creation will be proceeding...")
@@ -976,22 +976,22 @@ def ingest_campaign_insights(start_date: str, end_date: str,) -> pd.DataFrame:
                     if table_clusters_filtered:
                         table_configuration_defined.clustering_fields = table_clusters_filtered
                     try:
-                        print(f"🔍 [INGEST] Creating TikTok Ads campaign insights table {raw_table_campaign} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}...")
-                        logging.info(f"🔍 [INGEST] Creating TikTok Ads campaign insights table {raw_table_campaign} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}...")
+                        print(f"🔍 [INGEST] Creating raw TikTok Ads campaign insights table {raw_table_campaign} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}...")
+                        logging.info(f"🔍 [INGEST] Creating raw TikTok Ads campaign insights table {raw_table_campaign} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}...")
                         table_metadata_defined = google_bigquery_client.create_table(table_configuration_defined)
-                        print(f"✅ [INGEST] Successfully created TikTok Ads campaign insights table {table_metadata_defined.full_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}.")
-                        logging.info(f"✅ [INGEST] Successfully created TikTok Ads campaign insights table {table_metadata_defined.full_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}.")
+                        print(f"✅ [INGEST] Successfully created raw TikTok Ads campaign insights table {table_metadata_defined.full_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}.")
+                        logging.info(f"✅ [INGEST] Successfully created raw TikTok Ads campaign insights table {table_metadata_defined.full_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}.")
                     except Exception as e:
-                        print(f"❌ [INGEST] Failed to create TikTok Ads campaign insights table {raw_table_campaign} due to {e}.")
-                        logging.error(f"❌ [INGEST] Failed to create TikTok Ads campaign insights table {raw_table_campaign} due to {e}.")
+                        print(f"❌ [INGEST] Failed to create raw TikTok Ads campaign insights table {raw_table_campaign} due to {e}.")
+                        logging.error(f"❌ [INGEST] Failed to create raw TikTok Ads campaign insights table {raw_table_campaign} due to {e}.")
                 else:
                     ingest_dates_new = ingest_df_deduplicated["stat_time_day"].dropna().unique().tolist()
                     ingest_query_existed = f"SELECT DISTINCT stat_time_day FROM `{raw_table_campaign}`"
                     ingest_dates_existed = [row.stat_time_day for row in google_bigquery_client.query(ingest_query_existed).result()]
                     ingest_dates_overlapped = set(ingest_dates_new) & set(ingest_dates_existed)
                     if ingest_dates_overlapped:
-                        print(f"⚠️ [INGEST] Found {len(ingest_dates_overlapped)} overlapping date(s) in TikTok Ads campaign insights {raw_table_campaign} table then deletion will be proceeding...")
-                        logging.warning(f"⚠️ [INGEST] Found {len(ingest_dates_overlapped)} overlapping date(s) in TikTok Ads campaign insights {raw_table_campaign} table then deletion will be proceeding...")
+                        print(f"⚠️ [INGEST] Found {len(ingest_dates_overlapped)} overlapping date(s) in raw TikTok Ads campaign insights {raw_table_campaign} table then deletion will be proceeding...")
+                        logging.warning(f"⚠️ [INGEST] Found {len(ingest_dates_overlapped)} overlapping date(s) in raw TikTok Ads campaign insights {raw_table_campaign} table then deletion will be proceeding...")
                         for ingest_date_overlapped in ingest_dates_overlapped:
                             query = f"""
                                 DELETE FROM `{raw_table_campaign}`
@@ -1003,19 +1003,19 @@ def ingest_campaign_insights(start_date: str, end_date: str,) -> pd.DataFrame:
                             try:
                                 ingest_result_deleted = google_bigquery_client.query(query, job_config=job_config).result()
                                 ingest_rows_deleted = ingest_result_deleted.num_dml_affected_rows
-                                print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of TikTok Ads campaign insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_campaign}.")
-                                logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of TikTok Ads campaign insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_campaign}.")
+                                print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of raw TikTok Ads campaign insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_campaign}.")
+                                logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of raw TikTok Ads campaign insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_campaign}.")
                             except Exception as e:
-                                print(f"❌ [INGEST] Failed to delete existing row(s) of TikTok Ads campaign insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_campaign} due to {e}.")
-                                logging.error(f"❌ [INGEST] Failed to delete existing row(s) of TikTok Ads campaign insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_campaign} due to {e}.")
+                                print(f"❌ [INGEST] Failed to delete existing row(s) of raw TikTok Ads campaign insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_campaign} due to {e}.")
+                                logging.error(f"❌ [INGEST] Failed to delete existing row(s) of raw TikTok Ads campaign insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_campaign} due to {e}.")
                     else:
-                        print(f"⚠️ [INGEST] No overlapping date(s) of TikTok Ads campaign insights found in Google BigQuery {raw_table_campaign} table then deletion is skipped.")
-                        logging.info(f"⚠️ [INGEST] No overlapping date(s) of TikTok Ads campaign insights found in Google BigQuery {raw_table_campaign} table then deletion is skipped.")
+                        print(f"⚠️ [INGEST] No overlapping date(s) of raw TikTok Ads campaign insights found in Google BigQuery {raw_table_campaign} table then deletion is skipped.")
+                        logging.info(f"⚠️ [INGEST] No overlapping date(s) of raw TikTok Ads campaign insights found in Google BigQuery {raw_table_campaign} table then deletion is skipped.")
                 ingest_sections_status[ingest_section_name] = "succeed"
             except Exception as e:
                 ingest_sections_status[ingest_section_name] = "failed"
-                print(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_campaign} if it not exist for TikTok Ads campaign insights due to {e}.")
-                logging.error(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_campaign} if it not exist for TikTok Ads campaign insights due to {e}.")
+                print(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_campaign} if it not exist for raw TikTok Ads campaign insights due to {e}.")
+                logging.error(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_campaign} if it not exist for raw TikTok Ads campaign insights due to {e}.")
             finally:
                 ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)
 
