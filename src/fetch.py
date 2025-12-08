@@ -16,7 +16,7 @@ downstream enrichment and transformation stages.
 ✔️ Returns normalized and schema-ready DataFrames for processing  
 ✔️ Logs detailed runtime information for monitoring and debugging  
 
-⚠️ This module focuses solely on *data retrieval and extraction*.  
+⚠️ This module focuses solely on data retrieval and extraction.  
 It does **not** perform schema enforcement, data enrichment, or 
 storage operations such as uploading to BigQuery.
 ==================================================================
