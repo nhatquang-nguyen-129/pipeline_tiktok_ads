@@ -10,11 +10,11 @@ By centralizing enrichment rules, this module ensures transparency,
 consistency, and maintainability across the marketing data pipeline to  
 build insight-ready tables.
 
-✔️ Maps `optimization_goal` to its corresponding business action type  
+✔️ Maps optimization_goal to its corresponding business action type  
 ✔️ Standardizes campaign, ad set and ad-level naming conventions  
 ✔️ Extracts and normalizes key performance metrics across campaigns  
 ✔️ Cleans and validates data to ensure schema and field consistency  
-✔️ Reduces payload size by removing redundant or raw field(s)
+✔️ Reduces payload size by removing redundant or raw fields
 
 ⚠️ This module focuses only on enrichment and transformation logic.  
 It does not handle data fetching, ingestion or staging.
@@ -55,9 +55,6 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
     enrich_time_start = time.time()   
     enrich_sections_status = {}
     enrich_sections_time = {}
-    enrich_df_table = pd.DataFrame()
-    enrich_df_campaign = pd.DataFrame()
-    enrich_df_other = pd.DataFrame()
     print(f"🔍 [ENRICH] Proceeding to enrich staging TikTok Ads campaign insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [ENRICH] Proceeding to enrich staging TikTok Ads campaign insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
@@ -84,18 +81,13 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
         try: 
             print(f"🔍 [ENRICH] Enriching table fields for staging TikTok Ads campaign insights with {len(enrich_df_input)} row(s)...")
             logging.info(f"🔍 [ENRICH] Enriching table fields for staging TikTok Ads campaign insights with {len(enrich_df_input)} row(s)...")
-            enrich_df_table = enrich_df_input.copy()
-            enrich_df_table = enrich_df_table.assign(
-                spend=lambda df: pd.to_numeric(df["spend"], errors="coerce").fillna(0)            )          
+            enrich_df_table = enrich_df_input.copy()    
             enrich_table_name = enrich_table_id.split(".")[-1]
-            match = re.search(
-                r"^(?P<company>\w+)_table_(?P<platform>\w+)_(?P<department>\w+)_(?P<account>\w+)_campaign_m\d{6}$",
-                enrich_table_name
-            )            
+            enrich_table_convention = re.search(r"^(?P<company>\w+)_table_(?P<platform>\w+)_(?P<department>\w+)_(?P<account>\w+)_campaign_m\d{6}$",enrich_table_name)            
             enrich_df_table = enrich_df_table.assign(
-                enrich_account_platform=match.group("platform") if match else "unknown",
-                enrich_account_department=match.group("department") if match else "unknown",
-                enrich_account_name=match.group("account") if match else "unknown"
+                enrich_account_platform=enrich_table_convention.group("platform") if enrich_table_convention else "unknown",
+                enrich_account_department=enrich_table_convention.group("department") if enrich_table_convention else "unknown",
+                enrich_account_name=enrich_table_convention.group("account") if enrich_table_convention else "unknown"
             )            
             print(f"✅ [ENRICH] Successfully enriched table fields for staging TikTok Ads campaign insights with {len(enrich_df_table)} row(s).")
             logging.info(f"✅ [ENRICH] Successfully enriched table fields for staging TikTok Ads campaign insights with {len(enrich_df_table)} row(s).")
@@ -127,28 +119,7 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
                     enrich_program_group=lambda df: df["campaign_name"].str.split("_").str[8].fillna("unknown"),
                     enrich_program_type=lambda df: df["campaign_name"].str.split("_").str[9].fillna("unknown"),
                 )
-            )
-            vietnamese_accents_mapping = {
-                'á': 'a', 'à': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a',
-                'ă': 'a', 'ắ': 'a', 'ằ': 'a', 'ẳ': 'a', 'ẵ': 'a', 'ặ': 'a',
-                'â': 'a', 'ấ': 'a', 'ầ': 'a', 'ẩ': 'a', 'ẫ': 'a', 'ậ': 'a',
-                'đ': 'd',
-                'é': 'e', 'è': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ẹ': 'e',
-                'ê': 'e', 'ế': 'e', 'ề': 'e', 'ể': 'e', 'ễ': 'e', 'ệ': 'e',
-                'í': 'i', 'ì': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ị': 'i',
-                'ó': 'o', 'ò': 'o', 'ỏ': 'o', 'õ': 'o', 'ọ': 'o',
-                'ô': 'o', 'ố': 'o', 'ồ': 'o', 'ổ': 'o', 'ỗ': 'o', 'ộ': 'o',
-                'ơ': 'o', 'ớ': 'o', 'ờ': 'o', 'ở': 'o', 'ỡ': 'o', 'ợ': 'o',
-                'ú': 'u', 'ù': 'u', 'ủ': 'u', 'ũ': 'u', 'ụ': 'u',
-                'ư': 'u', 'ứ': 'u', 'ừ': 'u', 'ử': 'u', 'ữ': 'u', 'ự': 'u',
-                'ý': 'y', 'ỳ': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
-            }
-            vietnamese_cases_upper = {k.upper(): v.upper() for k, v in vietnamese_accents_mapping.items()}
-            vietnamese_characters_all = {**vietnamese_accents_mapping, **vietnamese_cases_upper}
-            enrich_df_campaign["enrich_campaign_personnel"] = (
-                enrich_df_campaign["enrich_campaign_personnel"]
-                .apply(lambda x: ''.join(vietnamese_characters_all.get(c, c) for c in x) if isinstance(x, str) else x)
-            )           
+            )       
             print(f"✅ [ENRICH] Successfully enriched campaign fields for staging TikTok Ads campaign insights with {len(enrich_df_campaign)} row(s).")
             logging.info(f"✅ [ENRICH] Successfully enriched campaign fields for staging TikTok Ads campaign insights with {len(enrich_df_campaign)} row(s).")
             enrich_sections_status[enrich_section_name] = "succeed"        
@@ -172,7 +143,7 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
                 year=lambda df: pd.to_datetime(df["date_start"], errors="coerce", utc=True).dt.strftime("%Y"),
                 month=lambda df: pd.to_datetime(df["date_start"], errors="coerce", utc=True).dt.strftime("%Y-%m"),
                 last_updated_at=lambda _: datetime.utcnow().replace(tzinfo=pytz.UTC),
-            )
+            ).drop(columns=["date_start"], errors="ignore")
             print(f"✅ [ENRICH] Successfully enriched date fields for staging TikTok Ads campaign insights with {len(enrich_df_other)} row(s).")
             logging.info(f"✅ [ENRICH] Successfully enriched date fields for staging TikTok Ads campaign insights with {len(enrich_df_other)} row(s).")
             enrich_sections_status[enrich_section_name] = "succeed"
@@ -235,10 +206,6 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
     enrich_time_start = time.time()   
     enrich_sections_status = {}
     enrich_sections_time = {}
-    enrich_df_table = pd.DataFrame()
-    enrich_df_campaign = pd.DataFrame()
-    enrich_df_adset = pd.DataFrame()
-    enrich_df_other = pd.DataFrame()
     print(f"🔍 [ENRICH] Proceeding to enrich staging TikTok Ads ad insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [ENRICH] Proceeding to enrich staging TikTok Ads ad insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
@@ -267,14 +234,13 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
             print(f"🔍 [ENRICH] Enriching table fields for staging TikTok Ads ad insights with {len(enrich_df_input)} row(s)...")
             logging.info(f"🔍 [ENRICH] Enriching table fields for staging TikTok Ads ad insights with {len(enrich_df_input)} row(s)...")
             enrich_df_table = enrich_df_input.copy()
-            enrich_df_table["spend"] = pd.to_numeric(enrich_df_table["spend"], errors="coerce").fillna(0)
             enrich_table_name = enrich_table_id.split(".")[-1]
-            match = re.search(r"^(?P<company>\w+)_table_(?P<platform>\w+)_(?P<department>\w+)_(?P<account>\w+)_ad_m\d{6}$", enrich_table_name)
+            enrich_table_convention = re.search(r"^(?P<company>\w+)_table_(?P<platform>\w+)_(?P<department>\w+)_(?P<account>\w+)_ad_m\d{6}$", enrich_table_name)
             enrich_df_table = enrich_df_table.assign(
                 spend=lambda df: pd.to_numeric(df["spend"], errors="coerce").fillna(0),
-                enrich_account_platform=match.group("platform") if match else None,
-                enrich_account_department=match.group("department") if match else None,
-                enrich_account_name=match.group("account") if match else None
+                enrich_account_platform=enrich_table_convention.group("platform") if enrich_table_convention else None,
+                enrich_account_department=enrich_table_convention.group("department") if enrich_table_convention else None,
+                enrich_account_name=enrich_table_convention.group("account") if enrich_table_convention else None
             )
             print(f"✅ [ENRICH] Successfully enriched table fields for staging TikTok Ads ad insights with {len(enrich_df_table)} row(s).")
             logging.info(f"✅ [ENRICH] Successfully enriched table fields for staging TikTok Ads ad insights with {len(enrich_df_table)} row(s).")
@@ -306,27 +272,6 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
                     enrich_program_group=lambda df: df["campaign_name"].str.split("_").str[8].fillna("unknown"),
                     enrich_program_type=lambda df: df["campaign_name"].str.split("_").str[9].fillna("unknown"),
                 )
-            )
-            vietnamese_accents_mapping = {
-                'á': 'a', 'à': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a',
-                'ă': 'a', 'ắ': 'a', 'ằ': 'a', 'ẳ': 'a', 'ẵ': 'a', 'ặ': 'a',
-                'â': 'a', 'ấ': 'a', 'ầ': 'a', 'ẩ': 'a', 'ẫ': 'a', 'ậ': 'a',
-                'đ': 'd',
-                'é': 'e', 'è': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ẹ': 'e',
-                'ê': 'e', 'ế': 'e', 'ề': 'e', 'ể': 'e', 'ễ': 'e', 'ệ': 'e',
-                'í': 'i', 'ì': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ị': 'i',
-                'ó': 'o', 'ò': 'o', 'ỏ': 'o', 'õ': 'o', 'ọ': 'o',
-                'ô': 'o', 'ố': 'o', 'ồ': 'o', 'ổ': 'o', 'ỗ': 'o', 'ộ': 'o',
-                'ơ': 'o', 'ớ': 'o', 'ờ': 'o', 'ở': 'o', 'ỡ': 'o', 'ợ': 'o',
-                'ú': 'u', 'ù': 'u', 'ủ': 'u', 'ũ': 'u', 'ụ': 'u',
-                'ư': 'u', 'ứ': 'u', 'ừ': 'u', 'ử': 'u', 'ữ': 'u', 'ự': 'u',
-                'ý': 'y', 'ỳ': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
-            }
-            vietnamese_cases_upper = {k.upper(): v.upper() for k, v in vietnamese_accents_mapping.items()}
-            vietnamese_characters_all = {**vietnamese_accents_mapping, **vietnamese_cases_upper}
-            enrich_df_campaign["enrich_campaign_personnel"] = (
-                enrich_df_campaign["enrich_campaign_personnel"]
-                .apply(lambda x: ''.join(vietnamese_characters_all.get(c, c) for c in x) if isinstance(x, str) else x)
             )
             print(f"✅ [ENRICH] Successfully enriched campaign fields for staging TikTok Ads ad insights with {len(enrich_df_campaign)} row(s).")
             logging.info(f"✅ [ENRICH] Successfully enriched campaign fields for staging TikTok Ads ad insights with {len(enrich_df_campaign)} row(s).")
@@ -375,7 +320,7 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
                 year=lambda df: pd.to_datetime(df["date_start"], errors="coerce", utc=True).dt.strftime("%Y"),
                 month=lambda df: pd.to_datetime(df["date_start"], errors="coerce", utc=True).dt.strftime("%Y-%m"),
                 last_updated_at=lambda _: datetime.utcnow().replace(tzinfo=pytz.UTC),
-            )
+            ).drop(columns=["date_start"], errors="ignore")
             print(f"✅ [ENRICH] Successfully enriched date fields for staging TikTok Ads ad insights with {len(enrich_df_other)} row(s).")
             logging.info(f"✅ [ENRICH] Successfully enriched date fields for staging TikTok Ads ad insights with {len(enrich_df_other)} row(s).")
             enrich_sections_status[enrich_section_name] = "succeed"
