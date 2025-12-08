@@ -89,9 +89,9 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
                 enrich_account_department=enrich_table_convention.group("department") if enrich_table_convention else "unknown",
                 enrich_account_name=enrich_table_convention.group("account") if enrich_table_convention else "unknown"
             )            
+            enrich_sections_status[enrich_section_name] = "succeed"            
             print(f"✅ [ENRICH] Successfully enriched table fields for staging TikTok Ads campaign insights with {len(enrich_df_table)} row(s).")
             logging.info(f"✅ [ENRICH] Successfully enriched table fields for staging TikTok Ads campaign insights with {len(enrich_df_table)} row(s).")
-            enrich_sections_status[enrich_section_name] = "succeed"        
         except Exception as e:
             enrich_sections_status[enrich_section_name] = "failed"
             print(f"❌ [ENRICH] Failed to enrich table fields for staging TikTok Ads campaign insights due to {e}.")
@@ -120,9 +120,9 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
                     enrich_program_type=lambda df: df["campaign_name"].str.split("_").str[9].fillna("unknown"),
                 )
             )       
+            enrich_sections_status[enrich_section_name] = "succeed"            
             print(f"✅ [ENRICH] Successfully enriched campaign fields for staging TikTok Ads campaign insights with {len(enrich_df_campaign)} row(s).")
-            logging.info(f"✅ [ENRICH] Successfully enriched campaign fields for staging TikTok Ads campaign insights with {len(enrich_df_campaign)} row(s).")
-            enrich_sections_status[enrich_section_name] = "succeed"        
+            logging.info(f"✅ [ENRICH] Successfully enriched campaign fields for staging TikTok Ads campaign insights with {len(enrich_df_campaign)} row(s).")            
         except Exception as e:
             enrich_sections_status[enrich_section_name] = "failed"
             print(f"❌ [ENRICH] Failed to enrich campaign fields for staging TikTok Ads campaign insights due to {e}.")
@@ -144,9 +144,9 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
                 month=lambda df: pd.to_datetime(df["date_start"], errors="coerce", utc=True).dt.strftime("%Y-%m"),
                 last_updated_at=lambda _: datetime.utcnow().replace(tzinfo=pytz.UTC),
             ).drop(columns=["date_start"], errors="ignore")
-            print(f"✅ [ENRICH] Successfully enriched date fields for staging TikTok Ads campaign insights with {len(enrich_df_other)} row(s).")
-            logging.info(f"✅ [ENRICH] Successfully enriched date fields for staging TikTok Ads campaign insights with {len(enrich_df_other)} row(s).")
             enrich_sections_status[enrich_section_name] = "succeed"
+            print(f"✅ [ENRICH] Successfully enriched date fields for staging TikTok Ads campaign insights with {len(enrich_df_other)} row(s).")
+            logging.info(f"✅ [ENRICH] Successfully enriched date fields for staging TikTok Ads campaign insights with {len(enrich_df_other)} row(s).")           
         except Exception as e:
             enrich_sections_status[enrich_section_name] = "failed"
             print(f"❌ [ENRICH] Failed to enrich date fields for staging TikTok Ads campaign insights due to {e}.")
@@ -242,9 +242,9 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
                 enrich_account_department=enrich_table_convention.group("department") if enrich_table_convention else None,
                 enrich_account_name=enrich_table_convention.group("account") if enrich_table_convention else None
             )
+            enrich_sections_status[enrich_section_name] = "succeed"
             print(f"✅ [ENRICH] Successfully enriched table fields for staging TikTok Ads ad insights with {len(enrich_df_table)} row(s).")
             logging.info(f"✅ [ENRICH] Successfully enriched table fields for staging TikTok Ads ad insights with {len(enrich_df_table)} row(s).")
-            enrich_sections_status[enrich_section_name] = "succeed"
         except Exception as e:
             enrich_sections_status[enrich_section_name] = "failed"
             print(f"❌ [ENRICH] Failed to enrich table fields for staging TikTok Ads ad insights due to {e}.")
@@ -273,9 +273,9 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
                     enrich_program_type=lambda df: df["campaign_name"].str.split("_").str[9].fillna("unknown"),
                 )
             )
-            print(f"✅ [ENRICH] Successfully enriched campaign fields for staging TikTok Ads ad insights with {len(enrich_df_campaign)} row(s).")
-            logging.info(f"✅ [ENRICH] Successfully enriched campaign fields for staging TikTok Ads ad insights with {len(enrich_df_campaign)} row(s).")
             enrich_sections_status[enrich_section_name] = "succeed"
+            print(f"✅ [ENRICH] Successfully enriched campaign fields for staging TikTok Ads ad insights with {len(enrich_df_campaign)} row(s).")
+            logging.info(f"✅ [ENRICH] Successfully enriched campaign fields for staging TikTok Ads ad insights with {len(enrich_df_campaign)} row(s).")           
         except Exception as e:
             enrich_sections_status[enrich_section_name] = "failed"
             print(f"❌ [ENRICH] Failed to enrich campaign fields for staging TikTok Ads ad insights due to {e}.")
@@ -321,9 +321,9 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
                 month=lambda df: pd.to_datetime(df["date_start"], errors="coerce", utc=True).dt.strftime("%Y-%m"),
                 last_updated_at=lambda _: datetime.utcnow().replace(tzinfo=pytz.UTC),
             ).drop(columns=["date_start"], errors="ignore")
-            print(f"✅ [ENRICH] Successfully enriched date fields for staging TikTok Ads ad insights with {len(enrich_df_other)} row(s).")
-            logging.info(f"✅ [ENRICH] Successfully enriched date fields for staging TikTok Ads ad insights with {len(enrich_df_other)} row(s).")
             enrich_sections_status[enrich_section_name] = "succeed"
+            print(f"✅ [ENRICH] Successfully enriched date fields for staging TikTok Ads ad insights with {len(enrich_df_other)} row(s).")
+            logging.info(f"✅ [ENRICH] Successfully enriched date fields for staging TikTok Ads ad insights with {len(enrich_df_other)} row(s).")           
         except Exception as e:
             enrich_sections_status[enrich_section_name] = "failed"
             print(f"❌ [ENRICH] Failed to enrich date fields for staging TikTok Ads ad insights due to {e}.")

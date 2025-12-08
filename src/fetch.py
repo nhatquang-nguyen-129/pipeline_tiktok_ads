@@ -30,14 +30,15 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.
 # Add Python logging ultilties for integration
 import logging
 
-# Add Python Pandas libraries for integration
-import pandas as pd
 
 # Add Python requests ultilities for integration
 import requests
 
 # Add Python time ultilities for integration
 import time
+
+# Add Python Pandas libraries for integration
+import pandas as pd
 
 # Add Google Secret Manager modules for integration
 from google.cloud import secretmanager
@@ -70,15 +71,15 @@ MODE = os.getenv("MODE")
 
 # 1.1. Fetch campaign metadata for TikTok Ads
 def fetch_campaign_metadata(fetch_ids_campaign: list[str]) -> pd.DataFrame:
-    print(f"🚀 [FETCH] Starting to fetch raw TikTok Ads campaign metadata for {len(fetch_ids_campaign)} campaign_id(s)...")
-    logging.info(f"🚀 [FETCH] Starting to fetch raw TikTok Ads campaign metadata for {len(fetch_ids_campaign)} campaign_id(s)...")
+    print(f"🚀 [FETCH] Starting to fetch TikTok Ads campaign metadata for {len(fetch_ids_campaign)} campaign_id(s)...")
+    logging.info(f"🚀 [FETCH] Starting to fetch TikTok Ads campaign metadata for {len(fetch_ids_campaign)} campaign_id(s)...")
 
     # 1.1.1. Start timing the TikTok Ads campaign metadata fetching
     fetch_time_start = time.time()   
     fetch_sections_status = {}
     fetch_sections_time = {}
-    print(f"🔍 [FETCH] Proceeding to fetch raw TikTok Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [FETCH] Proceeding to fetch raw TikTok Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [FETCH] Proceeding to fetch TikTok Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    logging.info(f"🔍 [FETCH] Proceeding to fetch TikTok Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
     try:
 
@@ -88,12 +89,12 @@ def fetch_campaign_metadata(fetch_ids_campaign: list[str]) -> pd.DataFrame:
         try:
             if not fetch_ids_campaign:
                 fetch_sections_status[fetch_section_name] = "failed"        
-                print("⚠️ [FETCH] Empty TikTok Ads campaign_id_list provided then fetching will be suspended.")
-                logging.warning("⚠️ [FETCH] Empty TikTok Ads campaign_id_list provided then fetching will be suspended.")
+                print("⚠️ [FETCH] Empty TikTok Ads campaign_id_list provided then fetching is suspended.")
+                logging.warning("⚠️ [FETCH] Empty TikTok Ads campaign_id_list provided then fetching is suspended.")
             else:
                 fetch_sections_status[fetch_section_name] = "succeed"
-                print(f"✅ [FETCH] Successfully validated input for {len(fetch_ids_campaign)} campaign_id(s) of raw TikTok Ads campaign metadata fetching.")
-                logging.info(f"✅ [FETCH] Successfully validated input for {len(fetch_ids_campaign)} campaign_id(s) of raw TikTok Ads campaign metadata fetching.")
+                print(f"✅ [FETCH] Successfully validated input for {len(fetch_ids_campaign)} campaign_id(s) of TikTok Ads campaign metadata fetching.")
+                logging.info(f"✅ [FETCH] Successfully validated input for {len(fetch_ids_campaign)} campaign_id(s) of TikTok Ads campaign metadata fetching.")
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
@@ -110,8 +111,8 @@ def fetch_campaign_metadata(fetch_ids_campaign: list[str]) -> pd.DataFrame:
                 "create_time"
             ]
             fetch_sections_status[fetch_section_name] = "succeed"
-            print(f"🔍 [FETCH] Preparing to fetch raw TikTok Ads campaign metadata with {fetch_fields_default} field(s)...")
-            logging.info(f"🔍 [FETCH] Preparing to fetch raw TikTok Ads campaign metadata with {fetch_fields_default} field(s)...")
+            print(f"🔍 [FETCH] Preparing to fetch TikTok Ads campaign metadata with {fetch_fields_default} field(s)...")
+            logging.info(f"🔍 [FETCH] Preparing to fetch TikTok Ads campaign metadata with {fetch_fields_default} field(s)...")
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)         
     
@@ -122,9 +123,9 @@ def fetch_campaign_metadata(fetch_ids_campaign: list[str]) -> pd.DataFrame:
             print(f"🔍 [FETCH] Initializing Google Secret Manager client for Google Cloud Platform project {PROJECT}...")
             logging.info(f"🔍 [FETCH] Initializing Google Secret Manager client for Google Cloud Platform project {PROJECT}...")
             google_secret_client = secretmanager.SecretManagerServiceClient()
-            print(f"✅ [FETCH] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
-            logging.info(f"✅ [FETCH] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
             fetch_sections_status[fetch_section_name] = "succeed"
+            print(f"✅ [FETCH] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
+            logging.info(f"✅ [FETCH] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")          
         except Exception as e:
             fetch_sections_status[fetch_section_name] = "failed"
             print(f"❌ [FETCH] Failed to initialize Google Secret Manager client for Google Cloud Platform project {PROJECT} due to {e}.")
@@ -136,13 +137,15 @@ def fetch_campaign_metadata(fetch_ids_campaign: list[str]) -> pd.DataFrame:
         fetch_section_name = "[FETCH] Get TikTok Ads access token from Google Secret Manager"
         fetch_section_start = time.time()              
         try: 
+            print(f"🔍 [FETCH] Retrieving TikTok Ads access token for account {ACCOUNT}...")
+            logging.info(f"🔍 [FETCH] Retrieving TikTok Ads access token for account {ACCOUNT}...")
             token_secret_id = f"{COMPANY}_secret_all_{PLATFORM}_token_access_user"
             token_secret_name = f"projects/{PROJECT}/secrets/{token_secret_id}/versions/latest"
             token_secret_response = google_secret_client.access_secret_version(request={"name": token_secret_name})
             token_access_user = token_secret_response.payload.data.decode("utf-8")
+            fetch_sections_status[fetch_section_name] = "succeed"            
             print(f"✅ [FETCH] Successfully retrieved TikTok Ads access token for account {ACCOUNT} from Google Secret Manager.")
             logging.info(f"✅ [FETCH] Successfully retrieved TikTok Ads access token for account {ACCOUNT} from Google Secret Manager.")
-            fetch_sections_status[fetch_section_name] = "succeed"
         except Exception as e:
             fetch_sections_status[fetch_section_name] = "failed"
             print(f"❌ [FETCH] Failed to retrieve TikTok access token for {ACCOUNT} from Google Secret Manager due to {e}.")
