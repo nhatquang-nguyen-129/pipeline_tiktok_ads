@@ -378,9 +378,12 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             print(f"❌ [SCHEMA] Failed to complete schema enforcement for TikTok Ads due to section(s): {', '.join(schema_sections_failed)} in {schema_time_elapsed}s.")
             logging.error(f"❌ [SCHEMA] Failed to complete schema enforcement for TikTok Ads due to section(s): {', '.join(schema_sections_failed)} in {schema_time_elapsed}s.")
             schema_status_final = "schema_failed_all"
+        elif schema_rows_input > 0 and schema_rows_output < schema_rows_input:
+            print(f"⚠️ [SCHEMA] Partially completed schema enforcement for TikTok Ads with {schema_rows_output}/{schema_rows_input} enforced row(s) in {schema_time_elapsed}s.")
+            logging.warning(f"⚠️ [SCHEMA] Partially completed schema enforcement for TikTok Ads with {schema_rows_output}/{schema_rows_input} enforced row(s) in {schema_time_elapsed}s.")
         else:
-            print(f"🏆 [SCHEMA] Successfully completed schema enforcement for TikTok Ads with {schema_rows_output} enforced row(s) output in {schema_time_elapsed}s.")
-            logging.info(f"🏆 [SCHEMA] Successfully completed schema enforcement for TikTok Ads with {schema_rows_output} enforced row(s) output in {schema_time_elapsed}s.")
+            print(f"🏆 [SCHEMA] Successfully completed schema enforcement for TikTok Ads with {schema_rows_output}/{schema_rows_input} enforced row(s) in {schema_time_elapsed}s.")
+            logging.info(f"🏆 [SCHEMA] Successfully completed schema enforcement for TikTok Ads with {schema_rows_output}/{schema_rows_input} enforced row(s) in {schema_time_elapsed}s.")
             schema_status_final = "schema_succeed_all"        
         schema_results_final = {
             "schema_df_final": schema_df_final,

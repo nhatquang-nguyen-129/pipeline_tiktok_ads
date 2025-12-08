@@ -30,7 +30,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.
 # Add Python logging ultilties for integration
 import logging
 
-
 # Add Python requests ultilities for integration
 import requests
 
@@ -230,7 +229,7 @@ def fetch_campaign_metadata(fetch_ids_campaign: list[str]) -> pd.DataFrame:
                 fetch_sections_status[fetch_section_name] = "succeed"
                 print(f"✅ [FETCH] Successfully retrieved TikTok Ads campaign metadata with {len(fetch_metadatas_campaign)}/{len(fetch_ids_campaign)} campaign_id(s) for advertiser_id {advertiser_id}.")
                 logging.info(f"✅ [FETCH] Successfully retrieved TikTok Ads campaign metadata with {len(fetch_metadatas_campaign)}/{len(fetch_ids_campaign)} campaign_id(s) for advertiser_id {advertiser_id}.")
-            elif 0 < len(fetch_metadatas_campaign) < len(fetch_ids_campaign):
+            elif len(fetch_ids_campaign) > 0 and len(fetch_metadatas_campaign) < len(fetch_ids_campaign):
                 fetch_sections_status[fetch_section_name] = "partial"
                 print(f"⚠️ [FETCH] Partially retrieved TikTok Ads campaign metadata with {len(fetch_metadatas_campaign)}/{len(fetch_ids_campaign)} campaign_id(s) for advertiser_id {advertiser_id}.")
                 logging.warning(f"⚠️ [FETCH] Partially retrieved TikTok Ads campaign metadata with {len(fetch_metadatas_campaign)}/{len(fetch_ids_campaign)} campaign_id(s) for advertiser_id {advertiser_id}.")
@@ -245,8 +244,8 @@ def fetch_campaign_metadata(fetch_ids_campaign: list[str]) -> pd.DataFrame:
         fetch_section_name = "[FETCH] Trigger to enforce schema for TikTok Ads campaign metadata"
         fetch_section_start = time.time()
         try:
-            print(f"🔄 [FETCH] Trigger to enforce schema for TikTok Ads campaign metadata with {len(fetch_df_flattened)} row(s)...")
-            logging.info(f"🔄 [FETCH] Trigger to enforce schema for TikTok Ads campaign metadata with {len(fetch_df_flattened)} row(s)...")            
+            print(f"🔄 [FETCH] Trigger to enforce schema for TikTok Ads campaign metadata with {len(fetch_df_flattened)} retrieved row(s)...")
+            logging.info(f"🔄 [FETCH] Trigger to enforce schema for TikTok Ads campaign metadata with {len(fetch_df_flattened)} retrieved row(s)...")
             fetch_results_schema = enforce_table_schema(fetch_df_flattened, "fetch_campaign_metadata")            
             fetch_summary_enforced = fetch_results_schema["schema_summary_final"]
             fetch_status_enforced = fetch_results_schema["schema_status_final"]
