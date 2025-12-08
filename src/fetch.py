@@ -479,7 +479,7 @@ def fetch_ad_metadata(fetch_ids_ad: list[str]) -> pd.DataFrame:
                 fetch_sections_status[fetch_section_name] = "succeed"
                 print(f"✅ [FETCH] Successfully retrieved TikTok Ads ad metadata with {len(fetch_metadatas_ad)}/{len(fetch_ids_ad)} ad_id(s) for advertiser_id {advertiser_id}.")
                 logging.info(f"✅ [FETCH] Successfully retrieved TikTok Ads ad metadata with {len(fetch_metadatas_ad)}/{len(fetch_ids_ad)} ad_id(s) for advertiser_id {advertiser_id}.")
-            elif 0 < len(fetch_metadatas_ad) < len(fetch_ids_ad):
+            elif len(fetch_ids_ad) > 0 and len(fetch_metadatas_ad) < len(fetch_ids_ad):
                 fetch_sections_status[fetch_section_name] = "partial"
                 print(f"⚠️ [FETCH] Partially retrieved TikTok Ads ad metadata with {len(fetch_metadatas_ad)}/{len(fetch_ids_ad)} ad_id(s) for advertiser_id {advertiser_id}.")
                 logging.warning(f"⚠️ [FETCH] Partially retrieved TikTok Ads ad metadata with {len(fetch_metadatas_ad)}/{len(fetch_ids_ad)} ad_id(s) for advertiser_id {advertiser_id}.")
@@ -494,20 +494,24 @@ def fetch_ad_metadata(fetch_ids_ad: list[str]) -> pd.DataFrame:
         fetch_section_name = "[FETCH] Trigger to enforce schema for TikTok Ads ad metadata"
         fetch_section_start = time.time()
         try:
-            print(f"🔄 [FETCH] Trigger to enforce schema for TikTok Ads ad metadata with {len(fetch_df_flattened)} row(s)...")
-            logging.info(f"🔄 [FETCH] Trigger to enforce schema for TikTok Ads ad metadata with {len(fetch_df_flattened)} row(s)...")            
+            print(f"🔄 [FETCH] Trigger to enforce schema for TikTok Ads ad metadata with {len(fetch_df_flattened)} retrieved row(s)...")
+            logging.info(f"🔄 [FETCH] Trigger to enforce schema for TikTok Ads ad metadata with {len(fetch_df_flattened)} retrieved row(s)...")
             fetch_results_schema = enforce_table_schema(fetch_df_flattened, "fetch_ad_metadata")            
             fetch_summary_enforced = fetch_results_schema["schema_summary_final"]
             fetch_status_enforced = fetch_results_schema["schema_status_final"]
             fetch_df_enforced = fetch_results_schema["schema_df_final"]    
             if fetch_status_enforced == "schema_succeed_all":
                 fetch_sections_status[fetch_section_name] = "succeed"
-                print(f"✅ [FETCH] Successfully triggered to enforce schema for TikTok Ads ad metadata with {fetch_summary_enforced['schema_rows_output']} enforced row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
-                logging.info(f"✅ [FETCH] Successfully triggered to enforce schema for TikTok Ads ad metadata with {fetch_summary_enforced['schema_rows_output']} enforced row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")                
+                print(f"✅ [FETCH] Successfully triggered TikTok Ads ad metadata schema enforcement with {fetch_summary_enforced['schema_rows_output']}/{fetch_summary_enforced['schema_rows_input']} enforced row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
+                logging.info(f"✅ [FETCH] Successfully triggered TikTok Ads ad metadata schema enforcement with {fetch_summary_enforced['schema_rows_output']}/{fetch_summary_enforced['schema_rows_input']} enforced row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
+            elif fetch_status_enforced == "schema_succeed_partial":
+                fetch_sections_status[fetch_section_name] = "partial"
+                print(f"⚠️ [FETCH] Partially triggered TikTok Ads ad metadata schema enforcement with {fetch_summary_enforced['schema_rows_output']}/{fetch_summary_enforced['schema_rows_input']} enforced row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
+                logging.warning(f"⚠️ [FETCH] Partially triggered TikTok Ads ad metadata schema enforcement with {fetch_summary_enforced['schema_rows_output']}/{fetch_summary_enforced['schema_rows_input']} enforced row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
             else:
                 fetch_sections_status[fetch_section_name] = "failed"
-                print(f"❌ [FETCH] Failed to trigger schema enforcement for raw TikTok Ads ad metadata with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
-                logging.error(f"❌ [FETCH] Failed to trigger schema enforcement for raw TikTok Ads ad metadata with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
+                print(f"❌ [FETCH] Failed to trigger TikTok Ads ad metadata schema enforcement with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
+                logging.error(f"❌ [FETCH] Failed to trigger TikTok Ads ad metadata schema enforcement with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
@@ -532,17 +536,17 @@ def fetch_ad_metadata(fetch_ids_ad: list[str]) -> pd.DataFrame:
             for fetch_section_summary in fetch_sections_summary
         }          
         if fetch_sections_failed:
-            print(f"❌ [FETCH] Failed to complete TikTok Ads ad metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) due to  {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
-            logging.error(f"❌ [FETCH] Failed to complete TikTok Ads ad metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) due to  {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
             fetch_status_final = "fetch_failed_all"
-        elif fetch_rows_output < fetch_rows_input:
-            print(f"⚠️ [FETCH] Partially completed TikTok Ads ad metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")
-            logging.warning(f"⚠️ [FETCH] Partially completed TikTok Ads ad metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")
+            print(f"❌ [FETCH] Failed to complete TikTok Ads ad metadata fetching due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
+            logging.error(f"❌ [FETCH] Failed to complete TikTok Ads ad metadata fetching due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")            
+        elif fetch_rows_input > 0 and fetch_rows_output < fetch_rows_input:
             fetch_status_final = "fetch_succeed_partial"
+            print(f"⚠️ [FETCH] Partially completed TikTok Ads ad metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")
+            logging.warning(f"⚠️ [FETCH] Partially completed TikTok Ads ad metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")           
         else:
+            fetch_status_final = "fetch_succeed_all"
             print(f"🏆 [FETCH] Successfully completed TikTok Ads ad metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")
-            logging.info(f"🏆 [FETCH] Successfully completed TikTOk Ads ad metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")
-            fetch_status_final = "fetch_succeed_all"    
+            logging.info(f"🏆 [FETCH] Successfully completed TikTOk Ads ad metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")  
         fetch_results_final = {
             "fetch_df_final": fetch_df_final,
             "fetch_status_final": fetch_status_final,
