@@ -867,7 +867,7 @@ def fetch_campaign_insights(fetch_date_start: str, fetch_date_end: str) -> pd.Da
                         resp_json = resp.json()
                         if resp_json.get("code") != 0:
                             raise Exception(
-                                f"❌ [FETCH] Failed to retrieve TikTok Ads campaign insights with BASIC report_type due to API error {resp_json.get('message')}."
+                                f"❌ [FETCH] Failed to retrieve TikTok Ads campaign insights due to API error {resp_json.get('message')}."
                             )
                         data_list = resp_json["data"].get("list", [])
                         fetch_records_campaign.extend(data_list)
