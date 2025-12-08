@@ -243,28 +243,30 @@ def ingest_campaign_metadata(ingest_ids_campaign: list) -> pd.DataFrame:
                 if not ingest_keys_unique.empty:
                     ingest_table_temporary = f"{PROJECT}.{raw_dataset}.temp_table_campaign_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
                     ingest_job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
-                    google_bigquery_client.load_table_from_dataframe(
+                    ingest_job_load = google_bigquery_client.load_table_from_dataframe(
                         ingest_keys_unique, 
                         ingest_table_temporary, 
                         job_config=ingest_job_config
-                        ).result()
+                        )
+                    ingest_job_result = ingest_job_load.result()
                     ingest_join_condition = " AND ".join([
                         f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
                         for col in ["campaign_id", "advertiser_id"]
                     ])
-                    ingest_query_delete = f"""
+                    ingest_query_config = f"""
                         DELETE FROM `{raw_table_campaign}` AS main
                         WHERE EXISTS (
                             SELECT 1 FROM `{ingest_table_temporary}` AS temp
                             WHERE {ingest_join_condition}
                         )
                     """
-                    ingest_query_result = google_bigquery_client.query(ingest_query_delete).result()
+                    ingest_query_load = google_bigquery_client.query(ingest_query_config)
+                    ingest_query_result = ingest_query_load.result()
+                    ingest_rows_deleted = ingest_query_result.num_dml_affected_rows
                     google_bigquery_client.delete_table(
                         ingest_table_temporary, 
                         not_found_ok=True
-                        )
-                    ingest_rows_deleted = ingest_query_result.num_dml_affected_rows
+                        )                    
                     print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of TikTok Ads campaign metadata table {raw_table_campaign}.")
                     logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of TikTok Ads campaign metadata table {raw_table_campaign}.")
                 else:
