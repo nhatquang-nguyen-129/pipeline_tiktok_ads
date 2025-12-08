@@ -176,8 +176,8 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
         }        
         if any(v == "failed" for v in enrich_sections_status.values()):
             enrich_status_final = "enrich_failed_all"
-            print(f"❌ [ENRICH] Failed to complete TikTok Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} row(s) due to section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")
-            logging.error(f"❌ [ENRICH] Failed to complete  TikTok Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} row(s) due to section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")            
+            print(f"❌ [ENRICH] Failed to complete TikTok Ads campaign insights enrichment due to section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")
+            logging.error(f"❌ [ENRICH] Failed to complete TikTok Ads campaign insights enrichment due to section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")
         elif enrich_rows_input > 0 and enrich_rows_output < enrich_rows_input:
             enrich_status_final = "enrich_succeed_partial"
             print(f"⚠️ [ENRICH] Partially completed TikTok Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} row(s) in {enrich_time_elapsed}s.")
@@ -356,8 +356,8 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
         }        
         if any(v == "failed" for v in enrich_sections_status.values()):
             enrich_status_final = "enrich_failed_all"
-            print(f"❌ [ENRICH] Failed to complete TikTok Ads ad insights enrichment with {enrich_rows_output}/{enrich_rows_input} row(s) due to section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")
-            logging.error(f"❌ [ENRICH] Failed to complete TikTok Ads ad insights enrichment with {enrich_rows_output}/{enrich_rows_input} row(s) due to section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")           
+            print(f"❌ [ENRICH] Failed to complete TikTok Ads ad insights enrichment due to section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")
+            logging.error(f"❌ [ENRICH] Failed to complete TikTok Ads ad insights enrichment due to section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")
         elif enrich_rows_input > 0 and enrich_rows_output < enrich_rows_input:
             enrich_status_final = "enrich_succeed_partial"
             print(f"⚠️ [ENRICH] Partially completed TikTok Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} row(s) in {enrich_time_elapsed}s.")
