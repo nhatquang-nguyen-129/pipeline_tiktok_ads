@@ -285,15 +285,17 @@ def ingest_campaign_metadata(ingest_ids_campaign: list) -> pd.DataFrame:
             print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of TikTok Ads campaign metadata to Google BigQuery table {raw_table_campaign}...")
             logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of TikTok Ads campaign metadata to Google BigQuery table {raw_table_campaign}...")
             ingest_job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
-            google_bigquery_client.load_table_from_dataframe(
+            ingest_job_load = google_bigquery_client.load_table_from_dataframe(
                 ingest_df_deduplicated, 
                 raw_table_campaign, 
                 job_config=ingest_job_config
-                ).result()
+                )
+            ingest_job_result = ingest_job_load.result()
+            ingest_rows_uploaded = ingest_job_result.output_rows
             ingest_df_uploaded = ingest_df_deduplicated.copy()
             ingest_sections_status[ingest_section_name] = "succeed"
-            print(f"✅ [INGEST] Successfully uploaded {len(ingest_df_uploaded)} row(s) of TikTok Ads campaign metadata to Google BigQuery table {raw_table_campaign}.")
-            logging.info(f"✅ [INGEST] Successfully uploaded {len(ingest_df_uploaded)} row(s) of TikTok Ads campaign metadata to Google BigQuery table {raw_table_campaign}.")
+            print(f"✅ [INGEST] Successfully uploaded {ingest_rows_uploaded} row(s) of TikTok Ads campaign metadata to Google BigQuery table {raw_table_campaign}.")
+            logging.info(f"✅ [INGEST] Successfully uploaded {ingest_rows_uploaded} row(s) of TikTok Ads campaign metadata to Google BigQuery table {raw_table_campaign}.")
         except Exception as e:
             ingest_sections_status[ingest_section_name] = "failed"
             print(f"❌ [INGEST] Failed to upload TikTok Ads campaign metadata to Google BigQuery table {raw_table_campaign} due to {e}.")
@@ -309,7 +311,7 @@ def ingest_campaign_metadata(ingest_ids_campaign: list) -> pd.DataFrame:
         ingest_sections_failed = [k for k, v in ingest_sections_status.items() if v == "failed"] 
         ingest_sections_succeeded = [k for k, v in ingest_sections_status.items() if v == "succeed"]
         ingest_rows_input = len(ingest_ids_campaign)
-        ingest_rows_output = len(ingest_df_final)
+        ingest_rows_output = ingest_rows_uploaded
         ingest_sections_summary = list(dict.fromkeys(
             list(ingest_sections_status.keys()) +
             list(ingest_sections_time.keys())
