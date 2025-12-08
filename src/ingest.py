@@ -745,7 +745,7 @@ def ingest_ad_creative() -> pd.DataFrame:
                     else:
                         bq_type = "STRING"
                     table_schemas_defined.append(bigquery.SchemaField(col, bq_type))
-                table_configuration_defined = bigquery.Table(raw_table_ad, schema=table_schemas_defined)
+                table_configuration_defined = bigquery.Table(raw_table_creative, schema=table_schemas_defined)
                 table_partition_effective = "date" if "date" in ingest_df_deduplicated.columns else None
                 if table_partition_effective:
                     table_configuration_defined.time_partitioning = bigquery.TimePartitioning(
@@ -894,8 +894,8 @@ def ingest_campaign_insights(ingest_date_start: str, ingest_date_end: str,) -> p
         "[INGEST] Upload TikTok Ads campaign insights to Google BigQuery": 0.0,
         "[INGEST] Cooldown before next TikTok Ads campaign insights fetch": 0.0,        
     }
-    print(f"🔍 [INGEST] Proceeding to ingest raw TikTok Ads campaign insights from {ingest_date_start} to {ingest_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [INGEST] Proceeding to ingest raw TikTok Ads campaign insights from {ingest_date_start} to {ingest_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads campaign insights from {ingest_date_start} to {ingest_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads campaign insights from {ingest_date_start} to {ingest_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     
     try:
 
@@ -929,8 +929,8 @@ def ingest_campaign_insights(ingest_date_start: str, ingest_date_end: str,) -> p
                 ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
                 ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
                 if ingest_status_fetched == "fetch_succeed_all":
-                    print(f"✅ [INGEST] Successfully triggered TikTok Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
-                    logging.info(f"✅ [INGEST] Successfully triggered TikTok Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                    print(f"✅ [INGEST] Successfully triggered TikTok Ads campaign insights fetching with {len(ingest_df_fetched)} fetched row(s) for {ingest_date_separated} in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                    logging.info(f"✅ [INGEST] Successfully triggered TikTok Ads campaign insights fetching with {len(ingest_df_fetched)} fetched row(s) for {ingest_date_separated} in {ingest_summary_fetched['fetch_time_elapsed']}s.")
                     ingest_sections_status[ingest_section_name] = "succeed"
                 elif ingest_status_fetched == "fetch_succeed_partial":
                     print(f"⚠️ [INGEST] Partially triggered TikTok Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
