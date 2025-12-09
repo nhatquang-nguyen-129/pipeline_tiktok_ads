@@ -235,16 +235,16 @@ def fetch_campaign_metadata(fetch_campaign_ids: list[str]) -> pd.DataFrame:
             fetch_df_flattened = pd.DataFrame(fetch_campaign_metadatas)
             if len(fetch_campaign_metadatas) == len(fetch_campaign_ids):
                 fetch_sections_status[fetch_section_name] = "succeed"
-                print(f"✅ [FETCH] Successfully retrieved TikTok Ads campaign metadata with {len(fetch_campaign_metadatas)}/{len(fetch_campaign_ids)} campaign_id(s) for advertiser_id {advertiser_id}.")
-                logging.info(f"✅ [FETCH] Successfully retrieved TikTok Ads campaign metadata with {len(fetch_campaign_metadatas)}/{len(fetch_campaign_ids)} campaign_id(s) for advertiser_id {advertiser_id}.")
+                print(f"✅ [FETCH] Successfully retrieved TikTok Ads campaign metadata with {len(fetch_campaign_metadatas)}/{len(fetch_campaign_ids)} campaign_id(s) for advertiser_id {fetch_advertiser_id}.")
+                logging.info(f"✅ [FETCH] Successfully retrieved TikTok Ads campaign metadata with {len(fetch_campaign_metadatas)}/{len(fetch_campaign_ids)} campaign_id(s) for advertiser_id {fetch_advertiser_id}.")
             elif len(fetch_campaign_ids) > 0 and len(fetch_campaign_metadatas) < len(fetch_campaign_ids):
                 fetch_sections_status[fetch_section_name] = "partial"
-                print(f"⚠️ [FETCH] Partially retrieved TikTok Ads campaign metadata with {len(fetch_campaign_metadatas)}/{len(fetch_campaign_ids)} campaign_id(s) for advertiser_id {advertiser_id}.")
-                logging.warning(f"⚠️ [FETCH] Partially retrieved TikTok Ads campaign metadata with {len(fetch_campaign_metadatas)}/{len(fetch_campaign_ids)} campaign_id(s) for advertiser_id {advertiser_id}.")
+                print(f"⚠️ [FETCH] Partially retrieved TikTok Ads campaign metadata with {len(fetch_campaign_metadatas)}/{len(fetch_campaign_ids)} campaign_id(s) for advertiser_id {fetch_advertiser_id}.")
+                logging.warning(f"⚠️ [FETCH] Partially retrieved TikTok Ads campaign metadata with {len(fetch_campaign_metadatas)}/{len(fetch_campaign_ids)} campaign_id(s) for advertiser_id {fetch_advertiser_id}.")
             else:
                 fetch_sections_status[fetch_section_name] = "failed"
-                print(f"❌ [FETCH] Failed to retrieve TikTok Ads campaign metadata with {len(fetch_campaign_metadatas)}/{len(fetch_campaign_ids)} campaign_id(s) for advertiser_id {advertiser_id}.")
-                logging.error(f"❌ [FETCH] Failed to retrieve TikTok Ads campaign metadata with {len(fetch_campaign_metadatas)}/{len(fetch_campaign_ids)} campaign_id(s) for advertiser_id {advertiser_id}.")
+                print(f"❌ [FETCH] Failed to retrieve TikTok Ads campaign metadata with {len(fetch_campaign_metadatas)}/{len(fetch_campaign_ids)} campaign_id(s) for advertiser_id {fetch_advertiser_id}.")
+                logging.error(f"❌ [FETCH] Failed to retrieve TikTok Ads campaign metadata with {len(fetch_campaign_metadatas)}/{len(fetch_campaign_ids)} campaign_id(s) for advertiser_id {fetch_advertiser_id}.")
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
@@ -268,8 +268,8 @@ def fetch_campaign_metadata(fetch_campaign_ids: list[str]) -> pd.DataFrame:
                 logging.warning(f"⚠️ [FETCH] Partially triggered TikTok Ads campaign metadata schema enforcement with {fetch_summary_enforced['schema_rows_output']}/{fetch_summary_enforced['schema_rows_input']} enforced row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
             else:
                 fetch_sections_status[fetch_section_name] = "failed"
-                print(f"❌ [FETCH] Failed to trigger TikTok Ads campaign metadata schema enforcement with {fetch_summary_enforced['schema_rows_output']}/{fetch_summary_enforced['schema_rows_input']} enforced row(s) due to failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
-                logging.error(f"❌ [FETCH] Failed to trigger TikTok Ads campaign metadata schema enforcement with {fetch_summary_enforced['schema_rows_output']}/{fetch_summary_enforced['schema_rows_input']} enforced row(s) due to failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
+                print(f"❌ [FETCH] Failed to trigger TikTok Ads campaign metadata schema enforcement with {fetch_summary_enforced['schema_rows_output']}/{fetch_summary_enforced['schema_rows_input']} enforced row(s) due to failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])} in {fetch_summary_enforced['schema_time_elapsed']}s.")
+                logging.error(f"❌ [FETCH] Failed to trigger TikTok Ads campaign metadata schema enforcement with {fetch_summary_enforced['schema_rows_output']}/{fetch_summary_enforced['schema_rows_input']} enforced row(s) due to failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])} in {fetch_summary_enforced['schema_time_elapsed']}s.")
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
@@ -321,9 +321,9 @@ def fetch_campaign_metadata(fetch_campaign_ids: list[str]) -> pd.DataFrame:
     return fetch_results_final
 
 # 1.2. Fetch ad metadata for TikTok Ads
-def fetch_ad_metadata(fetch_ids_ad: list[str]) -> pd.DataFrame:
-    print(f"🚀 [FETCH] Starting to fetch TikTok Ads ad metadata for {len(fetch_ids_ad)} ad_id(s)...")
-    logging.info(f"🚀 [FETCH] Starting to fetch TikTok Ads ad metadata for {len(fetch_ids_ad)} ad_id(s)...")
+def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
+    print(f"🚀 [FETCH] Starting to fetch TikTok Ads ad metadata for {len(fetch_ad_ids)} ad_id(s)...")
+    logging.info(f"🚀 [FETCH] Starting to fetch TikTok Ads ad metadata for {len(fetch_ad_ids)} ad_id(s)...")
 
     # 1.2.1. Start timing the TikTok Ads ad metadata fetching
     fetch_time_start = time.time()   
@@ -338,14 +338,14 @@ def fetch_ad_metadata(fetch_ids_ad: list[str]) -> pd.DataFrame:
         fetch_section_name = "[FETCH] Validate input for TikTok Ads ad metadata fetching"
         fetch_section_start = time.time()        
         try:
-            if not fetch_ids_ad:
+            if not fetch_ad_ids:
                 fetch_sections_status[fetch_section_name] = "failed"        
                 print("⚠️ [FETCH] Empty TikTok Ads fetch_ids_ad list provided then fetching will be suspended.")
                 ("⚠️ [FETCH] Empty TikTok Ads fetch_ids_ad list provided then fetching will be suspended.")
             else:
                 fetch_sections_status[fetch_section_name] = "succeed"
-                print(f"✅ [FETCH] Successfully validated input for {len(fetch_ids_ad)} ad_id(s) of raw TikTok Ads ad metadata fetching.")
-                logging.info(f"✅ [FETCH] Successfully validated input for {len(fetch_ids_ad)} ad_id(s) of raw TikTok Ads ad metadata fetching.")
+                print(f"✅ [FETCH] Successfully validated input for {len(fetch_ad_ids)} ad_id(s) of TikTok Ads ad metadata fetching.")
+                logging.info(f"✅ [FETCH] Successfully validated input for {len(fetch_ad_ids)} ad_id(s) of TikTok Ads ad metadata fetching.")
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
@@ -353,7 +353,7 @@ def fetch_ad_metadata(fetch_ids_ad: list[str]) -> pd.DataFrame:
         fetch_section_name = "[FETCH] Prepare fields for TikTok Ads ad metadata fetching"
         fetch_section_start = time.time()
         try:
-            fetch_fields_default = [
+            fetch_ad_fields = [
                 "advertiser_id",
                 "ad_id",
                 "ad_name",
@@ -368,8 +368,8 @@ def fetch_ad_metadata(fetch_ids_ad: list[str]) -> pd.DataFrame:
                 "video_id"
             ]
             fetch_sections_status[fetch_section_name] = "succeed" 
-            print(f"🔍 [FETCH] Preparing to fetch TikTok Ads ad metadata with {fetch_fields_default} field(s)...")
-            logging.info(f"🔍 [FETCH] Preparing to fetch TikTok Ads ad metadata with {fetch_fields_default} field(s)...")
+            print(f"🔍 [FETCH] Preparing to fetch TikTok Ads ad metadata with {fetch_ad_fields} field(s)...")
+            logging.info(f"🔍 [FETCH] Preparing to fetch TikTok Ads ad metadata with {fetch_ad_fields} field(s)...")
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
@@ -399,7 +399,7 @@ def fetch_ad_metadata(fetch_ids_ad: list[str]) -> pd.DataFrame:
             token_secret_id = f"{COMPANY}_secret_all_{PLATFORM}_token_access_user"
             token_secret_name = f"projects/{PROJECT}/secrets/{token_secret_id}/versions/latest"
             token_secret_response = google_secret_client.access_secret_version(request={"name": token_secret_name})
-            token_access_user = token_secret_response.payload.data.decode("utf-8")
+            fetch_access_user = token_secret_response.payload.data.decode("utf-8")
             fetch_sections_status[fetch_section_name] = "succeed"
             print(f"✅ [FETCH] Successfully retrieved TikTok Ads access token for account {ACCOUNT} from Google Secret Manager.")
             logging.info(f"✅ [FETCH] Successfully retrieved TikTok Ads access token for account {ACCOUNT} from Google Secret Manager.")           
@@ -419,10 +419,10 @@ def fetch_ad_metadata(fetch_ids_ad: list[str]) -> pd.DataFrame:
             advertiser_secret_id = f"{COMPANY}_secret_{DEPARTMENT}_tiktok_account_id_{ACCOUNT}"
             advertiser_secret_name = f"projects/{PROJECT}/secrets/{advertiser_secret_id}/versions/latest"
             advertiser_secret_response = google_secret_client.access_secret_version(request={"name": advertiser_secret_name})
-            advertiser_id = advertiser_secret_response.payload.data.decode("utf-8")
+            fetch_advertiser_id = advertiser_secret_response.payload.data.decode("utf-8")
             fetch_sections_status[fetch_section_name] = "succeed"
-            print(f"✅ [FETCH] Successfully retrieved TikTok Ads advertiser_id {advertiser_id} from Google Secret Manager.")
-            logging.info(f"✅ [FETCH] Successfully retrieved TikTok Ads advertiser_id {advertiser_id} from Google Secret Manager.")           
+            print(f"✅ [FETCH] Successfully retrieved TikTok Ads advertiser_id {fetch_advertiser_id} from Google Secret Manager.")
+            logging.info(f"✅ [FETCH] Successfully retrieved TikTok Ads advertiser_id {fetch_advertiser_id} from Google Secret Manager.")           
         except Exception as e:
             fetch_sections_status[fetch_section_name] = "failed"
             print(f"❌ [FETCH] Failed to retrieve TikTok Ads advertiser_id for {ACCOUNT} from Google Secret Manager due to {e}.")
@@ -434,23 +434,27 @@ def fetch_ad_metadata(fetch_ids_ad: list[str]) -> pd.DataFrame:
         fetch_section_name = "[FETCH] Make TikTok Ads API call for advertiser endpoint"
         fetch_section_start = time.time()     
         try: 
-            print(f"🔍 [FETCH] Retrieving advertiser_name for TikTok Ads advertiser_id {advertiser_id}...")
-            logging.info(f"🔍 [FETCH] Retrieving advertiser_name for TikTok Ads advertiser_id {advertiser_id}...")
-            fetch_url_advertiser = "https://business-api.tiktok.com/open_api/v1.3/advertiser/info/"
-            fetch_headers_advertiser = {
-                "Access-Token": token_access_user,
+            print(f"🔍 [FETCH] Retrieving advertiser_name for TikTok Ads advertiser_id {fetch_advertiser_id}...")
+            logging.info(f"🔍 [FETCH] Retrieving advertiser_name for TikTok Ads advertiser_id {fetch_advertiser_id}...")
+            fetch_advertiser_url = "https://business-api.tiktok.com/open_api/v1.3/advertiser/info/"
+            fetch_advertiser_headers = {
+                "Access-Token": fetch_access_user,
                 "Content-Type": "application/json"
             }            
-            payload = {"advertiser_ids": [advertiser_id]}
-            response = requests.get(fetch_url_advertiser, headers=fetch_headers_advertiser, json=payload)
-            advertiser_name = response.json()["data"]["list"][0]["name"]       
+            fetch_advertiser_payload = {"advertiser_ids": [fetch_advertiser_id]}
+            fetch_advertiser_response = requests.get(
+                fetch_advertiser_url, 
+                headers=fetch_advertiser_headers, 
+                json=fetch_advertiser_payload
+                )
+            fetch_advertiser_name = fetch_advertiser_response.json()["data"]["list"][0]["name"]       
             fetch_sections_status[fetch_section_name] = "succeed"
-            print(f"✅ [FETCH] Successfully retrieved advertiser_name {advertiser_name} for TikTok Ads advertiser_id {advertiser_id}.")
-            logging.info(f"✅ [FETCH] Successfully retrieved advertiser_name {advertiser_name} for TikTok Ads advertiser_id {advertiser_id}.")            
+            print(f"✅ [FETCH] Successfully retrieved advertiser_name {fetch_advertiser_name} for TikTok Ads advertiser_id {fetch_advertiser_id}.")
+            logging.info(f"✅ [FETCH] Successfully retrieved advertiser_name {fetch_advertiser_name} for TikTok Ads advertiser_id {fetch_advertiser_id}.")           
         except Exception as e:
             fetch_sections_status[fetch_section_name] = "failed"
-            print(f"❌ [FETCH] Failed to retrieve advertiser_name for TikTok Ads advertiser_id {advertiser_id} due to {e}.")
-            logging.error(f"❌ [FETCH] Failed to retrieve advertiser_name for TikTok Ads advertiser_id {advertiser_id} due to {e}.")
+            print(f"❌ [FETCH] Failed to fetch advertiser_name for TikTok Ads advertiser_id {fetch_advertiser_id} due to {e}.")
+            logging.error(f"❌ [FETCH] Failed to fetch advertiser_name for TikTok Ads advertiser_id {fetch_advertiser_id} due to {e}.")
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
@@ -458,43 +462,47 @@ def fetch_ad_metadata(fetch_ids_ad: list[str]) -> pd.DataFrame:
         fetch_section_name = "[FETCH] Make TikTok Ads API call for ad endpoint"
         fetch_section_start = time.time()            
         try:
-            print(f"🔍 [FETCH] Retrieving TikTok Ads ad metadata for {len(fetch_ids_ad)} ad_id(s)...")
-            logging.info(f"🔍 [FETCH] Retrieving TikTok Ads ad metadata for {len(fetch_ids_ad)} ad_id(s)...")
-            fetch_metadatas_ad = []
-            fetch_url_ad = "https://business-api.tiktok.com/open_api/v1.3/ad/get/"
-            fetch_headers_ad = {
-                "Access-Token": token_access_user,
+            print(f"🔍 [FETCH] Retrieving TikTok Ads ad metadata for {len(fetch_ad_ids)} ad_id(s)...")
+            logging.info(f"🔍 [FETCH] Retrieving TikTok Ads ad metadata for {len(fetch_ad_ids)} ad_id(s)...")
+            fetch_ad_metadatas = []
+            fetch_ad_url = "https://business-api.tiktok.com/open_api/v1.3/ad/get/"
+            fetch_ad_headers = {
+                "Access-Token": fetch_access_user,
                 "Content-Type": "application/json"
             }
-            for fetch_id_ad in fetch_ids_ad:
+            for fetch_ad_id in fetch_ad_ids:
                 try:
-                    payload = {
-                        "advertiser_id": advertiser_id,
-                        "filtering": {"ad_ids": [fetch_id_ad]},
-                        "fields": fetch_fields_default
+                    fetch_ad_payload = {
+                        "advertiser_id": fetch_advertiser_id,
+                        "filtering": {"ad_ids": [fetch_ad_id]},
+                        "fields": fetch_ad_fields
                     }
-                    response = requests.get(fetch_url_ad, headers=fetch_headers_ad, json=payload)
-                    response.raise_for_status()
-                    data = response.json()
-                    fetch_metadata_ad = data["data"]["list"][0]
-                    fetch_metadata_ad["advertiser_name"] = advertiser_name
-                    fetch_metadatas_ad.append(fetch_metadata_ad)                    
+                    fetch_ad_response = requests.get(
+                        fetch_ad_url, 
+                        headers=fetch_ad_headers, 
+                        json=fetch_ad_payload
+                        )
+                    fetch_ad_response.raise_for_status()
+                    fetch_ad_json = fetch_ad_response.json()
+                    fetch_ad_metadata = fetch_ad_json["data"]["list"][0]
+                    fetch_ad_metadata["advertiser_name"] = fetch_advertiser_name
+                    fetch_ad_metadatas.append(fetch_ad_metadata)                    
                 except Exception as e:
-                    print(f"⚠️ [FETCH] Failed to retrieve TikTok Ads ad metadata for ad_id {fetch_id_ad} due to {e}.")
-                    logging.warning(f"⚠️ [FETCH] Failed to retrieve TikTok Ads ad metadata for ad_id {fetch_id_ad} due to {e}.")
-            fetch_df_flattened = pd.DataFrame(fetch_metadatas_ad)
-            if len(fetch_metadatas_ad) == len(fetch_ids_ad):
+                    print(f"⚠️ [FETCH] Failed to retrieve TikTok Ads ad metadata for ad_id {fetch_ad_id} due to {e}.")
+                    logging.warning(f"⚠️ [FETCH] Failed to retrieve TikTok Ads ad metadata for ad_id {fetch_ad_id} due to {e}.")
+            fetch_df_flattened = pd.DataFrame(fetch_ad_metadatas)
+            if len(fetch_ad_metadatas) == len(fetch_ad_ids):
                 fetch_sections_status[fetch_section_name] = "succeed"
-                print(f"✅ [FETCH] Successfully retrieved TikTok Ads ad metadata with {len(fetch_metadatas_ad)}/{len(fetch_ids_ad)} ad_id(s) for advertiser_id {advertiser_id}.")
-                logging.info(f"✅ [FETCH] Successfully retrieved TikTok Ads ad metadata with {len(fetch_metadatas_ad)}/{len(fetch_ids_ad)} ad_id(s) for advertiser_id {advertiser_id}.")
-            elif len(fetch_ids_ad) > 0 and len(fetch_metadatas_ad) < len(fetch_ids_ad):
+                print(f"✅ [FETCH] Successfully retrieved TikTok Ads ad metadata with {len(fetch_ad_metadatas)}/{len(fetch_ad_ids)} ad_id(s) for advertiser_id {fetch_advertiser_id}.")
+                logging.info(f"✅ [FETCH] Successfully retrieved TikTok Ads ad metadata with {len(fetch_ad_metadatas)}/{len(fetch_ad_ids)} ad_id(s) for advertiser_id {fetch_advertiser_id}.")
+            elif len(fetch_ad_ids) > 0 and len(fetch_ad_metadatas) < len(fetch_ad_ids):
                 fetch_sections_status[fetch_section_name] = "partial"
-                print(f"⚠️ [FETCH] Partially retrieved TikTok Ads ad metadata with {len(fetch_metadatas_ad)}/{len(fetch_ids_ad)} ad_id(s) for advertiser_id {advertiser_id}.")
-                logging.warning(f"⚠️ [FETCH] Partially retrieved TikTok Ads ad metadata with {len(fetch_metadatas_ad)}/{len(fetch_ids_ad)} ad_id(s) for advertiser_id {advertiser_id}.")
+                print(f"⚠️ [FETCH] Partially retrieved TikTok Ads ad metadata with {len(fetch_ad_metadatas)}/{len(fetch_ad_ids)} ad_id(s) for advertiser_id {fetch_advertiser_id}.")
+                logging.warning(f"⚠️ [FETCH] Partially retrieved TikTok Ads ad metadata with {len(fetch_ad_metadatas)}/{len(fetch_ad_ids)} ad_id(s) for advertiser_id {fetch_advertiser_id}.")
             else:
                 fetch_sections_status[fetch_section_name] = "failed"
-                print(f"❌ [FETCH] Failed to retrieve TikTok Ads ad metadata with {len(fetch_metadatas_ad)}/{len(fetch_ids_ad)} ad_id(s) for advertiser_id {advertiser_id}.")
-                logging.error(f"❌ [FETCH] Failed to retrieve TikTok Ads ad metadata with {len(fetch_metadatas_ad)}/{len(fetch_ids_ad)} ad_id(s) for advertiser_id {advertiser_id}.")
+                print(f"❌ [FETCH] Failed to retrieve TikTok Ads ad metadata with {len(fetch_ad_metadatas)}/{len(fetch_ad_ids)} ad_id(s) for advertiser_id {fetch_advertiser_id}.")
+                logging.error(f"❌ [FETCH] Failed to retrieve TikTok Ads ad metadata with {len(fetch_ad_metadatas)}/{len(fetch_ad_ids)} ad_id(s) for advertiser_id {fetch_advertiser_id}.")
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
@@ -518,8 +526,8 @@ def fetch_ad_metadata(fetch_ids_ad: list[str]) -> pd.DataFrame:
                 logging.warning(f"⚠️ [FETCH] Partially triggered TikTok Ads ad metadata schema enforcement with {fetch_summary_enforced['schema_rows_output']}/{fetch_summary_enforced['schema_rows_input']} enforced row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
             else:
                 fetch_sections_status[fetch_section_name] = "failed"
-                print(f"❌ [FETCH] Failed to trigger TikTok Ads ad metadata schema enforcement with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
-                logging.error(f"❌ [FETCH] Failed to trigger TikTok Ads ad metadata schema enforcement with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
+                print(f"❌ [FETCH] Failed to trigger TikTok Ads ad metadata schema enforcement with {fetch_summary_enforced['schema_rows_output']}/{fetch_summary_enforced['schema_rows_input']} enforced row(s) due to failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])} in {fetch_summary_enforced['schema_time_elapsed']}s.")
+                logging.error(f"❌ [FETCH] Failed to trigger TikTok Ads ad metadata schema enforcement with {fetch_summary_enforced['schema_rows_output']}/{fetch_summary_enforced['schema_rows_input']} enforced row(s) due to failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])} in {fetch_summary_enforced['schema_time_elapsed']}s.")
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
@@ -530,7 +538,7 @@ def fetch_ad_metadata(fetch_ids_ad: list[str]) -> pd.DataFrame:
         fetch_sections_total = len(fetch_sections_status) 
         fetch_sections_failed = [k for k, v in fetch_sections_status.items() if v == "failed"] 
         fetch_sections_succeeded = [k for k, v in fetch_sections_status.items() if v == "succeed"]
-        fetch_rows_input = len(fetch_ids_ad)
+        fetch_rows_input = len(fetch_ad_ids)
         fetch_rows_output = len(fetch_df_final)
         fetch_sections_summary = list(dict.fromkeys(
             list(fetch_sections_status.keys()) +
@@ -545,8 +553,8 @@ def fetch_ad_metadata(fetch_ids_ad: list[str]) -> pd.DataFrame:
         }          
         if fetch_sections_failed:
             fetch_status_final = "fetch_failed_all"
-            print(f"❌ [FETCH] Failed to complete TikTok Ads ad metadata fetching due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
-            logging.error(f"❌ [FETCH] Failed to complete TikTok Ads ad metadata fetching due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")            
+            print(f"❌ [FETCH] Failed to complete TikTok Ads ad metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
+            logging.error(f"❌ [FETCH] Failed to complete TikTok Ads ad metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
         elif fetch_rows_input > 0 and fetch_rows_output < fetch_rows_input:
             fetch_status_final = "fetch_succeed_partial"
             print(f"⚠️ [FETCH] Partially completed TikTok Ads ad metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")
