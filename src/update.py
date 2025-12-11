@@ -102,13 +102,13 @@ def update_campaign_insights(start_date: str, end_date: str):
             ingest_summary_insights = ingest_results_insights["ingest_summary_final"]
             updated_ids_campaign = set(ingest_df_insights["campaign_id"].dropna().unique())
             if ingest_status_insights == "ingest_succeed_all":
-                print(f"✅ [UPDATE] Successfully triggered TikTok Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_summary_insights['ingest_dates_output']}/{ingest_summary_insights['ingest_dates_input']} ingested day(s) and {ingest_summary_insights['ingest_rows_output']} ingested row(s) in {ingest_summary_insights['ingest_time_elapsed']}s.")
-                logging.info(f"✅ [UPDATE] Successfully triggered TikTok Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_summary_insights['ingest_dates_output']}/{ingest_summary_insights['ingest_dates_input']} ingested day(s) and {ingest_summary_insights['ingest_rows_output']} ingested row(s) in {ingest_summary_insights['ingest_time_elapsed']}s.")
                 update_sections_status[update_section_name] = "succeed"
+                print(f"✅ [UPDATE] Successfully triggered TikTok Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_summary_insights['ingest_dates_output']}/{ingest_summary_insights['ingest_dates_input']} ingested day(s) and {ingest_summary_insights['ingest_rows_output']} ingested row(s) in {ingest_summary_insights['ingest_time_elapsed']}s.")
+                logging.info(f"✅ [UPDATE] Successfully triggered TikTok Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_summary_insights['ingest_dates_output']}/{ingest_summary_insights['ingest_dates_input']} ingested day(s) and {ingest_summary_insights['ingest_rows_output']} ingested row(s) in {ingest_summary_insights['ingest_time_elapsed']}s.")                
             elif ingest_status_insights == "ingest_succeed_partial":
-                print(f"⚠️ [UPDATE] Partially triggered TikTok Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_summary_insights['ingest_dates_output']}/{ingest_summary_insights['ingest_dates_input']} ingested day(s) and {ingest_summary_insights['ingest_rows_output']} ingested row(s) in {ingest_summary_insights['ingest_time_elapsed']}s.")
-                logging.warning(f"⚠️ [UPDATE] Partially triggered TikTok Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_summary_insights['ingest_dates_output']}/{ingest_summary_insights['ingest_dates_input']} ingested day(s) and {ingest_summary_insights['ingest_rows_output']} ingested row(s) in {ingest_summary_insights['ingest_time_elapsed']}s.")
                 update_sections_status[update_section_name] = "partial"
+                print(f"⚠️ [UPDATE] Partially triggered TikTok Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_summary_insights['ingest_dates_output']}/{ingest_summary_insights['ingest_dates_input']} ingested day(s) and {ingest_summary_insights['ingest_rows_output']} ingested row(s) in {ingest_summary_insights['ingest_time_elapsed']}s.")
+                logging.warning(f"⚠️ [UPDATE] Partially triggered TikTok Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_summary_insights['ingest_dates_output']}/{ingest_summary_insights['ingest_dates_input']} ingested day(s) and {ingest_summary_insights['ingest_rows_output']} ingested row(s) in {ingest_summary_insights['ingest_time_elapsed']}s.")                
             else:
                 update_sections_status[update_section_name] = "failed"
                 print(f"❌ [UPDATE] Failed to trigger TikTok Ads campaign insights ingestion from {start_date} to {end_date} with with {ingest_summary_insights['ingest_dates_output']}/{ingest_summary_insights['ingest_dates_input']} ingested day(s) and {ingest_summary_insights['ingest_rows_output']} ingested row(s) in {ingest_summary_insights['ingest_time_elapsed']}s.")
@@ -127,17 +127,17 @@ def update_campaign_insights(start_date: str, end_date: str):
                 ingest_status_metadata = ingest_results_metadata["ingest_status_final"]
                 ingest_summary_metadata = ingest_results_metadata["ingest_summary_final"]
                 if ingest_status_metadata == "ingest_succeed_all":
-                    print(f"✅ [UPDATE] Successfully triggered TikTok Ads campaign metadata ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
-                    logging.info(f"✅ [UPDATE] Successfully triggered TikTok Ads campaign metadata ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
                     update_sections_status[update_section_name] = "succeed"
+                    print(f"✅ [UPDATE] Successfully triggered TikTok Ads campaign metadata ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
+                    logging.info(f"✅ [UPDATE] Successfully triggered TikTok Ads campaign metadata ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")                    
                 elif ingest_status_metadata == "ingest_success_partial":
-                    print(f"⚠️ [UPDATE] Partially triggered TikTok Ads campaign metadata ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
-                    logging.warning(f"⚠️ [UPDATE] Partially triggered TikTok Ads campaign metadata ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
                     update_sections_status[update_section_name] = "partial"
+                    print(f"⚠️ [UPDATE] Partially triggered TikTok Ads campaign metadata ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
+                    logging.warning(f"⚠️ [UPDATE] Partially triggered TikTok Ads campaign metadata ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")                                    
                 else:
-                    print(f"❌ [UPDATE] Failed to trigger TikTok Ads campaign metadata ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
-                    logging.error(f"❌ [UPDATE] Failed to trigger TikTok Ads campaign metadata ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
                     update_sections_status[update_section_name] = "failed"
+                    print(f"❌ [UPDATE] Failed to trigger TikTok Ads campaign metadata ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
+                    logging.error(f"❌ [UPDATE] Failed to trigger TikTok Ads campaign metadata ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")                    
             else:
                 print("⚠️ [UPDATE] No updates for any campaign_id then TikTok Ads campaign metadata ingestion is marked as failed.")
                 logging.warning("⚠️ [UPDATE] No updates for any campaign_id then TikTok Ads campaign metadata ingestion is marked as failed.")
@@ -156,21 +156,21 @@ def update_campaign_insights(start_date: str, end_date: str):
                 staging_status_campaign = staging_results_campaign["staging_status_final"]
                 staging_summary_campaign = staging_results_campaign["staging_summary_final"]
                 if staging_status_campaign == "staging_succeed_all":
-                    print(f"✅ [UPDATE] Successfully triggered TikTok Ads campaign insights staging with {staging_summary_campaign['staging_tables_output']}/{staging_summary_campaign['staging_tables_input']} table(s) on {staging_summary_campaign['staging_tables_input']} queried table(s) and {staging_summary_campaign['staging_rows_output']} uploaded row(s) in {staging_summary_campaign['staging_time_elapsed']}s.")
-                    logging.info(f"✅ [UPDATE] Successfully triggered TikTok Ads campaign insights staging with {staging_summary_campaign['staging_tables_output']}/{staging_summary_campaign['staging_tables_input']} table(s) on {staging_summary_campaign['staging_tables_input']} queried table(s) and {staging_summary_campaign['staging_rows_output']} uploaded row(s) in {staging_summary_campaign['staging_time_elapsed']}s.")
                     update_sections_status[update_section_name] = "succeed"
+                    print(f"✅ [UPDATE] Successfully triggered TikTok Ads campaign insights staging with {staging_summary_campaign['staging_tables_output']}/{staging_summary_campaign['staging_tables_input']} table(s) on {staging_summary_campaign['staging_tables_input']} queried table(s) and {staging_summary_campaign['staging_rows_output']} uploaded row(s) in {staging_summary_campaign['staging_time_elapsed']}s.")
+                    logging.info(f"✅ [UPDATE] Successfully triggered TikTok Ads campaign insights staging with {staging_summary_campaign['staging_tables_output']}/{staging_summary_campaign['staging_tables_input']} table(s) on {staging_summary_campaign['staging_tables_input']} queried table(s) and {staging_summary_campaign['staging_rows_output']} uploaded row(s) in {staging_summary_campaign['staging_time_elapsed']}s.")                    
                 elif staging_status_campaign == "staging_failed_partial":
-                    print(f"⚠️ [UPDATE] Partially triggered TikTok Ads campaign insights staging with {staging_summary_campaign['staging_tables_output']}/{staging_summary_campaign['staging_tables_input']} table(s) on {staging_summary_campaign['staging_tables_input']} queried table(s) and {staging_summary_campaign['staging_rows_output']} uploaded row(s) in {staging_summary_campaign['staging_time_elapsed']}s.")
-                    logging.warning(f"⚠️ [UPDATE] Partially triggered TikTok Ads campaign insights staging with {staging_summary_campaign['staging_tables_output']}/{staging_summary_campaign['staging_tables_input']} table(s) on {staging_summary_campaign['staging_tables_input']} queried table(s) and {staging_summary_campaign['staging_rows_output']} uploaded row(s) in {staging_summary_campaign['staging_time_elapsed']}s.")
                     update_sections_status[update_section_name] = "partial"
+                    print(f"⚠️ [UPDATE] Partially triggered TikTok Ads campaign insights staging with {staging_summary_campaign['staging_tables_output']}/{staging_summary_campaign['staging_tables_input']} table(s) on {staging_summary_campaign['staging_tables_input']} queried table(s) and {staging_summary_campaign['staging_rows_output']} uploaded row(s) in {staging_summary_campaign['staging_time_elapsed']}s.")
+                    logging.warning(f"⚠️ [UPDATE] Partially triggered TikTok Ads campaign insights staging with {staging_summary_campaign['staging_tables_output']}/{staging_summary_campaign['staging_tables_input']} table(s) on {staging_summary_campaign['staging_tables_input']} queried table(s) and {staging_summary_campaign['staging_rows_output']} uploaded row(s) in {staging_summary_campaign['staging_time_elapsed']}s.")                    
                 else:
-                    print(f"❌ [UPDATE] Failed to trigger TikTok Ads campaign insights staging with {staging_summary_campaign['staging_tables_output']}/{staging_summary_campaign['staging_tables_input']} table(s) on {staging_summary_campaign['staging_tables_input']} queried table(s) and {staging_summary_campaign['staging_rows_output']} uploaded row(s) in {staging_summary_campaign['staging_time_elapsed']}s.")
-                    logging.error(f"❌ [UPDATE] Failed to trigger TikTok Ads campaign insights staging with {staging_summary_campaign['staging_tables_output']}/{staging_summary_campaign['staging_tables_input']} table(s) on {staging_summary_campaign['staging_tables_input']} queried table(s) and {staging_summary_campaign['staging_rows_output']} uploaded row(s) in {staging_summary_campaign['staging_time_elapsed']}s.")
                     update_sections_status[update_section_name] = "failed"
+                    print(f"❌ [UPDATE] Failed to trigger TikTok Ads campaign insights staging with {staging_summary_campaign['staging_tables_output']}/{staging_summary_campaign['staging_tables_input']} table(s) on {staging_summary_campaign['staging_tables_input']} queried table(s) and {staging_summary_campaign['staging_rows_output']} uploaded row(s) in {staging_summary_campaign['staging_time_elapsed']}s.")
+                    logging.error(f"❌ [UPDATE] Failed to trigger TikTok Ads campaign insights staging with {staging_summary_campaign['staging_tables_output']}/{staging_summary_campaign['staging_tables_input']} table(s) on {staging_summary_campaign['staging_tables_input']} queried table(s) and {staging_summary_campaign['staging_rows_output']} uploaded row(s) in {staging_summary_campaign['staging_time_elapsed']}s.")                    
             else:
-                print("⚠️ [UPDATE] No updates for any campaign_id then TikTok Ads campaign insights staging is marked as failed.")
-                logging.error("⚠️ [UPDATE] No updates for any campaign_id then TikTok Ads campaign insights staging is marked as failed.")
                 update_sections_status[update_section_name] = "failed"
+                print("⚠️ [UPDATE] No updates for any campaign_id then TikTok Ads campaign insights staging is marked as failed.")
+                logging.error("⚠️ [UPDATE] No updates for any campaign_id then TikTok Ads campaign insights staging is marked as failed.")                
         finally:
             update_sections_time[update_section_name] = round(time.time() - update_section_start, 2)
 
@@ -185,17 +185,17 @@ def update_campaign_insights(start_date: str, end_date: str):
                 mart_status_all = mart_results_all["mart_status_final"]
                 mart_summary_all = mart_results_all["mart_summary_final"]                
                 if mart_status_all == "mart_succeed_all":
-                    print(f"✅ [UPDATE] Successfully completed TikTok Ads campaign performance materialization in {mart_summary_all['mart_time_elapsed']}s.")
-                    logging.info(f"✅ [UPDATE] Successfully completed TikTok Ads campaign performance materialization in {mart_summary_all['mart_time_elapsed']}s.")
                     update_sections_status[update_section_name] = "succeed"
+                    print(f"✅ [UPDATE] Successfully triggered TikTok Ads campaign performance materialization with {mart_summary_all['mart_rows_output']} in {mart_summary_all['mart_time_elapsed']}s.")
+                    logging.info(f"✅ [UPDATE] Successfully triggered TikTok Ads campaign performance materialization with {mart_summary_all['mart_rows_output']} in {mart_summary_all['mart_time_elapsed']}s.")
                 elif mart_status_all == "mart_failed_all":
-                    print(f"❌ [UPDATE] Failed to complete TikTok Ads campaign performance materialization due to unsuccessful section(s) of {', '.join(mart_summary_all['mart_sections_failed']) if mart_summary_all['mart_sections_failed'] else 'unknown'}.")
-                    logging.error(f"❌ [UPDATE] Failed to complete TikTok Ads campaign performance materialization due to unsuccessful section(s) of {', '.join(mart_summary_all['mart_sections_failed']) if mart_summary_all['mart_sections_failed'] else 'unknown'}.")
                     update_sections_status[update_section_name] = "failed"
+                    print(f"❌ [UPDATE] Failed to complete TikTok Ads campaign performance materialization with {mart_summary_all['mart_rows_output']} in {mart_summary_all['mart_time_elapsed']}s.")
+                    logging.error(f"❌ [UPDATE] Failed to complete TikTok Ads campaign performance materialization with {mart_summary_all['mart_rows_output']} in {mart_summary_all['mart_time_elapsed']}s.")                    
             else:
-                print("⚠️ [UPDATE] No data returned from TikTok Ads campaign insights staging then materialization is skipped.")
-                logging.warning("⚠️ [UPDATE] No data returned from TikTok Ads campaign insights staging then materialization is skipped.")
                 update_sections_status[update_section_name] = "failed"
+                print("⚠️ [UPDATE] No data returned from TikTok Ads campaign insights staging then materialization is skipped.")
+                logging.warning("⚠️ [UPDATE] No data returned from TikTok Ads campaign insights staging then materialization is skipped.")                
         finally:
             update_sections_time[update_section_name] = round(time.time() - update_section_start, 2)
 
