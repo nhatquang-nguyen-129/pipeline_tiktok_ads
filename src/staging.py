@@ -211,8 +211,8 @@ def staging_campaign_insights() -> dict:
                     staging_tables_enriched.append(raw_table_campaign)
                     staging_dfs_enriched.append(staging_df_enriched)
                 else:
-                    print(f"❌ [STAGING] Failed to trigger TikTok Ads campaign insights enrichment with {staging_summary_enriched['enrich_rows_output']}/{staging_summary_enriched['enrich_rows_input']} enriched row(s) due to section(s) {', '.join(staging_summary_enriched.get('enrich_sections_failed', []))} in {staging_summary_enriched['enrich_time_elapsed']}s.")
-                    logging.error(f"❌ [STAGING] Failed to trigger TikTok Ads campaign insights enrichment with {staging_summary_enriched['enrich_rows_output']}/{staging_summary_enriched['enrich_rows_input']} enriched row(s) due to section(s) {', '.join(staging_summary_enriched.get('enrich_sections_failed', []))} in {staging_summary_enriched['enrich_time_elapsed']}s.")
+                    print(f"❌ [STAGING] Failed to trigger TikTok Ads campaign insights enrichment with {staging_summary_enriched['enrich_rows_output']}/{staging_summary_enriched['enrich_rows_input']} enriched row(s) in {staging_summary_enriched['enrich_time_elapsed']}s.")
+                    logging.error(f"❌ [STAGING] Failed to trigger TikTok Ads campaign insights enrichment with {staging_summary_enriched['enrich_rows_output']}/{staging_summary_enriched['enrich_rows_input']} enriched row(s) in {staging_summary_enriched['enrich_time_elapsed']}s.")
         finally:
             staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)                        
         if len(staging_tables_enriched) == len(staging_tables_queried):
@@ -586,8 +586,8 @@ def staging_ad_insights() -> dict:
                     staging_tables_enriched.append(raw_table_ad)
                     staging_dfs_enriched.append(staging_df_enriched)              
                 else:
-                    print(f"❌ [STAGING] Failed to trigger TikTok Ads ad insights enrichment with {staging_summary_enriched['enrich_rows_output']}/{staging_summary_enriched['enrich_rows_input']} enriched row(s) due to section(s) {', '.join(staging_summary_enriched.get('enrich_sections_failed', []))} in {staging_summary_enriched['enrich_time_elapsed']}s.")
-                    logging.error(f"❌ [STAGING] Failed to trigger TikTok Ads ad insights enrichment with {staging_summary_enriched['enrich_rows_output']}/{staging_summary_enriched['enrich_rows_input']} enriched row(s) due to section(s) {', '.join(staging_summary_enriched.get('enrich_sections_failed', []))} in {staging_summary_enriched['enrich_time_elapsed']}s.")
+                    print(f"❌ [STAGING] Failed to trigger TikTok Ads ad insights enrichment with {staging_summary_enriched['enrich_rows_output']}/{staging_summary_enriched['enrich_rows_input']} enriched row(s) in {staging_summary_enriched['enrich_time_elapsed']}s.")
+                    logging.error(f"❌ [STAGING] Failed to trigger TikTok Ads ad insights enrichment with {staging_summary_enriched['enrich_rows_output']}/{staging_summary_enriched['enrich_rows_input']} enriched row(s) in {staging_summary_enriched['enrich_time_elapsed']}s.")
         finally:
             staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)             
         if len(staging_tables_enriched) == len(staging_tables_queried):
