@@ -1070,8 +1070,8 @@ def fetch_ad_insights(fetch_date_start: str, fetch_date_end: str) -> pd.DataFram
         fetch_section_name = "[FETCH] Make TikTok Ads API call for ad insights"
         fetch_section_start = time.time()
         try:
-            print(f"🔍 [FETCH] Retrieving TikTok Ads ad insights for advertiser_id {advertiser_id} from {fetch_date_start} to {fetch_date_end}..")
-            logging.info(f"🔍 [FETCH] Retrieving TikTok Ads ad insights for advertiser_id {advertiser_id} from {fetch_date_start} to {fetch_date_end}..")
+            print(f"🔍 [FETCH] Retrieving TikTok Ads ad insights for advertiser_id {fetch_advertiser_id} from {fetch_date_start} to {fetch_date_end}..")
+            logging.info(f"🔍 [FETCH] Retrieving TikTok Ads ad insights for advertiser_id {fetch_advertiser_id} from {fetch_date_start} to {fetch_date_end}..")
             fetch_attempts_queued = 2
             fetch_ad_insights = []
             fetch_ad_records = []     
