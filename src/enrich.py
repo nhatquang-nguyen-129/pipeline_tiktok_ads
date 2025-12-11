@@ -180,12 +180,12 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
             logging.error(f"❌ [ENRICH] Failed to complete TikTok Ads campaign insights enrichment due to section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")
         elif enrich_rows_output == enrich_rows_input:
             enrich_status_final = "enrich_succeed_all"
-            print(f"🏆 [ENRICH] Successfully completed TikTok Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} row(s) output in {enrich_time_elapsed}s.")
-            logging.info(f"🏆 [ENRICH] Successfully completed TikTok Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} row(s) output in {enrich_time_elapsed}s.")            
+            print(f"🏆 [ENRICH] Successfully completed TikTok Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} enriched row(s) in {enrich_time_elapsed}s.")
+            logging.info(f"🏆 [ENRICH] Successfully completed TikTok Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} enriched row(s) in {enrich_time_elapsed}s.")            
         else:
             enrich_status_final = "enrich_succeed_partial"
-            print(f"⚠️ [ENRICH] Partially completed TikTok Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} row(s) in {enrich_time_elapsed}s.")
-            logging.warning(f"⚠️ [ENRICH] Partially completed TikTok Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} enforced row(s) in {enrich_time_elapsed}s.")            
+            print(f"⚠️ [ENRICH] Partially completed TikTok Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} enriched row(s) in {enrich_time_elapsed}s.")
+            logging.warning(f"⚠️ [ENRICH] Partially completed TikTok Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} enriched row(s) in {enrich_time_elapsed}s.")            
         enrich_results_final = {
             "enrich_df_final": enrich_df_final,
             "enrich_status_final": enrich_status_final,
@@ -360,12 +360,12 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
             logging.error(f"❌ [ENRICH] Failed to complete TikTok Ads ad insights enrichment due to section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")
         elif enrich_rows_output == enrich_rows_input:
             enrich_status_final = "enrich_succeed_all"
-            print(f"🏆 [ENRICH] Successfully completed TikTok Ads ad insights enrichment with {enrich_rows_output}/{enrich_rows_input} row(s) in {enrich_time_elapsed}s.")
-            logging.info(f"🏆 [ENRICH] Successfully completed TikTok Ads ad insights enrichment with {enrich_rows_output}/{enrich_rows_input} row(s) in {enrich_time_elapsed}s.")
+            print(f"🏆 [ENRICH] Successfully completed TikTok Ads ad insights enrichment with {enrich_rows_output}/{enrich_rows_input} enriched row(s) in {enrich_time_elapsed}s.")
+            logging.info(f"🏆 [ENRICH] Successfully completed TikTok Ads ad insights enrichment with {enrich_rows_output}/{enrich_rows_input} enriched row(s) in {enrich_time_elapsed}s.")
         else:
             enrich_status_final = "enrich_succeed_partial"
-            print(f"⚠️ [ENRICH] Partially completed TikTok Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} row(s) in {enrich_time_elapsed}s.")
-            logging.warning(f"⚠️ [ENRICH] Partially completed TikTok Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} row(s) in {enrich_time_elapsed}s.")                    
+            print(f"⚠️ [ENRICH] Partially completed TikTok Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} enriched row(s) in {enrich_time_elapsed}s.")
+            logging.warning(f"⚠️ [ENRICH] Partially completed TikTok Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} enriched row(s) in {enrich_time_elapsed}s.")                    
         enrich_results_final = {
             "enrich_df_final": enrich_df_final,
             "enrich_status_final": enrich_status_final,
