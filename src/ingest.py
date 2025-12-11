@@ -1157,8 +1157,8 @@ def ingest_campaign_insights(ingest_date_start: str, ingest_date_end: str,) -> p
                 "type": "loop" if ingest_section_separated in ingest_loops_time else "single"
             }
         if ingest_sections_failed:
-            print(f"❌ [INGEST] Failed to complete TikTok Ads campaign insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
-            logging.error(f"❌ [INGEST] Failed to complete TikTok Ads campaign insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
+            print(f"❌ [INGEST] Failed to complete TikTok Ads campaign insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")
+            logging.error(f"❌ [INGEST] Failed to complete TikTok Ads campaign insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")
             ingest_status_final = "ingest_failed_all"
         elif ingest_dates_output == ingest_dates_input:
             print(f"🏆 [INGEST] Successfully completed TikTok Ads campaign insights ingestion from from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
@@ -1215,9 +1215,9 @@ def ingest_ad_insights(ingest_date_start: str, ingest_date_end: str,) -> pd.Data
             print(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
             logging.info(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
             google_bigquery_client = bigquery.Client(project=PROJECT)
-            print(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-            logging.info(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
             ingest_sections_status[ingest_section_name] = "succeed"
+            print(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+            logging.info(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")            
         except Exception as e:
             ingest_sections_status[ingest_section_name] = "failed"
             print(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
@@ -1265,7 +1265,7 @@ def ingest_ad_insights(ingest_date_start: str, ingest_date_end: str,) -> pd.Data
                 if ingest_status_enforced == "schema_succeed_all":
                     ingest_sections_status[ingest_section_name] = "succeed"
                     print(f"✅ [INGEST] Successfully triggered TikTok Ads ad insights schema enforcement for {ingest_date_separated} with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
-                    logging.info(f"✅ [INGEST] Successfully triggered raw TikTok Ads ad insights schema enforcement for {ingest_date_separated} with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")                    
+                    logging.info(f"✅ [INGEST] Successfully triggered TikTok Ads ad insights schema enforcement for {ingest_date_separated} with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")                    
                 elif ingest_status_enforced == "schema_succeed_partial":
                     ingest_sections_status[ingest_section_name] = "partial"
                     print(f"⚠️ [FETCH] Partially triggered TikTok Ads ad insights schema enforcement for {ingest_date_separated} with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
@@ -1450,8 +1450,8 @@ def ingest_ad_insights(ingest_date_start: str, ingest_date_end: str,) -> pd.Data
                 "type": "loop" if ingest_section_separated in ingest_loops_time else "single"
             }
         if ingest_sections_failed:
-            print(f"❌ [INGEST] Failed to complete TikTok Ads ad insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
-            logging.error(f"❌ [INGEST] Failed to complete TikTok Ads ad insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
+            print(f"❌ [INGEST] Failed to complete TikTok Ads ad insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")
+            logging.error(f"❌ [INGEST] Failed to complete TikTok Ads ad insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")
             ingest_status_final = "ingest_failed_all"
         elif ingest_dates_output == ingest_dates_input:
             print(f"🏆 [INGEST] Successfully completed TikTok Ads ad insights ingestion from from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
