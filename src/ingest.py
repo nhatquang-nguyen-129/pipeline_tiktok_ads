@@ -331,17 +331,17 @@ def ingest_campaign_metadata(ingest_ids_campaign: list) -> pd.DataFrame:
             for ingest_section_summary in ingest_sections_summary
         }     
         if ingest_sections_failed:
-            print(f"❌ [INGEST] Failed to complete TikTok Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")
-            logging.error(f"❌ [INGEST] Failed to complete TikTok Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")
             ingest_status_final = "ingest_failed_all"
-        elif ingest_rows_input > 0 and ingest_rows_output < ingest_rows_input:
-            print(f"⚠️ [INGEST] Partially completed TikTok Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")
-            logging.warning(f"⚠️ [INGEST] Partially completed TikTok Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")
-            ingest_status_final = "ingest_succeed_partial"
-        else:
-            print(f"🏆 [INGEST] Successfully completed TikTok Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")
-            logging.info(f"🏆 [INGEST] Successfully completed TikTok Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")
+            print(f"❌ [INGEST] Failed to complete TikTok Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")
+            logging.error(f"❌ [INGEST] Failed to complete TikTok Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")            
+        elif ingest_rows_output == ingest_rows_input:
             ingest_status_final = "ingest_succeed_all"
+            print(f"🏆 [INGEST] Successfully completed TikTok Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")
+            logging.info(f"🏆 [INGEST] Successfully completed TikTok Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")    
+        else:
+            ingest_status_final = "ingest_succeed_partial"
+            print(f"⚠️ [INGEST] Partially completed TikTok Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")
+            logging.warning(f"⚠️ [INGEST] Partially completed TikTok Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")        
         ingest_results_final = {
             "ingest_df_final": ingest_df_final,
             "ingest_status_final": ingest_status_final,
@@ -934,30 +934,30 @@ def ingest_campaign_insights(ingest_date_start: str, ingest_date_end: str,) -> p
         
     # 2.1.3. Trigger to fetch TikTok Ads campaign insights
         ingest_date_list = pd.date_range(start=ingest_date_start, end=ingest_date_end).strftime("%Y-%m-%d").tolist()
-        for ingest_date_separated in ingest_date_list:           
+        for ingest_date_indexed, ingest_date_separated in enumerate(ingest_date_list):    
             ingest_section_name = "[INGEST] Trigger to fetch TikTok Ads campaign insights"
             ingest_section_start = time.time()
             try:
-                print(f"🔁 [INGEST] Triggering to fetch raw TikTok Ads campaigns insights for {ingest_date_separated}...")
-                logging.info(f"🔁 [INGEST] Triggering to fetch raw TikTok Ads campaigns insights for {ingest_date_separated}...")
+                print(f"🔁 [INGEST] Triggering to fetch TikTok Ads campaigns insights for {ingest_date_separated}...")
+                logging.info(f"🔁 [INGEST] Triggering to fetch TikTok Ads campaigns insights for {ingest_date_separated}...")
                 ingest_results_fetched = fetch_campaign_insights(ingest_date_separated, ingest_date_separated)
                 ingest_df_fetched = ingest_results_fetched["fetch_df_final"]
                 ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
                 ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
                 if ingest_status_fetched == "fetch_succeed_all":
-                    print(f"✅ [INGEST] Successfully triggered TikTok Ads campaign insights fetching with {len(ingest_df_fetched)} fetched row(s) for {ingest_date_separated} on {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
-                    logging.info(f"✅ [INGEST] Successfully triggered TikTok Ads campaign insights fetching with {len(ingest_df_fetched)} fetched row(s) for {ingest_date_separated} on {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
                     ingest_sections_status[ingest_section_name] = "succeed"
+                    print(f"✅ [INGEST] Successfully triggered TikTok Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                    logging.info(f"✅ [INGEST] Successfully triggered TikTok Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")                    
                 elif ingest_status_fetched == "fetch_succeed_partial":
-                    print(f"⚠️ [INGEST] Partially triggered TikTok Ads campaign insights fetching with {len(ingest_df_fetched)} fetched row(s) for {ingest_date_separated} on {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
-                    logging.warning(f"⚠️ [INGEST] Partially triggered TikTok Ads campaign insights fetching with {len(ingest_df_fetched)} fetched row(s) for {ingest_date_separated} on {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
                     ingest_sections_status[ingest_section_name] = "partial"
+                    print(f"⚠️ [INGEST] Partially triggered TikTok Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                    logging.warning(f"⚠️ [INGEST] Partially triggered TikTok Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")                    
                 else:
                     ingest_sections_status[ingest_section_name] = "failed"
                     print(f"❌ [INGEST] Failed to trigger TikTok Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
-                    logging.error(f"❌ [INGEST] Failed to trigger TikTok Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                    logging.error(f"❌ [INGEST] Failed to trigger TikTok Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")     
             finally:
-                ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2) 
+                ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)
 
     # 2.1.4. Trigger to enforce schema for TikTok Ads campaign insights
             ingest_section_name = "[INGEST] Trigger to enforce schema for TikTok Ads campaign insights"
@@ -1111,7 +1111,24 @@ def ingest_campaign_insights(ingest_date_start: str, ingest_date_end: str,) -> p
             finally:
                 ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2) 
 
-    # 2.1.8. Summarize ingestion results for TikTok Ads campaign insights
+    # 2.1.8. Cooldown before next TikTok Ads campaign insights fetch
+            ingest_section_name = "[INGEST] Cooldown before next TikTok Ads campaign insights fetch"
+            ingest_section_start = time.time()
+            try:
+                if ingest_date_indexed < len(ingest_date_list) - 1:
+                    ingest_cooldown_queued = ingest_results_fetched["fetch_summary_final"].get("fetch_cooldown_queued", 60)
+                    print(f"🔁 [INGEST] Waiting {ingest_cooldown_queued}s cooldown before triggering to fetch next day of TikTok Ads campaign insights...")
+                    logging.info(f"🔁 [INGEST] Waiting {ingest_cooldown_queued}s cooldown before triggering to fetch next day of TikTok Ads campaign insights...")
+                    time.sleep(ingest_cooldown_queued)
+                ingest_sections_status[ingest_section_name] = "succeed"
+            except Exception as e:
+                ingest_sections_status[ingest_section_name] = "failed"
+                print(f"❌ [INGEST] Failed to set cooldown for {ingest_cooldown_queued}s before triggering to fetch next day of TikTok Ads campaign insights due to {e}")
+                logging.error(f"❌ [INGEST] Failed to set cooldown for {ingest_cooldown_queued}s before triggering to fetch next day of TikTok Ads campaign insights due to {e}")
+            finally:
+                ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)
+
+    # 2.1.9. Summarize ingestion results for TikTok Ads campaign insights
     finally:
         ingest_time_elapsed = round(time.time() - ingest_time_start, 2)
         ingest_df_final = pd.concat(ingest_dates_uploaded or [], ignore_index=True)
