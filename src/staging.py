@@ -36,7 +36,7 @@ import time
 # Add Python Pandas libraries for integration
 import pandas as pd
 
-# Add Google Cloud modules for integration
+# Add Google BigQuery modules for integration
 from google.cloud import bigquery
 
 # Add internal TikTok module for handling
@@ -110,9 +110,9 @@ def staging_campaign_insights() -> dict:
             print(f"🔍 [STAGING] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
             logging.info(f"🔍 [STAGING] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
             google_bigquery_client = bigquery.Client(project=PROJECT)
-            print(f"✅ [STAGING] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-            logging.info(f"✅ [STAGING] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
             staging_sections_status[staging_section_name] = "succeed"
+            print(f"✅ [STAGING] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+            logging.info(f"✅ [STAGING] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")            
         except Exception as e:
             staging_sections_status[staging_section_name] = "failed"
             print(f"❌ [STAGING] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
@@ -120,8 +120,8 @@ def staging_campaign_insights() -> dict:
         finally:
             staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)
 
-    # 1.1.4. Scan all raw TikTok Ads campaign insights table(s)
-        staging_section_name = "[STAGING] Scan all raw TikTok Ads campaign insights table(s)"
+    # 1.1.4. Scan all raw TikTok Ads campaign insights tables
+        staging_section_name = "[STAGING] Scan all raw TikTok Ads campaign insights tables"
         staging_section_start = time.time()            
         try:
             print(f"🔍 [STAGING] Scanning all raw TikTok Ads campaign insights table(s) from Google BigQuery dataset {raw_dataset}...")
@@ -138,9 +138,9 @@ def staging_campaign_insights() -> dict:
             raw_tables_campaign = [f"{PROJECT}.{raw_dataset}.{t}" for t in raw_tables_campaign]
             if not raw_tables_campaign:
                 raise RuntimeError("❌ [STAGING] Failed to scan raw TikTok Ads campaign insights table(s) due to no tables found.")
+            staging_sections_status[staging_section_name] = "succeed"
             print(f"✅ [STAGING] Successfully found {len(raw_tables_campaign)} raw TikTok Ads campaign insights table(s).")
             logging.info(f"✅ [STAGING] Successfully found {len(raw_tables_campaign)} raw TikTok Ads campaign insights table(s).")
-            staging_sections_status[staging_section_name] = "succeed"
         except Exception as e:
             staging_sections_status[staging_section_name] = "failed"
             print(f"❌ [STAGING] Failed to scan raw TikTok Ads campaign insights table(s) due to {e}.")
@@ -148,8 +148,8 @@ def staging_campaign_insights() -> dict:
         finally:
             staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)    
 
-    # 1.1.5. Query all raw TikTok Ads campaign insights table(s)
-        staging_section_name = "[STAGING] Query all raw TikTok Ads campaign insights table(s)"
+    # 1.1.5. Query all raw TikTok Ads campaign insights tables
+        staging_section_name = "[STAGING] Query all raw TikTok Ads campaign insights tables"
         staging_section_start = time.time()            
         try:        
             for raw_table_campaign in raw_tables_campaign:
@@ -180,10 +180,10 @@ def staging_campaign_insights() -> dict:
             staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)                     
         if len(staging_tables_queried) == len(raw_tables_campaign):
             staging_sections_status[staging_section_name] = "succeed"
-        elif len(staging_tables_queried) > 0:
-            staging_sections_status[staging_section_name] = "partial"
-        else:
+        elif len(staging_tables_queried) == 0:
             staging_sections_status[staging_section_name] = "failed"
+        else:
+            staging_sections_status[staging_section_name] = "partial"
 
     # 1.1.6. Trigger to enrich TikTok Ads campaign insights
         staging_section_name = "[STAGING] Trigger to enrich TikTok Ads campaign insights"
@@ -205,6 +205,11 @@ def staging_campaign_insights() -> dict:
                     logging.info(f"✅ [STAGING] Successfully triggered TikTok Ads campaign insights enrichment with {staging_summary_enriched['enrich_rows_output']}/{staging_summary_enriched['enrich_rows_input']} enriched row(s) in {staging_summary_enriched['enrich_time_elapsed']}s.")
                     staging_tables_enriched.append(raw_table_campaign)
                     staging_dfs_enriched.append(staging_df_enriched)
+                elif staging_status_enriched == "enrich_succeed_partial":
+                    print(f"⚠️ [STAGING] Partially triggered TikTok Ads campaign insights enrichment with {staging_summary_enriched['enrich_rows_output']}/{staging_summary_enriched['enrich_rows_input']} enriched row(s) in {staging_summary_enriched['enrich_time_elapsed']}s.")
+                    logging.info(f"⚠️ [STAGING] Partially triggered TikTok Ads campaign insights enrichment with {staging_summary_enriched['enrich_rows_output']}/{staging_summary_enriched['enrich_rows_input']} enriched row(s) in {staging_summary_enriched['enrich_time_elapsed']}s.")
+                    staging_tables_enriched.append(raw_table_campaign)
+                    staging_dfs_enriched.append(staging_df_enriched)
                 else:
                     print(f"❌ [STAGING] Failed to trigger TikTok Ads campaign insights enrichment with {staging_summary_enriched['enrich_rows_output']}/{staging_summary_enriched['enrich_rows_input']} enriched row(s) due to section(s) {', '.join(staging_summary_enriched.get('enrich_sections_failed', []))} in {staging_summary_enriched['enrich_time_elapsed']}s.")
                     logging.error(f"❌ [STAGING] Failed to trigger TikTok Ads campaign insights enrichment with {staging_summary_enriched['enrich_rows_output']}/{staging_summary_enriched['enrich_rows_input']} enriched row(s) due to section(s) {', '.join(staging_summary_enriched.get('enrich_sections_failed', []))} in {staging_summary_enriched['enrich_time_elapsed']}s.")
@@ -212,10 +217,10 @@ def staging_campaign_insights() -> dict:
             staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)                        
         if len(staging_tables_enriched) == len(staging_tables_queried):
             staging_sections_status[staging_section_name] = "succeed"
-        elif len(staging_tables_enriched) > 0:
-            staging_sections_status[staging_section_name] = "partial"
-        else:
+        elif len(staging_tables_enriched) == 0:
             staging_sections_status[staging_section_name] = "failed"
+        else:
+            staging_sections_status[staging_section_name] = "parital"
 
     # 1.1.7. Concatenate enriched TikTok Ads campaign insights
         staging_section_name = "[STAGING] Concatenate enriched TikTok Ads campaign insights"
@@ -228,14 +233,14 @@ def staging_campaign_insights() -> dict:
                         "advertiser_name": "account_name",
                         "operation_status": "delivery_status"
                     })
-                print(f"✅ [STAGING] Successully concatenated TikTok Ads campaign insights with {len(staging_df_concatenated)} enriched rows from {len(staging_dfs_enriched)} DataFrame(s).")
-                logging.info(f"✅ [STAGING] Successully concatenated TikTok Ads campaign insights with {len(staging_df_concatenated)} enriched rows from {len(staging_dfs_enriched)} DataFrame(s).")
                 staging_sections_status[staging_section_name] = "succeed"
+                print(f"✅ [STAGING] Successully concatenated TikTok Ads campaign insights with {len(staging_df_concatenated)} enriched rows from {len(staging_dfs_enriched)} DataFrame(s).")
+                logging.info(f"✅ [STAGING] Successully concatenated TikTok Ads campaign insights with {len(staging_df_concatenated)} enriched rows from {len(staging_dfs_enriched)} DataFrame(s).")                
             else:
-                print("⚠️ [STAGING] No enriched DataFrame found for TikTok Ads campaign insights then concatenation is failed.")
-                logging.warning("⚠️ [STAGING] No enriched DataFrame found for TikTok Ads campaign insights then concatenation is failed.")
                 staging_df_concatenated = pd.DataFrame()
-                staging_sections_status[staging_section_name] = "failed"
+                staging_sections_status[staging_section_name] = "failed"                
+                print("⚠️ [STAGING] No enriched DataFrame found for TikTok Ads campaign insights then concatenation is failed.")
+                logging.warning("⚠️ [STAGING] No enriched DataFrame found for TikTok Ads campaign insights then concatenation is failed.")                                
         finally:
             staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)  
     
@@ -250,9 +255,13 @@ def staging_campaign_insights() -> dict:
             staging_status_enforced = staging_results_enforced["schema_status_final"]
             staging_summary_enforced = staging_results_enforced["schema_summary_final"]
             if staging_status_enforced == "schema_succeed_all":
+                staging_sections_status[staging_section_name] = "succeed"
                 print(f"✅ [STAGING] Successfully triggered TikTok Ads campaign insights schema enforcement with {staging_summary_enforced['schema_rows_output']}/{staging_summary_enforced['schema_rows_input']} enforced row(s) in {staging_summary_enforced['schema_time_elapsed']}s.")
                 logging.info(f"✅ [STAGING] Successfully triggered TikTok Ads campaign insights schema enforcement with {staging_summary_enforced['schema_rows_output']}/{staging_summary_enforced['schema_rows_input']} enforced row(s) in {staging_summary_enforced['schema_time_elapsed']}s.")
-                staging_sections_status[staging_section_name] = "succeed"
+            elif staging_status_enforced == "schema_succeed_partial":
+                staging_sections_status[staging_section_name] = "partial"
+                print(f"⚠️ [FETCH] Partially triggered TikTok Ads campaign insights schema enforcement with {staging_summary_enforced['schema_rows_output']}/{staging_summary_enforced['schema_rows_input']} enforced row(s) in {staging_summary_enforced['schema_time_elapsed']}s.")
+                logging.warning(f"⚠️ [FETCH] Partially triggered TikTok Ads campaign insights schema enforcement with {staging_summary_enforced['schema_rows_output']}/{staging_summary_enforced['schema_rows_input']} enforced row(s) in {staging_summary_enforced['schema_time_elapsed']}s.")
             else:
                 staging_sections_status[staging_section_name] = "failed"
                 print(f"❌ [STAGING] Failed to trigger TikTok Ads campaign insights schema enforcement with {staging_summary_enforced['schema_rows_output']}/{staging_summary_enforced['schema_rows_input']} enforced row(s) in {staging_summary_enforced['schema_time_elapsed']}s.")
@@ -262,11 +271,11 @@ def staging_campaign_insights() -> dict:
 
     # 1.1.9. Create new staging TikTok Ads campaign insights table
         staging_section_name = "[STAGING] Create new staging TikTok Ads campaign insights table"
-        staging_section_start = time.time()               
-        staging_df_deduplicated = staging_df_enforced.drop_duplicates()
-        table_clusters_filtered = []
-        table_schemas_defined = []
+        staging_section_start = time.time()
         try:            
+            staging_df_deduplicated = staging_df_enforced.drop_duplicates()
+            table_clusters_filtered = []
+            table_schemas_defined = []
             try:
                 print(f"🔍 [STAGING] Checking staging TikTok Ads campaign insights table {staging_table_campaign} existence...")
                 logging.info(f"🔍 [STAGING] Checking staging TikTok Ads campaign insights table {staging_table_campaign} existence...")
@@ -301,21 +310,21 @@ def staging_campaign_insights() -> dict:
                 if table_clusters_filtered:  
                     table_configuration_defined.clustering_fields = table_clusters_filtered  
                 try:
-                    print(f"🔍 [STAGING] Creating staging TikTok Ads campaign insights table with defined name {staging_table_campaign} and partition on {table_partition_effective}...")
-                    logging.info(f"🔍 [STAGING] Creating staging TikTok Ads campaign insights table with defined name {staging_table_campaign} and partition on {table_partition_effective}...")
-                    table_metadata_defined = google_bigquery_client.create_table(table_configuration_defined)
-                    print(f"✅ [STAGING] Successfully created staging TikTok Ads campaign insights table with actual name {table_metadata_defined.full_table_id}.")
-                    logging.info(f"✅ [STAGING] Successfully created staging TikTok Ads campaign insights table with actual name {table_metadata_defined.full_table_id}.")
+                    print(f"🔍 [STAGING] Creating staging TikTok Ads campaign insights table {staging_table_campaign} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}...")
+                    logging.info(f"🔍 [STAGING] Creating staging TikTok Ads campaign insights table {staging_table_campaign} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}...")
+                    staging_table_create = google_bigquery_client.create_table(table_configuration_defined)
+                    staging_table_id = staging_table_create.full_table_id
                     staging_sections_status[staging_section_name] = "succeed"
+                    print(f"✅ [STAGING] Successfully created staging TikTok Ads campaign insights table with actual name {staging_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}.")
+                    logging.info(f"✅ [STAGING] Successfully created staging TikTok Ads campaign insights table with actual name {staging_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}.")                    
                 except Exception as e:
                     staging_sections_status[staging_section_name] = "failed"
                     print(f"❌ [STAGING] Failed to create staging TikTok Ads campaign insights table {staging_table_campaign} due to {e}.")
                     logging.error(f"❌ [STAGING] Failed to create staging TikTok Ads campaign insights table {staging_table_campaign} due to {e}.")
-                    raise RuntimeError(f"❌ [STAGING] Failed to create staging TikTok Ads campaign insights table {staging_table_campaign} due to {e}.") from e
             else:
-                print(f"⚠️ [STAGING] Staging TikTok Ads campaign insights table {staging_table_campaign} already exists then creation will be skipped.")
-                logging.info(f"⚠️ [STAGING] Staging TikTok Ads campaign insights table {staging_table_campaign} already exists then creation will be skipped.")
                 staging_sections_status[staging_section_name] = "succeed"
+                print(f"⚠️ [STAGING] Staging TikTok Ads campaign insights table {staging_table_campaign} already exists then creation is skipped.")
+                logging.info(f"⚠️ [STAGING] Staging TikTok Ads campaign insights table {staging_table_campaign} already exists then creation is skipped.")                
         finally:
             staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)
             
@@ -325,9 +334,9 @@ def staging_campaign_insights() -> dict:
         try:            
             if not staging_table_exists:
                 try: 
-                    print(f"🔍 [STAGING] Uploading {len(staging_df_enforced)} row(s) of staging TikTok Ads campaign insights to new Google BigQuery table {table_metadata_defined.full_table_id}...")
-                    logging.warning(f"🔍 [STAGING] Uploading {len(staging_df_enforced)} row(s) of staging TikTok Ads campaign insights to Google BigQuery table {table_metadata_defined.full_table_id}...")     
-                    job_config = bigquery.LoadJobConfig(
+                    print(f"🔍 [STAGING] Uploading {len(staging_df_deduplicated)} deduplicated row(s) of staging TikTok Ads campaign insights to new Google BigQuery table {staging_table_id}...")
+                    logging.warning(f"🔍 [STAGING] Uploading {len(staging_df_deduplicated)} deduplicated row(s) of staging TikTok Ads campaign insights to new Google BigQuery table {staging_table_id}...")
+                    staging_job_config = bigquery.LoadJobConfig(
                         write_disposition="WRITE_APPEND",
                         time_partitioning=bigquery.TimePartitioning(
                             type_=bigquery.TimePartitioningType.DAY,
@@ -335,42 +344,43 @@ def staging_campaign_insights() -> dict:
                         ),
                         clustering_fields=table_clusters_filtered if table_clusters_filtered else None
                     )
-                    load_job = google_bigquery_client.load_table_from_dataframe(
-                        staging_df_enforced,
+                    staging_job_load = google_bigquery_client.load_table_from_dataframe(
+                        staging_df_deduplicated,
                         staging_table_campaign, 
-                        job_config=job_config
+                        job_config=staging_job_config
                     )
-                    load_job.result()
-                    staging_df_uploaded = staging_df_enforced.copy()
-                    print(f"✅ [STAGING] Successfully uploaded {len(staging_df_uploaded)} row(s) of staging TikTok Ads campaign insights to new Google BigQuery table {table_metadata_defined.full_table_id}.")
-                    logging.info(f"✅ [STAGING] Successfully uploaded {len(staging_df_uploaded)} row(s) of staging TikTok Ads campaign insights to new Google BigQuery table {table_metadata_defined.full_table_id}.")
+                    staging_job_result = staging_job_load.result()
+                    staging_rows_uploaded = staging_job_result.output_rows
+                    staging_df_uploaded = staging_df_deduplicated.copy()
                     staging_sections_status[staging_section_name] = "succeed"
+                    print(f"✅ [STAGING] Successfully uploaded {staging_rows_uploaded} deduplicated row(s) of staging TikTok Ads campaign insights to new Google BigQuery table {staging_table_id}.")
+                    logging.info(f"✅ [STAGING] Successfully uploaded {staging_rows_uploaded} deduplicated row(s) of staging TikTok Ads campaign insights to new Google BigQuery table {staging_table_id}.")
                 except Exception as e:
                     staging_sections_status[staging_section_name] = "failed"
-                    print(f"❌ [STAGING] Failed to upload {len(staging_df_enforced)} row(s) of staging TikTok Ads campaign insights to Google BigQuery table {table_metadata_defined.full_table_id} due to {e}.")
-                    logging.error(f"❌ [STAGING] Failed to upload {len(staging_df_enforced)} row(s) of staging TikTok Ads campaign insights to Google BigQuery table {table_metadata_defined.full_table_id} due to {e}.")      
-                    raise RuntimeError(f"❌ [STAGING] Failed to upload {len(staging_df_enforced)} row(s) of staging TikTok Ads campaign insights to Google BigQuery table {table_metadata_defined.full_table_id} due to {e}.") from e  
+                    print(f"❌ [STAGING] Failed to upload {len(staging_df_deduplicated)} deduplicated row(s) of staging TikTok Ads campaign insights to Google BigQuery table {staging_table_id} due to {e}.")
+                    logging.error(f"❌ [STAGING] Failed to upload {len(staging_df_deduplicated)} deduplicated row(s) of staging TikTok Ads campaign insights to Google BigQuery table {staging_table_id} due to {e}.")
             else:
                 try:
-                    print(f"🔍 [STAGING] Found existing Google BigQuery table {staging_table_campaign} and {len(staging_df_enforced)} row(s) of staging TikTok Ads campaign insights will be overwritten...")
-                    logging.warning(f"🔍 [STAGING] Found existing Google BigQuery table {staging_table_campaign} and {len(staging_df_enforced)} row(s) of staging TikTok Ads campaign insights will be overwritten...")                    
-                    job_config = bigquery.LoadJobConfig(
+                    print(f"🔍 [STAGING] Found existing Google BigQuery table {staging_table_campaign} and {len(staging_df_deduplicated)} deduplicated row(s) of staging TikTok Ads campaign insights will be overwritten...")
+                    logging.warning(f"🔍 [STAGING] Found existing Google BigQuery table {staging_table_campaign} and {len(staging_df_deduplicated)} deduplicated row(s) of staging TikTok Ads campaign insights will be overwritten...")
+                    staging_job_config = bigquery.LoadJobConfig(
                         write_disposition="WRITE_TRUNCATE",
                     )
-                    load_job = google_bigquery_client.load_table_from_dataframe(
-                        staging_df_enforced,
+                    staging_job_load = google_bigquery_client.load_table_from_dataframe(
+                        staging_df_deduplicated,
                         staging_table_campaign, 
-                        job_config=job_config
+                        job_config=staging_job_config
                     )
-                    load_job.result()
-                    staging_df_uploaded = staging_df_enforced.copy()
-                    print(f"✅ [STAGING] Successfully overwrote {len(staging_df_uploaded)} row(s) of staging TikTok Ads campaign insights to existing Google BigQuery table {staging_table_campaign}.")
-                    logging.info(f"✅ [STAGING] Successfully overwrote {len(staging_df_uploaded)} row(s) of staging TikTok Ads campaign insights to existing Google BigQuery table {staging_table_campaign}.")
+                    staging_job_result = staging_job_load.result()
+                    staging_rows_uploaded = staging_job_result.output_rows
+                    staging_df_uploaded = staging_df_deduplicated.copy()
                     staging_sections_status[staging_section_name] = "succeed"
+                    print(f"✅ [STAGING] Successfully overwrote {staging_rows_uploaded} deduplicated row(s) of staging TikTok Ads campaign insights to existing Google BigQuery table {staging_table_campaign}.")
+                    logging.info(f"✅ [STAGING] Successfully overwrote {staging_rows_uploaded} deduplicated row(s) of staging TikTok Ads campaign insights to existing Google BigQuery table {staging_table_campaign}.")                    
                 except Exception as e:
                     staging_sections_status[staging_section_name] = "failed"
-                    print(f"❌ [STAGING] Failed to overwrite {len(staging_df_enforced)} row(s) of staging TikTok Ads campaign insights to existing Google BigQuery table {staging_table_campaign} due to {e}.")
-                    logging.error(f"❌ [STAGING] Failed to overwrite {len(staging_df_enforced)} row(s) of staging TikTok Ads campaign insights to existing Google BigQuery table {staging_table_campaign} due to {e}.")      
+                    print(f"❌ [STAGING] Failed to overwrite {len(staging_df_deduplicated)} deduplicated row(s) of staging TikTok Ads campaign insights to existing Google BigQuery table {staging_table_campaign} due to {e}.")
+                    logging.error(f"❌ [STAGING] Failed to overwrite {len(staging_df_deduplicated)} deduplicated row(s) of staging TikTok Ads campaign insights to existing Google BigQuery table {staging_table_campaign} due to {e}.")
         finally:
             staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)             
 
@@ -384,7 +394,7 @@ def staging_campaign_insights() -> dict:
         staging_tables_input = len(raw_tables_campaign)
         staging_tables_output = len(staging_tables_queried)
         staging_tables_failed = staging_tables_input - staging_tables_output
-        staging_rows_output = len(staging_df_final)
+        staging_rows_output = staging_rows_uploaded
         staging_sections_summary = list(dict.fromkeys(
             list(staging_sections_status.keys()) +
             list(staging_sections_time.keys())
@@ -397,17 +407,17 @@ def staging_campaign_insights() -> dict:
             for staging_section_summary in staging_sections_summary
         }
         if staging_sections_failed:
-            print(f"❌ [STAGING] Failed to complete TikTok Ads campaign insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
-            logging.error(f"❌ [STAGING] Failed to complete TikTok Ads campaign insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
             staging_status_final = "staging_failed_all"
-        elif staging_tables_failed > 0:
-            print(f"⚠️ [STAGING] Partially completed TikTok Ads campaign insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
-            logging.warning(f"⚠️ [STAGING] Partially completed TikTok Ads campaign insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
-            staging_status_final = "staging_failed_partial"
-        else:
+            print(f"❌ [STAGING] Failed to complete TikTok Ads campaign insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) due to {', '.join(staging_sections_failed)} failed section(s) in {staging_time_elapsed}s.")
+            logging.error(f"❌ [STAGING] Failed to complete TikTok Ads campaign insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) due to {', '.join(staging_sections_failed)} failed section(s) in {staging_time_elapsed}s.")            
+        elif staging_tables_output == staging_tables_input:
+            staging_status_final = "staging_succeed_all"
             print(f"🏆 [STAGING] Successfully completed TikTok Ads campaign insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
             logging.info(f"🏆 [STAGING] Successfully completed TikTok Ads campaign insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
-            staging_status_final = "staging_succeed_all"
+        else:            
+            staging_status_final = "staging_failed_partial"            
+            print(f"⚠️ [STAGING] Partially completed TikTok Ads campaign insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
+            logging.warning(f"⚠️ [STAGING] Partially completed TikTok Ads campaign insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
         staging_results_final = {
             "staging_df_final": staging_df_final,
             "staging_status_final": staging_status_final,
