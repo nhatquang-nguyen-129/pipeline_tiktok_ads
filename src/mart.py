@@ -189,8 +189,8 @@ def mart_campaign_all() -> dict:
         }       
         if mart_sections_failed:
             mart_status_final = "mart_failed_all"
-            print(f"❌ [MART] Failed to complete TikTok Ads campaign performance materialization due to unsuccessful section(s) {', '.join(mart_sections_failed)}.")
-            logging.error(f"❌ [MART] Failed to complete TikTok Ads campaign performance materialization due to unsuccessful section(s) {', '.join(mart_sections_failed)}.")            
+            print(f"❌ [MART] Failed to complete TikTok Ads campaign performance materialization with {len(mart_rows_output)} materialized row(s) due to {', '.join(mart_sections_failed)} failed section(s) in {mart_time_elapsed}s.")
+            logging.error(f"❌ [MART] Failed to complete TikTok Ads campaign performance materialization with {len(mart_rows_output)} materialized row(s) due to {', '.join(mart_sections_failed)} failed section(s) in {mart_time_elapsed}s.")
         else:
             mart_status_final = "mart_succeed_all"
             print(f"🏆 [MART] Successfully completed TikTok Ads campaign performance materialization with {len(mart_rows_output)} materialized row(s) in {mart_time_elapsed}s.")
@@ -343,8 +343,8 @@ def mart_creative_all() -> dict:
         }          
         if mart_sections_failed:
             mart_status_final = "mart_failed_all"
-            print(f"❌ [MART] Failed to complete TikTok Ads creative performance materialization due to unsuccessful section(s) {', '.join(mart_sections_failed)}.")
-            logging.error(f"❌ [MART] Failed to complete TikTok Ads creative performance materialization due to unsuccessful section(s) {', '.join(mart_sections_failed)}.")            
+            print(f"❌ [MART] Failed to complete TikTok Ads creative performance materialization with {len(mart_rows_output)} materialized row(s) due to {', '.join(mart_sections_failed)} failed section(s) in {mart_time_elapsed}s.")
+            logging.error(f"❌ [MART] Failed to complete TikTok Ads creative performance materialization with {len(mart_rows_output)} materialized row(s) due to {', '.join(mart_sections_failed)} failed section(s) in {mart_time_elapsed}s.")
         else:
             mart_status_final = "mart_succeed_all"
             print(f"🏆 [MART] Successfully completed TikTok Ads creative performance materialization with {len(mart_rows_output)} materialized row(s) in {mart_time_elapsed}s.")
