@@ -409,7 +409,7 @@ def staging_campaign_insights() -> dict:
         if staging_sections_failed:
             staging_status_final = "staging_failed_all"
             print(f"❌ [STAGING] Failed to complete TikTok Ads campaign insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) due to {', '.join(staging_sections_failed)} failed section(s) in {staging_time_elapsed}s.")
-            logging.error(f"❌ [STAGING] Failed to complete TikTok Ads campaign insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) due to {', '.join(staging_sections_failed)} failed section(s) in {staging_time_elapsed}s.")            
+            logging.error(f"❌ [STAGING] Failed to complete TikTok Ads campaign insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) due to {', '.join(staging_sections_failed)} failed section(s) in {staging_time_elapsed}s.")
         elif staging_tables_output == staging_tables_input:
             staging_status_final = "staging_succeed_all"
             print(f"🏆 [STAGING] Successfully completed TikTok Ads campaign insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
@@ -779,17 +779,17 @@ def staging_ad_insights() -> dict:
             for staging_section_summary in staging_sections_summary
         }     
         if staging_sections_failed:
-            print(f"❌ [STAGING] Failed to complete TikTok Ads ad insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
-            logging.error(f"❌ [STAGING] Failed to complete TikTok Ads ad insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
             staging_status_final = "staging_failed_all"
-        elif staging_tables_failed > 0:
-            print(f"⚠️ [STAGING] Partially completed TikTok Ads ad insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
-            logging.warning(f"⚠️ [STAGING] Partially completed TikTok Ads ad insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
-            staging_status_final = "staging_failed_partial"
-        else:
+            print(f"❌ [STAGING] Failed to complete TikTok Ads ad insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) due to {', '.join(staging_sections_failed)} failed section(s) in {staging_time_elapsed}s.")
+            logging.error(f"❌ [STAGING] Failed to complete TikTok Ads ad insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) due to {', '.join(staging_sections_failed)} failed section(s) in {staging_time_elapsed}s.")
+        elif staging_tables_output == staging_tables_input:
+            staging_status_final = "staging_succeed_all"
             print(f"🏆 [STAGING] Successfully completed TikTok Ads ad insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
             logging.info(f"🏆 [STAGING] Successfully completed TikTok Ads ad insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
-            staging_status_final = "staging_succeed_all"
+        else:            
+            staging_status_final = "staging_failed_partial"            
+            print(f"⚠️ [STAGING] Partially completed TikTok Ads ad insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
+            logging.warning(f"⚠️ [STAGING] Partially completed TikTok Ads ad insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
         staging_results_final = {
             "staging_df_final": staging_df_final,
             "staging_status_final": staging_status_final,
