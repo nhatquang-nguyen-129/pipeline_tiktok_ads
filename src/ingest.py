@@ -1352,29 +1352,30 @@ def ingest_ad_insights(ingest_date_start: str, ingest_date_end: str,) -> pd.Data
                         print(f"⚠️ [INGEST] Found {len(ingest_dates_overlapped)} overlapping date(s) in raw TikTok Ads ad insights {raw_table_ad} table then deletion will be proceeding...")
                         logging.warning(f"⚠️ [INGEST] Found {len(ingest_dates_overlapped)} overlapping date(s) in raw TikTok Ads ad insights {raw_table_ad} table then deletion will be proceeding...")
                         for ingest_date_overlapped in ingest_dates_overlapped:
-                            query = f"""
+                            ingest_query_config = f"""
                                 DELETE FROM `{raw_table_ad}`
                                 WHERE stat_time_day = @date_value
                             """
-                            job_config = bigquery.QueryJobConfig(
+                            ingest_job_config = bigquery.QueryJobConfig(
                                 query_parameters=[bigquery.ScalarQueryParameter("date_value", "STRING", ingest_date_overlapped)]
                             )
                             try:
-                                ingest_result_deleted = google_bigquery_client.query(query, job_config=job_config).result()
-                                ingest_rows_deleted = ingest_result_deleted.num_dml_affected_rows
-                                print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of raw TikTok Ads ad insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_ad}.")
-                                logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of raw TikTok Ads ad insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_ad}.")
+                                ingest_query_load = google_bigquery_client.query(ingest_query_config, job_config=ingest_job_config).result()
+                                ingest_query_result = ingest_query_load.result()
+                                ingest_rows_deleted = ingest_query_result.num_dml_affected_rows
+                                print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of TikTok Ads ad insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_ad}.")
+                                logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of TikTok Ads ad insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_ad}.")
                             except Exception as e:
-                                print(f"❌ [INGEST] Failed to delete existing row(s) of raw TikTok Ads ad insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_ad} due to {e}.")
-                                logging.error(f"❌ [INGEST] Failed to delete existing row(s) of raw TikTok Ads ad insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_ad} due to {e}.")
+                                print(f"❌ [INGEST] Failed to delete existing row(s) of TikTok Ads ad insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_ad} due to {e}.")
+                                logging.error(f"❌ [INGEST] Failed to delete existing row(s) of TikTok Ads ad insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_ad} due to {e}.")
                     else:
-                        print(f"⚠️ [INGEST] No overlapping date(s) of raw TikTok Ads ad insights found in Google BigQuery {raw_table_ad} table then deletion is skipped.")
-                        logging.info(f"⚠️ [INGEST] No overlapping date(s) of raw TikTok Ads ad insights found in Google BigQuery {raw_table_ad} table then deletion is skipped.")
+                        print(f"⚠️ [INGEST] No overlapping date(s) of TikTok Ads ad insights found in Google BigQuery {raw_table_ad} table then deletion is skipped.")
+                        logging.info(f"⚠️ [INGEST] No overlapping date(s) of TikTok Ads ad insights found in Google BigQuery {raw_table_ad} table then deletion is skipped.")
                 ingest_sections_status[ingest_section_name] = "succeed"
             except Exception as e:
                 ingest_sections_status[ingest_section_name] = "failed"
-                print(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_ad} if it not exist for raw TikTok Ads ad insights due to {e}.")
-                logging.error(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_ad} if it not exist for raw TikTok Ads ad insights due to {e}.")
+                print(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_ad} if it not exist for TikTok Ads ad insights due to {e}.")
+                logging.error(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_ad} if it not exist for TikTok Ads ad insights due to {e}.")
             finally:
                 ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)
 
@@ -1382,27 +1383,45 @@ def ingest_ad_insights(ingest_date_start: str, ingest_date_end: str,) -> pd.Data
             ingest_section_name = "[INGEST] Upload TikTok Ads ad insights to Google BigQuery"
             ingest_section_start = time.time()
             try:
-                print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of raw TikTok Ads ad insights to Google BigQuery table {raw_table_ad}...")
-                logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of raw TikTok Ads ad insights to Google BigQuery table {raw_table_ad}...")
-                job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
-                load_job = google_bigquery_client.load_table_from_dataframe(
+                print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of TikTok Ads ad insights to Google BigQuery table {raw_table_ad}...")
+                logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of TikTok Ads ad insights to Google BigQuery table {raw_table_ad}...")
+                ingest_job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
+                ingest_job_load = google_bigquery_client.load_table_from_dataframe(
                     ingest_df_deduplicated,
                     raw_table_ad,
-                    job_config=job_config
+                    job_config=ingest_job_config
                 )
-                load_job.result()
+                ingest_job_result = ingest_job_load.result()
+                ingest_rows_uploaded = ingest_job_result.output_rows
                 ingest_dates_uploaded.append(ingest_df_deduplicated.copy())
                 ingest_sections_status[ingest_section_name] = "succeed"
-                print(f"✅ [INGEST] Successfully uploaded {len(ingest_df_deduplicated)} row(s) of raw TikTok Ads ad insights to Google BigQuery table {raw_table_ad}.")
-                logging.info(f"✅ [INGEST] Successfully uploaded {len(ingest_df_deduplicated)} row(s) of raw TikTok Ads ad insights to Google BigQuery table {raw_table_ad}.")
+                print(f"✅ [INGEST] Successfully uploaded {ingest_rows_uploaded} row(s) of TikTok Ads ad insights to Google BigQuery table {raw_table_ad}.")
+                logging.info(f"✅ [INGEST] Successfully uploaded {ingest_rows_uploaded} row(s) of TikTok Ads ad insights to Google BigQuery table {raw_table_ad}.")
             except Exception as e:
                 ingest_sections_status[ingest_section_name] = "failed"
-                print(f"❌ [INGEST] Failed to upload {len(ingest_df_deduplicated)} row(s) of raw TikTok Ads ad insights to Google BigQuery table {raw_table_ad} due to {e}.")
-                logging.error(f"❌ [INGEST] Failed to upload {len(ingest_df_deduplicated)} row(s) of raw TikTok Ads ad insights to Google BigQuery table {raw_table_ad} due to {e}.")
+                print(f"❌ [INGEST] Failed to upload {len(ingest_df_deduplicated)} deduplicated row(s) of TikTok Ads ad insights to Google BigQuery table {raw_table_ad} due to {e}.")
+                logging.error(f"❌ [INGEST] Failed to upload {len(ingest_df_deduplicated)} deduplicated row(s) of TikTok Ads ad insights to Google BigQuery table {raw_table_ad} due to {e}.")
+            finally:
+                ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2) 
+
+    # 2.2.8. Cooldown before next TikTok Ads ad insights fetch
+            ingest_section_name = "[INGEST] Cooldown before next TikTok Ads ad insights fetch"
+            ingest_section_start = time.time()
+            try:
+                if ingest_date_indexed < len(ingest_date_list) - 1:
+                    ingest_cooldown_queued = ingest_results_fetched["fetch_summary_final"].get("fetch_cooldown_queued", 60)
+                    print(f"🔁 [INGEST] Waiting {ingest_cooldown_queued}s cooldown before triggering to fetch next day of TikTok Ads ad insights...")
+                    logging.info(f"🔁 [INGEST] Waiting {ingest_cooldown_queued}s cooldown before triggering to fetch next day of TikTok Ads ad insights...")
+                    time.sleep(ingest_cooldown_queued)
+                ingest_sections_status[ingest_section_name] = "succeed"
+            except Exception as e:
+                ingest_sections_status[ingest_section_name] = "failed"
+                print(f"❌ [INGEST] Failed to set cooldown for {ingest_cooldown_queued}s before triggering to fetch next day of TikTok Ads ad insights due to {e}")
+                logging.error(f"❌ [INGEST] Failed to set cooldown for {ingest_cooldown_queued}s before triggering to fetch next day of TikTok Ads ad insights due to {e}")
             finally:
                 ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)
 
-    # 2.2.8. Summarize ingestion results for TikTok Ads ad insights
+    # 2.2.9. Summarize ingestion results for TikTok Ads ad insights
     finally:
         ingest_time_elapsed = round(time.time() - ingest_time_start, 2)
         ingest_df_final = pd.concat(ingest_dates_uploaded or [], ignore_index=True)
@@ -1430,18 +1449,18 @@ def ingest_ad_insights(ingest_date_start: str, ingest_date_end: str,) -> pd.Data
                 "time": round(ingest_section_time or 0.0, 2),
                 "type": "loop" if ingest_section_separated in ingest_loops_time else "single"
             }
-        if len(ingest_dates_uploaded) == 0:
-            print(f"❌ [INGEST] Failed to complete TikTok Ads ad insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
-            logging.error(f"❌ [INGEST] Failed to complete TikTok Ads ad insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
+        if ingest_sections_failed:
+            print(f"❌ [INGEST] Failed to complete TikTok Ads ad insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
+            logging.error(f"❌ [INGEST] Failed to complete TikTok Ads ad insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
             ingest_status_final = "ingest_failed_all"
-        elif ingest_dates_failed > 0:
-            print(f"⚠️ [INGEST] Partially completed TikTok Ads ad ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
-            logging.warning(f"⚠️ [INGEST] Partially completed TikTok Ads ad insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
-            ingest_status_final = "ingest_succeed_partial"
+        elif ingest_dates_output == ingest_dates_input:
+            print(f"🏆 [INGEST] Successfully completed TikTok Ads ad insights ingestion from from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
+            logging.info(f"🏆 [INGEST] Successfully completed TikTok Ads ad insights ingestion from from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
+            ingest_status_final = "ingest_succeed_all"            
         else:
-            print(f"🏆 [INGEST] Successfully completed TikTok Ads ad insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
-            logging.info(f"🏆 [INGEST] Successfully completed TikTok Ads ad insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
-            ingest_status_final = "ingest_succeed_all"
+            print(f"⚠️ [INGEST] Partially completed TikTok Ads ad insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
+            logging.warning(f"⚠️ [INGEST] Partially completed TikTok Ads ad insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
+            ingest_status_final = "ingest_succeed_partial"
         ingest_results_final = {
             "ingest_df_final": ingest_df_final,
             "ingest_status_final": ingest_status_final,
