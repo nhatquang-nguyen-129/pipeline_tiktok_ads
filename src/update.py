@@ -27,13 +27,16 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
+# Add Python datetime utilities for integration
+from datetime import datetime
+
 # Add logging ultilities for integration
 import logging
 
 # Add Python 'time' libraries for integration
 import time
 
-# Add Pythoin IANA time zone ultilities for integration
+# Add Python IANA time zone ultilities for integration
 from zoneinfo import ZoneInfo
 
 # Add internal TikTok Ads module for handling
@@ -82,11 +85,12 @@ def update_campaign_insights(update_date_start: str, update_date_end: str):
     logging.info(f"🚀 [UPDATE] Starting to update TikTok Ads campaign insights from {update_date_start} to {update_date_end}...")
 
     # 1.1.1. Start timing TikTok Ads campaign insights update
+    ICT = ZoneInfo("Asia/Ho_Chi_Minh")
     update_time_start = time.time()
     update_sections_status = {}
     update_sections_time = {}
-    print(f"🔍 [UPDATE] Proceeding to update TikTok Ads campaign insights from {update_date_start} to {update_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
-    logging.info(f"🔍 [UPDATE] Proceeding to update TikTok Ads campaign insights from {update_date_start} to {update_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
+    print(f"🔍 [UPDATE] Proceeding to update TikTok Ads campaign insights from {update_date_start} to {update_date_end} at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
+    logging.info(f"🔍 [UPDATE] Proceeding to update TikTok Ads campaign insights from {update_date_start} to {update_date_end} at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
 
     try:
 
