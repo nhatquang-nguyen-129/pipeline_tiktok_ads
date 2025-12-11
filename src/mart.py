@@ -188,13 +188,13 @@ def mart_campaign_all() -> dict:
             for mart_section_summary in mart_sections_summary
         }       
         if mart_sections_failed:
-            print(f"❌ [MART] Failed to complete TikTok Ads campaign performance materialization due to unsuccessful section(s) {', '.join(mart_sections_failed)}.")
-            logging.error(f"❌ [MART] Failed to complete TikTok Ads campaign performance materialization due to unsuccessful section(s) {', '.join(mart_sections_failed)}.")
             mart_status_final = "mart_failed_all"
+            print(f"❌ [MART] Failed to complete TikTok Ads campaign performance materialization due to unsuccessful section(s) {', '.join(mart_sections_failed)}.")
+            logging.error(f"❌ [MART] Failed to complete TikTok Ads campaign performance materialization due to unsuccessful section(s) {', '.join(mart_sections_failed)}.")            
         else:
-            print(f"🏆 [MART] Successfully completed TikTok Ads campaign performance materialization with {len(mart_rows_output)} materialized row(s) in {mart_time_elapsed}s.")
-            logging.info(f"🏆 [MART] Successfully completed TikTok Ads campaign performance materialization with {len(mart_rows_output)} materialized row(s) in {mart_time_elapsed}s.")
             mart_status_final = "mart_succeed_all"
+            print(f"🏆 [MART] Successfully completed TikTok Ads campaign performance materialization with {len(mart_rows_output)} materialized row(s) in {mart_time_elapsed}s.")
+            logging.info(f"🏆 [MART] Successfully completed TikTok Ads campaign performance materialization with {len(mart_rows_output)} materialized row(s) in {mart_time_elapsed}s.")            
         mart_results_final = {
             "mart_df_final": None,
             "mart_status_final": mart_status_final,
@@ -211,7 +211,7 @@ def mart_campaign_all() -> dict:
 
 # 2. BUILD MATERIALIZED TABLE FOR TIKTOK ADS CREATIVE PERFORMANCE
 
-# 2.1. Build materialized table for TikTok creative performance by union all staging table(s)
+# 2.1. Build materialized table for TikTok creative performance by union all staging tables
 def mart_creative_all() -> dict:
     print(f"🚀 [MART] Starting to build materialized table for TikTok Ads creative performance...")
     logging.info(f"🚀 [MART] Starting to build materialized table for TikTok Ads creative performance...")
@@ -226,9 +226,9 @@ def mart_creative_all() -> dict:
     try:
 
     # 2.1.2. Prepare Google BigQuery table_id for materialization
+        mart_section_name = "[MART] Prepare Google BigQuery table_id for materialization"
+        mart_section_start = time.time()        
         try:
-            mart_section_name = "[MART] Prepare Google BigQuery table_id for materialization"
-            mart_section_start = time.time()    
             staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
             staging_table_ad = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"
             print(f"🔍 [MART] Using staging table {staging_table_ad} to build materialized table for TikTok Ads creative performance...")
@@ -238,7 +238,6 @@ def mart_creative_all() -> dict:
             print(f"🔍 [MART] Preparing to build materialized table {mart_table_all} for TikTok Ads creative performance...")
             logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_all} for TikTok Ads creative performance...") 
             mart_sections_status[mart_section_name] = "succeed"    
-            mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
         finally:
             mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
 
@@ -249,9 +248,9 @@ def mart_creative_all() -> dict:
             print(f"🔍 [MART] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
             logging.info(f"🔍 [MART] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
             google_bigquery_client = bigquery.Client(project=PROJECT)
-            print(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-            logging.info(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
             mart_sections_status[mart_section_name] = "succeed"
+            print(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+            logging.info(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")            
         except Exception as e:
             mart_sections_status[mart_section_name] = "failed"
             print(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
@@ -259,11 +258,11 @@ def mart_creative_all() -> dict:
         finally:
             mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
 
-    # 2.1.4. Query all staging table(s) for materialization
-        mart_section_name = "[MART] Query all staging table(s) for materialization"
+    # 2.1.4. Query all staging tables for materialization
+        mart_section_name = "[MART] Query all staging tables for materialization"
         mart_section_start = time.time()  
         try:
-            query = f"""
+            mart_query_config = f"""
                 CREATE OR REPLACE TABLE `{mart_table_all}`
                 PARTITION BY ngay
                 CLUSTER BY nhan_su, ma_ngan_sach_cap_1, nganh_hang, hang_muc
@@ -307,26 +306,30 @@ def mart_creative_all() -> dict:
                 FROM `{staging_table_ad}`
             """
             print(f"🔄 [MART] Querying staging TikTok Ads ad insights table {staging_table_ad} to create or replace materialized table for creative performance...")
-            logging.info(f"🔄 [MART] Querying staging FaceTikTokbook Ads ad insights table {staging_table_ad} to create or replace materialized table for creative performance...")       
-            google_bigquery_client.query(query).result()
-            count_query = f"SELECT COUNT(1) AS row_count FROM `{mart_table_all}`"
-            row_count = list(google_bigquery_client.query(count_query).result())[0]["row_count"]
-            print(f"✅ [MART] Successfully created or replaced materialized table {mart_table_all} for TikTok Ads creative performance with {row_count} row(s).")
-            logging.info(f"✅ [MART] Successfully created or replaced materialized table {mart_table_all} for TikTok Ads creative performance with {row_count} row(s).")
+            logging.info(f"🔄 [MART] Querying staging TikTok Ads ad insights table {staging_table_ad} to create or replace materialized table for creative performance...")
+            mart_query_load = google_bigquery_client.query(mart_query_config)
+            mart_query_result = mart_query_load.result()
+            mart_count_config = f"SELECT COUNT(1) AS mart_rows_count FROM `{mart_table_all}`"
+            mart_count_load = google_bigquery_client.query(mart_count_config)
+            mart_count_result = mart_count_load.result()
+            mart_rows_uploaded = list(mart_count_result)[0]["mart_rows_count"]
             mart_sections_status[mart_section_name] = "succeed"
+            print(f"✅ [MART] Successfully created or replace materialized table {mart_table_all} for TikTok Ads creative performance with {mart_rows_uploaded} row(s).")
+            logging.info(f"✅ [MART] Successfully created or replace materialized table {mart_table_all} for TikTok Ads creative performance with {mart_rows_uploaded} row(s).")
         except Exception as e:
             mart_sections_status[mart_section_name] = "failed"
-            print(f"❌ [MART] Failed to create or replace materialized table for TikTok Ads creative performance due to {e}.")
-            logging.error(f"❌ [MART] Failed to create or replace materialized table for TikTok Ads creative performance due to {e}.")
+            print(f"❌ [MART] Failed to create or replace materialized table for TikTok Ads campaign performance due to {e}.")
+            logging.error(f"❌ [MART] Failed to create or replace materialized table for TikTok Ads campaign performance due to {e}.")
         finally:
             mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
 
-    # 2.1.5. Summarize materialization result(s) for TikTok Ads creative performance
+    # 2.1.5. Summarize materialization results for TikTok Ads creative performance
     finally:
         mart_time_elapsed = round(time.time() - mart_time_start, 2)
         mart_sections_total = len(mart_sections_status) 
         mart_sections_failed = [k for k, v in mart_sections_status.items() if v == "failed"] 
         mart_sections_succeeded = [k for k, v in mart_sections_status.items() if v == "succeed"]
+        mart_rows_output = mart_rows_uploaded        
         mart_sections_summary = list(dict.fromkeys(
             list(mart_sections_status.keys()) +
             list(mart_sections_time.keys())
@@ -338,14 +341,14 @@ def mart_creative_all() -> dict:
             }
             for mart_section_summary in mart_sections_summary
         }          
-        if len(mart_sections_failed) > 0:
-            print(f"❌ [MART] Failed to complete TikTok Ads creative performance materialization due to unsuccessful section(s) {', '.join(mart_sections_failed)}.")
-            logging.error(f"❌ [MART] Failed to complete TikTok Ads creative performance materialization due to unsuccessful section(s) {', '.join(mart_sections_failed)}.")
+        if mart_sections_failed:
             mart_status_final = "mart_failed_all"
+            print(f"❌ [MART] Failed to complete TikTok Ads creative performance materialization due to unsuccessful section(s) {', '.join(mart_sections_failed)}.")
+            logging.error(f"❌ [MART] Failed to complete TikTok Ads creative performance materialization due to unsuccessful section(s) {', '.join(mart_sections_failed)}.")            
         else:
-            print(f"🏆 [MART] Successfully completed TikTok Ads creative performance materialization in {mart_time_elapsed}s.")
-            logging.info(f"🏆 [MART] Successfully completed TikTok Ads creative performance materialization in {mart_time_elapsed}s.")
             mart_status_final = "mart_succeed_all"
+            print(f"🏆 [MART] Successfully completed TikTok Ads creative performance materialization with {len(mart_rows_output)} materialized row(s) in {mart_time_elapsed}s.")
+            logging.info(f"🏆 [MART] Successfully completed TikTok Ads creative performance materialization with {len(mart_rows_output)} materialized row(s) in {mart_time_elapsed}s.")            
         mart_results_final = {
             "mart_df_final": None,
             "mart_status_final": mart_status_final,
@@ -355,6 +358,7 @@ def mart_creative_all() -> dict:
                 "mart_sections_succeed": mart_sections_succeeded,
                 "mart_sections_failed": mart_sections_failed,
                 "mart_sections_detail": mart_sections_detail,
+                "mart_rows_output": mart_rows_output,
             },
         }
     return mart_results_final
