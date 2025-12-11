@@ -31,11 +31,14 @@ from datetime import (
     timedelta
 )
 
-# Add dynamic platform-specific ultilities for integration
+# Add Python dynamic platform-specific ultilities for integration
 import importlib
 
-# Add logging ultilities for integration
+# Add Python logging ultilities for integration
 import logging
+
+# Add Pythoin IANA time zone ultilities for integration
+from zoneinfo import ZoneInfo
 
 # Get environment variable for Company
 COMPANY = os.getenv("COMPANY") 
@@ -70,60 +73,63 @@ try:
 except ModuleNotFoundError:
     raise ImportError(f"❌ [MAIN] Platform '{PLATFORM}' is not supported so please ensure src/update.py exists.")
 
-# 1.2. Main entrypoint function
-def main():
-    today = datetime.today()
+# 1. MAIN ENTRYPOINT CONTROLLER
 
-    # 1.2.1. PLATFORM = tiktok (keep original logic)
+# 1.1. Validate input for main entrypoint function
+if PLATFORM != "tiktok":
+    raise ValueError("❌ [MAIN] Only 'tiktok' platform is supported in this script.")
+try:
+    update_module_location = importlib.import_module(f"src.update")
+except ModuleNotFoundError:
+    raise ImportError(f"❌ [MAIN] Platform '{PLATFORM}' is not supported so please ensure src/update.py exists.")
+
+# 1.2. Execution controller
+def main():
+    ICT = ZoneInfo("Asia/Ho_Chi_Minh")
+    main_date_today = datetime.now(ICT)
     if PLATFORM == "tiktok":
         try:
-            update_campaign_insights = update_module.update_campaign_insights
-            update_ad_insights = update_module.update_ad_insights
+            update_campaign_insights = update_module_location.update_campaign_insights
+            update_ad_insights = update_module_location.update_ad_insights
         except AttributeError:
-            raise ImportError(f"❌ [MAIN] TikTok update module must define update_campaign_insights and update_ad_insights.")
-        layers = [layer.strip() for layer in LAYER.split(",") if layer.strip()]
-        if len(layers) != 1:
+            raise ImportError(f"❌ [MAIN] Failed to locate TikTok Ads update module due to update_campaign_insights and update_ad_insights must be defined.")
+        main_layers_variable = [layer.strip() for layer in LAYER.split(",") if layer.strip()]
+        if len(main_layers_variable) != 1:
             raise ValueError("⚠️ [MAIN] Only one layer is supported per execution so please run separately for each layer.")
         if MODE == "today":
-            start_date = end_date = today.strftime("%Y-%m-%d")
+            main_date_start = main_date_end = main_date_today.strftime("%Y-%m-%d")
         elif MODE == "last3days":
-            start = today - timedelta(days=3)
-            start_date = start.strftime("%Y-%m-%d")
-            end_date = today.strftime("%Y-%m-%d")
+            main_date_start = (main_date_today - timedelta(days=3)).strftime("%Y-%m-%d")
+            main_date_end = (main_date_today - timedelta(days=1)).strftime("%Y-%m-%d")      
         elif MODE == "last7days":
-            start = today - timedelta(days=7)
-            start_date = start.strftime("%Y-%m-%d")
-            end_date = today.strftime("%Y-%m-%d")
+            main_date_start = (main_date_today - timedelta(days=7)).strftime("%Y-%m-%d")
+            main_date_end = (main_date_today - timedelta(days=1)).strftime("%Y-%m-%d")
         elif MODE == "thismonth":
-            start = today.replace(day=1)
-            start_date = start.strftime("%Y-%m-%d")
-            end_date = today.strftime("%Y-%m-%d")
+            main_date_start = main_date_today.replace(day=1).strftime("%Y-%m-%d")
+            main_date_end = main_date_today.strftime("%Y-%m-%d")
         elif MODE == "lastmonth":
-            first_day_this_month = today.replace(day=1)
-            last_day_last_month = first_day_this_month - timedelta(days=1)
-            first_day_last_month = last_day_last_month.replace(day=1)
-            start_date = first_day_last_month.strftime("%Y-%m-%d")
-            end_date = last_day_last_month.strftime("%Y-%m-%d")
+            main_date_start = (main_date_today.replace(day=1) - timedelta(days=1)).replace(day=1).strftime("%Y-%m-%d")
+            main_date_end = (main_date_today.replace(day=1) - timedelta(days=1)).strftime("%Y-%m-%d")
         else:
             raise ValueError(f"⚠️ [MAIN] Unsupported mode {MODE} for TikTok Ads main entrypoint so please re-check input environment variable.")
-        if "campaign" in layers:
+        if "campaign" in main_layers_variable:
             try:
-                print(f"🚀 [MAIN] Starting to update '{PLATFORM}' campaign performance of '{COMPANY}' company in '{MODE}' mode and '{LAYER}' layer from {start_date} to {end_date}...")
-                logging.info(f"🚀 [MAIN] Starting to update '{PLATFORM}' campaign performance of '{COMPANY}' company in '{MODE}' mode and '{LAYER}' layer from {start_date} to {end_date}...")
-                update_campaign_insights(start_date=start_date, end_date=end_date)
+                print(f"🚀 [MAIN] Starting to update '{PLATFORM}' campaign performance of '{COMPANY}' company in '{MODE}' mode and '{LAYER}' layer from {main_date_start} to {main_date_end}...")
+                logging.info(f"🚀 [MAIN] Starting to update '{PLATFORM}' campaign performance of '{COMPANY}' company in '{MODE}' mode and '{LAYER}' layer from {main_date_start} to {main_date_end}...")
+                update_campaign_insights(update_date_start=main_date_start, update_date_end=main_date_end)
             except Exception as e:
-                print(f"❌ [MAIN] Failed to trigger update '{PLATFORM}' campaign insights of '{COMPANY}' in '{MODE}' mode and '{LAYER}' layer from {start_date} to {end_date} due to {e}.")
-                logging.error(f"❌ [MAIN] Failed to trigger update '{PLATFORM}' campaign insights of '{COMPANY}' in '{MODE}' mode and '{LAYER}' layer from {start_date} to {end_date} due to {e}.")
-        if "ad" in layers:
+                print(f"❌ [MAIN] Failed to trigger update '{PLATFORM}' campaign insights of '{COMPANY}' in '{MODE}' mode and '{LAYER}' layer from {main_date_start} to {main_date_end} due to {e}.")
+                logging.error(f"❌ [MAIN] Failed to trigger update '{PLATFORM}' campaign insights of '{COMPANY}' in '{MODE}' mode and '{LAYER}' layer from {main_date_start} to {main_date_end} due to {e}.")
+        if "ad" in main_layers_variable:
             try:
-                print(f"🚀 [MAIN] Starting to update '{PLATFORM}' ad performance of '{COMPANY}' in '{MODE}' mode and '{LAYER}' layer from {start_date} to {end_date}...")
-                logging.info(f"🚀 [MAIN] Starting to update '{PLATFORM}' ad performance of '{COMPANY}' in '{MODE}' mode and '{LAYER}' layer from {start_date} to {end_date}...")
-                update_ad_insights(start_date=start_date, end_date=end_date)
+                print(f"🚀 [MAIN] Starting to update '{PLATFORM}' ad performance of '{COMPANY}' in '{MODE}' mode and '{LAYER}' layer from {main_date_start} to {main_date_end}...")
+                logging.info(f"🚀 [MAIN] Starting to update '{PLATFORM}' ad performance of '{COMPANY}' in '{MODE}' mode and '{LAYER}' layer from {main_date_start} to {main_date_end}...")
+                update_ad_insights(update_date_start=main_date_start, update_date_end=main_date_end)
             except Exception as e:
-                print(f"❌ [MAIN] Failed to trigger update '{PLATFORM}' ad insights of '{COMPANY}' in '{MODE}' mode and '{LAYER}' layer from {start_date} to {end_date} due to {e}.")
-                logging.error(f"❌ [MAIN] Failed to trigger update '{PLATFORM}' ad insights of '{COMPANY}' in '{MODE}' mode and '{LAYER}' layer from {start_date} to {end_date} due to {e}.")
+                print(f"❌ [MAIN] Failed to trigger update '{PLATFORM}' ad insights of '{COMPANY}' in '{MODE}' mode and '{LAYER}' layer from {main_date_start} to {main_date_end} due to {e}.")
+                logging.error(f"❌ [MAIN] Failed to trigger update '{PLATFORM}' ad insights of '{COMPANY}' in '{MODE}' mode and '{LAYER}' layer from {main_date_start} to {main_date_end} due to {e}.")
 
-# 1.3. Entrypoint guard
+# 1.3. Execute main entrypoint function
 if __name__ == "__main__":
     try:
         main()
