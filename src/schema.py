@@ -373,8 +373,8 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
         }         
         if schema_sections_failed:
             schema_status_final = "schema_failed_all"
-            print(f"❌ [SCHEMA] Failed to complete TikTok Ads schema enforcement due to section(s) {', '.join(schema_sections_failed)} in {schema_time_elapsed}s.")
-            logging.error(f"❌ [SCHEMA] Failed to complete TikTok Ads schema enforcement due to section(s) {', '.join(schema_sections_failed)} in {schema_time_elapsed}s.")
+            print(f"❌ [SCHEMA] Failed to complete TikTok Ads schema enforcement with {schema_rows_output}/{schema_rows_input} enforced row(s) due to section(s) {', '.join(schema_sections_failed)} in {schema_time_elapsed}s.")
+            logging.error(f"❌ [SCHEMA] Failed to complete TikTok Ads schema enforcement with {schema_rows_output}/{schema_rows_input} enforced row(s) due to section(s) {', '.join(schema_sections_failed)} in {schema_time_elapsed}s.")
         elif schema_rows_output == schema_rows_input:
             schema_status_final = "schema_succeed_all"
             print(f"🏆 [SCHEMA] Successfully completed TikTok Ads schema enforcement with {schema_rows_output}/{schema_rows_input} enforced row(s) in {schema_time_elapsed}s.")
