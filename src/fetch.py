@@ -297,14 +297,14 @@ def fetch_campaign_metadata(fetch_campaign_ids: list[str]) -> pd.DataFrame:
             fetch_status_final = "fetch_failed_all"
             print(f"❌ [FETCH] Failed to complete TikTok Ads campaign metadata fetching due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
             logging.error(f"❌ [FETCH] Failed to complete TikTok Ads campaign metadata fetching due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")            
-        elif fetch_rows_input > 0 and fetch_rows_output < fetch_rows_input:
+        elif fetch_rows_output == fetch_rows_input:
+            fetch_status_final = "fetch_succeed_all"
+            print(f"🏆 [FETCH] Successfully completed TikTok Ads campaign metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")
+            logging.info(f"🏆 [FETCH] Successfully completed TikTOk Ads campaign metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")            
+        else:
             fetch_status_final = "fetch_succeed_partial"
             print(f"⚠️ [FETCH] Partially completed TikTok Ads campaign metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")
             logging.warning(f"⚠️ [FETCH] Partially completed TikTok Ads campaign metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")           
-        else:
-            fetch_status_final = "fetch_succeed_all"
-            print(f"🏆 [FETCH] Successfully completed TikTok Ads campaign metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")
-            logging.info(f"🏆 [FETCH] Successfully completed TikTOk Ads campaign metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")                
         fetch_results_final = {
             "fetch_df_final": fetch_df_final,
             "fetch_status_final": fetch_status_final,
@@ -555,14 +555,14 @@ def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
             fetch_status_final = "fetch_failed_all"
             print(f"❌ [FETCH] Failed to complete TikTok Ads ad metadata fetching due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
             logging.error(f"❌ [FETCH] Failed to complete TikTok Ads ad metadata fetching due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
-        elif fetch_rows_input > 0 and fetch_rows_output < fetch_rows_input:
+        elif fetch_rows_output == fetch_rows_input:
+            fetch_status_final = "fetch_succeed_all"
+            print(f"🏆 [FETCH] Successfully completed TikTok Ads ad metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")
+            logging.info(f"🏆 [FETCH] Successfully completed TikTok Ads ad metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")  
+        else:
             fetch_status_final = "fetch_succeed_partial"
             print(f"⚠️ [FETCH] Partially completed TikTok Ads ad metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")
             logging.warning(f"⚠️ [FETCH] Partially completed TikTok Ads ad metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")           
-        else:
-            fetch_status_final = "fetch_succeed_all"
-            print(f"🏆 [FETCH] Successfully completed TikTok Ads ad metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")
-            logging.info(f"🏆 [FETCH] Successfully completed TikTOk Ads ad metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")  
         fetch_results_final = {
             "fetch_df_final": fetch_df_final,
             "fetch_status_final": fetch_status_final,
@@ -967,17 +967,17 @@ def fetch_campaign_insights(fetch_date_start: str, fetch_date_end: str) -> pd.Da
             for fetch_section_summary in fetch_sections_summary
         }        
         if fetch_sections_failed:
+            fetch_status_final = "fetch_failed_all"            
             print(f"❌ [FETCH] Failed to complete TikTok Ads campaign insights fetching from {fetch_date_start} to {fetch_date_end} due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
             logging.error(f"❌ [FETCH] Failed to complete TikTok Ads campaign insights fetching from {fetch_date_start} to {fetch_date_end} due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
-            fetch_status_final = "fetch_failed_all"
-        elif fetch_days_output < fetch_days_input:
-            print(f"⚠️ [FETCH] Partially completed TikTok Ads campaign insights fetching from {fetch_date_start} to {fetch_date_end} with {fetch_days_output}/{fetch_days_input} fetched day(s) in {fetch_time_elapsed}s.")
-            logging.warning(f"⚠️ [FETCH] Partially completed TikTok Ads campaign insights fetching from {fetch_date_start} to {fetch_date_end} with {fetch_days_output}/{fetch_days_input} fetched day(s) in {fetch_time_elapsed}s.")
-            fetch_status_final = "fetch_succeed_partial"
-        else:
+        elif fetch_days_output == fetch_days_input:
+            fetch_status_final = "fetch_succeed_all" 
             print(f"🏆 [FETCH] Successfully completed TikTok Ads campaign insights fetching from {fetch_date_start} to {fetch_date_end} with {fetch_days_output}/{fetch_days_input} fetched day(s) in {fetch_time_elapsed}s.")
-            logging.info(f"🏆 [FETCH] Successfully completed TikTok Ads campaign insights fetching from {fetch_date_start} to {fetch_date_end} with {fetch_days_output}/{fetch_days_input} fetched day(s) in {fetch_time_elapsed}s.")
-            fetch_status_final = "fetch_succeed_all"                     
+            logging.info(f"🏆 [FETCH] Successfully completed TikTok Ads campaign insights fetching from {fetch_date_start} to {fetch_date_end} with {fetch_days_output}/{fetch_days_input} fetched day(s) in {fetch_time_elapsed}s.")                    
+        else:
+            fetch_status_final = "fetch_succeed_partial"
+            print(f"⚠️ [FETCH] Partially completed TikTok Ads campaign insights fetching from {fetch_date_start} to {fetch_date_end} with {fetch_days_output}/{fetch_days_input} fetched day(s) in {fetch_time_elapsed}s.")
+            logging.warning(f"⚠️ [FETCH] Partially completed TikTok Ads campaign insights fetching from {fetch_date_start} to {fetch_date_end} with {fetch_days_output}/{fetch_days_input} fetched day(s) in {fetch_time_elapsed}s.")            
         fetch_results_final = {
             "fetch_df_final": fetch_df_final,
             "fetch_status_final": fetch_status_final,
