@@ -37,7 +37,7 @@ import importlib
 # Add Python logging ultilities for integration
 import logging
 
-# Add Pythoin IANA time zone ultilities for integration
+# Add Python IANA time zone ultilities for integration
 from zoneinfo import ZoneInfo
 
 # Get environment variable for Company
