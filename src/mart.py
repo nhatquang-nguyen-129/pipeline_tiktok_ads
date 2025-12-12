@@ -117,7 +117,7 @@ def mart_campaign_all() -> dict:
         mart_section_name = "[MART] Query all staging TikTok Ads campaign insights tables"
         mart_section_start = time.time()    
         try:
-            mart_query_config = f"""
+            query_replace_config = f"""
                 CREATE OR REPLACE TABLE `{mart_table_all}`
                 PARTITION BY ngay
                 CLUSTER BY nhan_su, ma_ngan_sach_cap_1, nganh_hang, hang_muc
@@ -160,12 +160,12 @@ def mart_campaign_all() -> dict:
             """
             print(f"🔄 [MART] Querying staging TikTok Ads campaign insights table {staging_table_campaign} to create or replace materialized table for campaign performance...")
             logging.info(f"🔄 [MART] Querying staging TikTok Ads campaign insights table {staging_table_campaign} to create or replace materialized table for campaign performance...")
-            mart_query_load = google_bigquery_client.query(mart_query_config)
-            mart_query_result = mart_query_load.result()
-            mart_count_config = f"SELECT COUNT(1) AS mart_rows_count FROM `{mart_table_all}`"
-            mart_count_load = google_bigquery_client.query(mart_count_config)
-            mart_count_result = mart_count_load.result()
-            mart_rows_uploaded = list(mart_count_result)[0]["mart_rows_count"]
+            query_replace_load = google_bigquery_client.query(query_replace_config)
+            query_replace_result = query_replace_load.result()
+            query_count_config = f"SELECT COUNT(1) AS mart_rows_count FROM `{mart_table_all}`"
+            query_count_load = google_bigquery_client.query(query_count_config)
+            query_count_result = query_count_load.result()
+            mart_rows_uploaded = list(query_count_result)[0]["mart_rows_count"]
             mart_sections_status[mart_section_name] = "succeed"
             print(f"✅ [MART] Successfully created or replace materialized table {mart_table_all} for TikTok Ads campaign performance with {mart_rows_uploaded} row(s).")
             logging.info(f"✅ [MART] Successfully created or replace materialized table {mart_table_all} for TikTok Ads campaign performance with {mart_rows_uploaded} row(s).")            
@@ -270,7 +270,7 @@ def mart_creative_all() -> dict:
         mart_section_name = "[MART] Query all staging tables for materialization"
         mart_section_start = time.time()  
         try:
-            mart_query_config = f"""
+            query_replace_config = f"""
                 CREATE OR REPLACE TABLE `{mart_table_all}`
                 PARTITION BY ngay
                 CLUSTER BY nhan_su, ma_ngan_sach_cap_1, nganh_hang, hang_muc
@@ -315,12 +315,12 @@ def mart_creative_all() -> dict:
             """
             print(f"🔄 [MART] Querying staging TikTok Ads ad insights table {staging_table_ad} to create or replace materialized table for creative performance...")
             logging.info(f"🔄 [MART] Querying staging TikTok Ads ad insights table {staging_table_ad} to create or replace materialized table for creative performance...")
-            mart_query_load = google_bigquery_client.query(mart_query_config)
-            mart_query_result = mart_query_load.result()
-            mart_count_config = f"SELECT COUNT(1) AS mart_rows_count FROM `{mart_table_all}`"
-            mart_count_load = google_bigquery_client.query(mart_count_config)
-            mart_count_result = mart_count_load.result()
-            mart_rows_uploaded = list(mart_count_result)[0]["mart_rows_count"]
+            query_replace_load = google_bigquery_client.query(query_replace_config)
+            query_replace_result = query_replace_load.result()
+            query_count_config = f"SELECT COUNT(1) AS mart_rows_count FROM `{mart_table_all}`"
+            query_count_load = google_bigquery_client.query(query_count_config)
+            query_count_result = query_count_load.result()
+            mart_rows_uploaded = list(query_count_result)[0]["mart_rows_count"]
             mart_sections_status[mart_section_name] = "succeed"
             print(f"✅ [MART] Successfully created or replace materialized table {mart_table_all} for TikTok Ads creative performance with {mart_rows_uploaded} row(s).")
             logging.info(f"✅ [MART] Successfully created or replace materialized table {mart_table_all} for TikTok Ads creative performance with {mart_rows_uploaded} row(s).")
