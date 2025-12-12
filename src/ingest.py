@@ -298,14 +298,14 @@ def ingest_campaign_metadata(ingest_ids_campaign: list) -> pd.DataFrame:
         try:
             print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of TikTok Ads campaign metadata to Google BigQuery table {raw_table_campaign}...")
             logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of TikTok Ads campaign metadata to Google BigQuery table {raw_table_campaign}...")
-            ingest_job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
-            ingest_job_load = google_bigquery_client.load_table_from_dataframe(
+            job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
+            job_load_load = google_bigquery_client.load_table_from_dataframe(
                 ingest_df_deduplicated, 
                 raw_table_campaign, 
-                job_config=ingest_job_config
+                job_config=job_load_config
                 )
-            ingest_job_result = ingest_job_load.result()
-            ingest_rows_uploaded = ingest_job_result.output_rows
+            job_load_result = job_load_load.result()
+            ingest_rows_uploaded = job_load_result.output_rows
             ingest_df_uploaded = ingest_df_deduplicated.copy()
             ingest_sections_status[ingest_section_name] = "succeed"
             print(f"✅ [INGEST] Successfully uploaded {ingest_rows_uploaded} row(s) of TikTok Ads campaign metadata to Google BigQuery table {raw_table_campaign}.")
@@ -533,32 +533,32 @@ def ingest_ad_metadata(ingest_ids_ad: list) -> pd.DataFrame:
                 logging.info(f"🔄 [INGEST] Found TikTok Ads ad metadata table {raw_table_ad} then existing row(s) deletion will be proceeding...")
                 ingest_keys_unique = ingest_df_deduplicated[["ad_id", "advertiser_id"]].dropna().drop_duplicates()
                 if not ingest_keys_unique.empty:
-                    ingest_table_temporary = f"{PROJECT}.{raw_dataset}.temp_table_ad_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
-                    ingest_job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
-                    ingest_job_load = google_bigquery_client.load_table_from_dataframe(
+                    table_id_temporary = f"{PROJECT}.{raw_dataset}.temp_table_ad_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
+                    job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
+                    job_load_load = google_bigquery_client.load_table_from_dataframe(
                         ingest_keys_unique, 
-                        ingest_table_temporary, 
-                        job_config=ingest_job_config
+                        table_id_temporary, 
+                        job_config=job_load_config
                         )
-                    ingest_job_result = ingest_job_load.result()
-                    ingest_join_condition = " AND ".join([
+                    job_load_result = job_load_load.result()
+                    query_delete_condition = " AND ".join([
                         f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
                         for col in ["ad_id", "advertiser_id"]
                     ])
-                    ingest_query_config = f"""
+                    query_delete_config = f"""
                         DELETE FROM `{raw_table_ad}` AS main
                         WHERE EXISTS (
-                            SELECT 1 FROM `{ingest_table_temporary}` AS temp
-                            WHERE {ingest_join_condition}
+                            SELECT 1 FROM `{table_id_temporary}` AS temp
+                            WHERE {query_delete_condition}
                         )
                     """
-                    ingest_query_load = google_bigquery_client.query(ingest_query_config)
-                    ingest_query_result = ingest_query_load.result()
-                    ingest_rows_deleted = ingest_query_result.num_dml_affected_rows
+                    query_delete_load = google_bigquery_client.query(query_delete_config)
+                    query_delete_result = query_delete_load.result()
+                    ingest_rows_deleted = query_delete_result.num_dml_affected_rows
                     google_bigquery_client.delete_table(
-                        ingest_table_temporary, 
+                        table_id_temporary, 
                         not_found_ok=True
-                        )                    
+                        )                             
                     print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of TikTok Ads ad metadata table {raw_table_ad}.")
                     logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of TikTok Ads ad metadata table {raw_table_ad}.")
                 else:
