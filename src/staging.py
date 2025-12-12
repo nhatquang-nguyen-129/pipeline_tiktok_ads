@@ -133,7 +133,7 @@ def staging_campaign_insights() -> dict:
         try:
             print(f"🔍 [STAGING] Scanning all raw TikTok Ads campaign insights table(s) from Google BigQuery dataset {raw_dataset}...")
             logging.info(f"🔍 [STAGING] Scanning all raw TikTok Ads campaign insights table(s) from Google BigQuery dataset {raw_dataset}...")
-            query_campaign_raw = f"""
+            query_select_config = f"""
                 SELECT table_name
                 FROM `{PROJECT}.{raw_dataset}.INFORMATION_SCHEMA.TABLES`
                 WHERE REGEXP_CONTAINS(
@@ -141,8 +141,10 @@ def staging_campaign_insights() -> dict:
                     r'^{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_campaign_m[0-1][0-9][0-9]{{4}}$'
                 )
             """
-            raw_tables_campaign = [row.table_name for row in google_bigquery_client.query(query_campaign_raw).result()]
-            raw_tables_campaign = [f"{PROJECT}.{raw_dataset}.{t}" for t in raw_tables_campaign]
+            query_select_load = google_bigquery_client.query(query_select_config)
+            query_select_result = query_select_load.result()
+            raw_tables_name = [row.table_name for row in query_select_result]
+            raw_tables_campaign = [f"{PROJECT}.{raw_dataset}.{t}" for t in raw_tables_name]
             if not raw_tables_campaign:
                 raise RuntimeError("❌ [STAGING] Failed to scan raw TikTok Ads campaign insights table(s) due to no tables found.")
             staging_sections_status[staging_section_name] = "succeed"
@@ -502,7 +504,7 @@ def staging_ad_insights() -> dict:
         try:
             print(f"🔍 [STAGING] Scanning all raw TikTok Ads ad insights table(s) from Google BigQuery dataset {raw_dataset}...")
             logging.info(f"🔍 [STAGING] Scanning all raw TikTok Ads ad insights table(s) from Google BigQuery dataset {raw_dataset}...")
-            query_ad_raw = f"""
+            query_select_config = f"""
                 SELECT table_name
                 FROM `{PROJECT}.{raw_dataset}.INFORMATION_SCHEMA.TABLES`
                 WHERE REGEXP_CONTAINS(
@@ -510,9 +512,11 @@ def staging_ad_insights() -> dict:
                     r'^{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_m[0-1][0-9][0-9]{{4}}$'
                 )
             """
-            raw_tables_ad = [row.table_name for row in google_bigquery_client.query(query_ad_raw).result()]
-            raw_tables_ad = [f"{PROJECT}.{raw_dataset}.{t}" for t in raw_tables_ad]
-            if not raw_tables_ad:
+            query_select_load = google_bigquery_client.query(query_select_config)
+            query_select_result = query_select_load.result()
+            raw_tables_name = [row.table_name for row in query_select_result]
+            raw_tables_id = [f"{PROJECT}.{raw_dataset}.{t}" for t in raw_tables_name]
+            if not raw_tables_id:
                 raise RuntimeError("❌ [STAGING] Failed to scan raw TikTok Ads ad insights table(s) due to no tables found.")
             print(f"✅ [STAGING] Successfully found {len(raw_tables_ad)} raw TikTok Ads ad insights table(s).")
             logging.info(f"✅ [STAGING] Successfully found {len(raw_tables_ad)} raw TikTok Ads ad insights table(s).")
@@ -528,7 +532,7 @@ def staging_ad_insights() -> dict:
         staging_section_name = "[STAGING] Query all raw TikTok Ads ad insights table(s)"
         staging_section_start = time.time() 
         try:            
-            for raw_table_ad in raw_tables_ad:
+            for raw_table_id in raw_tables_id:
                 query_ad_staging = f"""
                 SELECT
                     raw.*,
@@ -546,7 +550,7 @@ def staging_ad_insights() -> dict:
                     creative.video_cover_url,
                     creative.preview_url,
                     creative.create_time AS creative_create_time
-                FROM `{raw_table_ad}` AS raw
+                FROM `{raw_table_id}` AS raw
                 LEFT JOIN `{raw_ad_metadata}` AS ad
                     ON CAST(raw.ad_id AS STRING) = CAST(ad.ad_id AS STRING)
                     AND CAST(raw.advertiser_id AS STRING) = CAST(ad.advertiser_id AS STRING)
@@ -555,8 +559,8 @@ def staging_ad_insights() -> dict:
                     AND CAST(ad.advertiser_id AS STRING) = CAST(creative.advertiser_id AS STRING)
                 """
                 try:
-                    print(f"🔄 [STAGING] Querying raw TikTok Ads ad insights table {raw_table_ad}...")
-                    logging.info(f"🔄 [STAGING] Querying raw TikTok Ads ad insights table {raw_table_ad}...")
+                    print(f"🔄 [STAGING] Querying raw TikTok Ads ad insights table {raw_table_id}...")
+                    logging.info(f"🔄 [STAGING] Querying raw TikTok Ads ad insights table {raw_table_id}...")
                     staging_df_queried = google_bigquery_client.query(query_ad_staging).to_dataframe()
                     staging_tables_queried.append({"raw_table_ad": raw_table_ad, "staging_df_queried": staging_df_queried})
                     print(f"✅ [STAGING] Successfully queried {len(staging_df_queried)} row(s) of raw TikTok Ads ad insights from {raw_table_ad}.")
