@@ -26,9 +26,9 @@ google-cloud-bigquery==3.38.0
 google-cloud-secret-manager==2.25.0
 
 # Google module for GCP BigQuery Storage
-google-cloud-bigquery-storage==2.34.0
+google-cloud-bigquery-storage==2.35.0
 
 # Google module for GCP BigQuery Native Pandas Connector
-pandas-gbq==0.31.0
+pandas-gbq==0.31.1
 
-# Last updated: 2025-11-21
+# Last updated: 2025-12-12
