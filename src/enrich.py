@@ -41,6 +41,9 @@ import pytz
 # Add Python time ultilities for integration
 import time
 
+# Add Python IANA time zone ultilities for integration
+from zoneinfo import ZoneInfo
+
 # Add Python Pandas libraries for integration
 import pandas as pd
 
@@ -52,11 +55,12 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
     logging.info(f"🚀 [ENRICH] Starting to enrich TikTok Ads campaign insights for {len(enrich_df_input)} row(s)...")   
 
     # 1.1.1. Start timing the TikTok Ads campaign insights enrichment
+    ICT = ZoneInfo("Asia/Ho_Chi_Minh")    
     enrich_time_start = time.time()   
     enrich_sections_status = {}
     enrich_sections_time = {}
-    print(f"🔍 [ENRICH] Proceeding to enrich TikTok Ads campaign insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [ENRICH] Proceeding to enrich TikTok Ads campaign insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [ENRICH] Proceeding to enrich TikTok Ads campaign insights for {len(enrich_df_input)} row(s) at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
+    logging.info(f"🔍 [ENRICH] Proceeding to enrich TikTok Ads campaign insights for {len(enrich_df_input)} row(s) at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
 
     try:
 
@@ -207,11 +211,12 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
     logging.info(f"🚀 [ENRICH] Starting to enrich TikTok Ads ad insights for {len(enrich_df_input)}...")        
     
     # 1.2.1. Start timing the TikTok Ads ad insights enrichment
+    ICT = ZoneInfo("Asia/Ho_Chi_Minh")    
     enrich_time_start = time.time()   
     enrich_sections_status = {}
     enrich_sections_time = {}
-    print(f"🔍 [ENRICH] Proceeding to enrich TikTok Ads ad insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [ENRICH] Proceeding to enrich TikTok Ads ad insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [ENRICH] Proceeding to enrich TikTok Ads ad insights for {len(enrich_df_input)} row(s) at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
+    logging.info(f"🔍 [ENRICH] Proceeding to enrich TikTok Ads ad insights for {len(enrich_df_input)} row(s) at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
 
     try:
 
