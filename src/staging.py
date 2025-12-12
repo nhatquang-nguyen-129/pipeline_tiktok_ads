@@ -515,8 +515,8 @@ def staging_ad_insights() -> dict:
             query_select_load = google_bigquery_client.query(query_select_config)
             query_select_result = query_select_load.result()
             raw_tables_name = [row.table_name for row in query_select_result]
-            raw_tables_id = [f"{PROJECT}.{raw_dataset}.{t}" for t in raw_tables_name]
-            if not raw_tables_id:
+            raw_tables_ad = [f"{PROJECT}.{raw_dataset}.{t}" for t in raw_tables_name]
+            if not raw_tables_ad:
                 raise RuntimeError("❌ [STAGING] Failed to scan raw TikTok Ads ad insights table(s) due to no tables found.")
             print(f"✅ [STAGING] Successfully found {len(raw_tables_ad)} raw TikTok Ads ad insights table(s).")
             logging.info(f"✅ [STAGING] Successfully found {len(raw_tables_ad)} raw TikTok Ads ad insights table(s).")
@@ -532,8 +532,8 @@ def staging_ad_insights() -> dict:
         staging_section_name = "[STAGING] Query all raw TikTok Ads ad insights table(s)"
         staging_section_start = time.time() 
         try:            
-            for raw_table_id in raw_tables_id:
-                query_ad_staging = f"""
+            for raw_table_ad in raw_tables_ad:
+                query_select_config = f"""
                 SELECT
                     raw.*,
                     ad.advertiser_id,
@@ -550,7 +550,7 @@ def staging_ad_insights() -> dict:
                     creative.video_cover_url,
                     creative.preview_url,
                     creative.create_time AS creative_create_time
-                FROM `{raw_table_id}` AS raw
+                FROM `{raw_table_ad}` AS raw
                 LEFT JOIN `{raw_ad_metadata}` AS ad
                     ON CAST(raw.ad_id AS STRING) = CAST(ad.ad_id AS STRING)
                     AND CAST(raw.advertiser_id AS STRING) = CAST(ad.advertiser_id AS STRING)
@@ -559,9 +559,10 @@ def staging_ad_insights() -> dict:
                     AND CAST(ad.advertiser_id AS STRING) = CAST(creative.advertiser_id AS STRING)
                 """
                 try:
-                    print(f"🔄 [STAGING] Querying raw TikTok Ads ad insights table {raw_table_id}...")
-                    logging.info(f"🔄 [STAGING] Querying raw TikTok Ads ad insights table {raw_table_id}...")
-                    staging_df_queried = google_bigquery_client.query(query_ad_staging).to_dataframe()
+                    print(f"🔄 [STAGING] Querying raw TikTok Ads ad insights table {raw_table_ad}...")
+                    logging.info(f"🔄 [STAGING] Querying raw TikTok Ads ad insights table {raw_table_ad}...")
+                    query_select_load = google_bigquery_client.query(query_select_config)
+                    staging_df_queried = query_select_load.to_dataframe()
                     staging_tables_queried.append({"raw_table_ad": raw_table_ad, "staging_df_queried": staging_df_queried})
                     print(f"✅ [STAGING] Successfully queried {len(staging_df_queried)} row(s) of raw TikTok Ads ad insights from {raw_table_ad}.")
                     logging.info(f"✅ [STAGING] Successfully queried {len(staging_df_queried)} row(s) of raw TikTok Ads ad insights from {raw_table_ad}.")
@@ -658,10 +659,10 @@ def staging_ad_insights() -> dict:
     # 1.2.9. Create new staging TikTok Ads ad insights table
         staging_section_name = "[STAGING] Create new staging TikTok Ads ad insights table"
         staging_section_start = time.time()     
-        staging_df_deduplicated = staging_df_enforced.drop_duplicates()
-        table_clusters_filtered = []
-        table_schemas_defined = []
         try:
+            staging_df_deduplicated = staging_df_enforced.drop_duplicates()
+            table_clusters_filtered = []
+            table_schemas_defined = []
             try:
                 print(f"🔍 [STAGING] Checking staging TikTok Ads ad insights table {staging_table_ad} existence...")
                 logging.info(f"🔍 [STAGING] Checking staging TikTok Ads ad insights table {staging_table_ad} existence...")
@@ -698,9 +699,11 @@ def staging_ad_insights() -> dict:
                 try:
                     print(f"🔍 [STAGING] Creating staging TikTok Ads ad insights table with defined name {staging_table_ad} and partition on {table_partition_effective}...")
                     logging.info(f"🔍 [STAGING] Creating staging TikTok Ads ad insights table with defined name {staging_table_ad} and partition on {table_partition_effective}...")
-                    table_metadata_defined = google_bigquery_client.create_table(table_configuration_defined)
-                    print(f"✅ [STAGING] Successfully created staging TikTok Ads ad insights table with actual name {table_metadata_defined.full_table_id}.")
-                    logging.info(f"✅ [STAGING] Successfully created staging TikTok Ads ad insights table with actual name {table_metadata_defined.full_table_id}.")
+                    staging_table_create = google_bigquery_client.create_table(table_configuration_defined)
+                    staging_table_id = staging_table_create.full_table_id
+                    staging_sections_status[staging_section_name] = "succeed"
+                    print(f"✅ [STAGING] Successfully created staging TikTok Ads ad insights table with actual name {staging_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}.")
+                    logging.info(f"✅ [STAGING] Successfully created staging TikTok Ads ad insights table with actual name {staging_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}.")     
                     staging_sections_status[staging_section_name] = "succeed"
                 except Exception as e:
                     staging_sections_status[staging_section_name] = "failed"
@@ -720,9 +723,9 @@ def staging_ad_insights() -> dict:
         try:            
             if not staging_table_exists:
                 try: 
-                    print(f"🔍 [STAGING] Uploading {len(staging_df_enforced)} row(s) of staging TikTok Ads ad insights to new Google BigQuery table {table_metadata_defined.full_table_id}...")
-                    logging.warning(f"🔍 [STAGING] Uploading {len(staging_df_enforced)} row(s) of staging TikTok Ads ad insights to Google BigQuery table {table_metadata_defined.full_table_id}...")     
-                    job_config = bigquery.LoadJobConfig(
+                    print(f"🔍 [STAGING] Uploading {len(staging_df_deduplicated)} deduplicated row(s) of staging TikTok Ads ad insights to new Google BigQuery table {staging_table_id}...")
+                    logging.warning(f"🔍 [STAGING] Uploading {len(staging_df_deduplicated)} deduplicated row(s) of staging TikTok Ads ad insights to new Google BigQuery table {staging_table_id}...")
+                    job_load_config = bigquery.LoadJobConfig(
                         write_disposition="WRITE_APPEND",
                         time_partitioning=bigquery.TimePartitioning(
                             type_=bigquery.TimePartitioningType.DAY,
@@ -730,44 +733,45 @@ def staging_ad_insights() -> dict:
                         ),
                         clustering_fields=table_clusters_filtered if table_clusters_filtered else None
                     )
-                    load_job = google_bigquery_client.load_table_from_dataframe(
-                        staging_df_enforced,
+                    job_load_load = google_bigquery_client.load_table_from_dataframe(
+                        staging_df_deduplicated,
                         staging_table_ad, 
-                        job_config=job_config
+                        job_config=job_load_config
                     )
-                    load_job.result()
-                    staging_df_uploaded = staging_df_enforced.copy()
-                    print(f"✅ [STAGING] Successfully uploaded {len(staging_df_uploaded)} row(s) of staging TikTok Ads ad insights to new Google BigQuery table {table_metadata_defined.full_table_id}.")
-                    logging.info(f"✅ [STAGING] Successfully uploaded {len(staging_df_uploaded)} row(s) of staging TikTok Ads ad insights to new Google BigQuery table {table_metadata_defined.full_table_id}.")
+                    job_load_result = job_load_load.result()
+                    staging_rows_uploaded = job_load_result.output_rows
+                    staging_df_uploaded = staging_df_deduplicated.copy()
                     staging_sections_status[staging_section_name] = "succeed"
+                    print(f"✅ [STAGING] Successfully uploaded {staging_rows_uploaded} deduplicated row(s) of staging TikTok Ads ad insights to new Google BigQuery table {staging_table_id}.")
+                    logging.info(f"✅ [STAGING] Successfully uploaded {staging_rows_uploaded} deduplicated row(s) of staging TikTok Ads ad insights to new Google BigQuery table {staging_table_id}.")
                 except Exception as e:
                     staging_sections_status[staging_section_name] = "failed"
-                    print(f"❌ [STAGING] Failed to upload {len(staging_df_enforced)} row(s) of staging TikTok Ads ad insights to Google BigQuery table {table_metadata_defined.full_table_id} due to {e}.")
-                    logging.error(f"❌ [STAGING] Failed to upload {len(staging_df_enforced)} row(s) of staging TikTok Ads ad insights to Google BigQuery table {table_metadata_defined.full_table_id} due to {e}.")      
-                    raise RuntimeError(f"❌ [STAGING] Failed to upload {len(staging_df_enforced)} row(s) of staging TikTok Ads ad insights to Google BigQuery table {table_metadata_defined.full_table_id} due to {e}.") from e  
+                    print(f"❌ [STAGING] Failed to upload {len(staging_df_deduplicated)} deduplicated row(s) of staging TikTok Ads ad insights to Google BigQuery table {staging_table_id} due to {e}.")
+                    logging.error(f"❌ [STAGING] Failed to upload {len(staging_df_deduplicated)} deduplicated row(s) of staging TikTok Ads ad insights to Google BigQuery table {staging_table_id} due to {e}.")
             else:
                 try:
-                    print(f"🔍 [STAGING] Found existing Google BigQuery table {staging_table_ad} and {len(staging_df_enforced)} row(s) of staging TikTok Ads ad insights will be overwritten...")
-                    logging.warning(f"🔍 [STAGING] Found existing Google BigQuery table {staging_table_ad} and {len(staging_df_enforced)} row(s) of staging TikTok Ads ad insights will be overwritten...")                    
-                    job_config = bigquery.LoadJobConfig(
+                    print(f"🔍 [STAGING] Found existing Google BigQuery table {staging_table_ad} and {len(staging_df_deduplicated)} deduplicated row(s) of staging TikTok Ads ad insights will be overwritten...")
+                    logging.warning(f"🔍 [STAGING] Found existing Google BigQuery table {staging_table_ad} and {len(staging_df_deduplicated)} deduplicated row(s) of staging TikTok Ads ad insights will be overwritten...")
+                    job_load_config = bigquery.LoadJobConfig(
                         write_disposition="WRITE_TRUNCATE",
                     )
-                    load_job = google_bigquery_client.load_table_from_dataframe(
-                        staging_df_enforced,
+                    job_load_load = google_bigquery_client.load_table_from_dataframe(
+                        staging_df_deduplicated,
                         staging_table_ad, 
-                        job_config=job_config
+                        job_config=job_load_config
                     )
-                    load_job.result()
-                    staging_df_uploaded = staging_df_enforced.copy()
-                    print(f"✅ [STAGING] Successfully overwrote {len(staging_df_uploaded)} row(s) of staging TikTok Ads ad insights to existing Google BigQuery table {staging_table_ad}.")
-                    logging.info(f"✅ [STAGING] Successfully overwrote {len(staging_df_uploaded)} row(s) of staging TikTok Ads ad insights to existing Google BigQuery table {staging_table_ad}.")
+                    job_load_result = job_load_load.result()
+                    staging_rows_uploaded = job_load_result.output_rows
+                    staging_df_uploaded = staging_df_deduplicated.copy()
                     staging_sections_status[staging_section_name] = "succeed"
+                    print(f"✅ [STAGING] Successfully overwrote {staging_rows_uploaded} deduplicated row(s) of staging TikTok Ads ad insights to existing Google BigQuery table {staging_table_ad}.")
+                    logging.info(f"✅ [STAGING] Successfully overwrote {staging_rows_uploaded} deduplicated row(s) of staging TikTok Ads ad insights to existing Google BigQuery table {staging_table_ad}.")
                 except Exception as e:
                     staging_sections_status[staging_section_name] = "failed"
-                    print(f"❌ [STAGING] Failed to overwrite {len(staging_df_enforced)} row(s) of staging TikTok Ads ad insights to existing Google BigQuery table {staging_table_ad} due to {e}.")
-                    logging.error(f"❌ [STAGING] Failed to overwrite {len(staging_df_enforced)} row(s) of staging TikTok Ads ad insights to existing Google BigQuery table {staging_table_ad} due to {e}.")                      
+                    print(f"❌ [STAGING] Failed to overwrite {len(staging_df_deduplicated)} deduplicated row(s) of staging TikTok Ads ad insights to existing Google BigQuery table {staging_table_ad} due to {e}.")
+                    logging.error(f"❌ [STAGING] Failed to overwrite {len(staging_df_deduplicated)} deduplicated row(s) of staging TikTok Ads ad insights to existing Google BigQuery table {staging_table_ad} due to {e}.")
         finally:
-            staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)     
+            staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)          
 
     # 1.2.11. Summarize staging results of TikTok Ads ad insights
     finally:
