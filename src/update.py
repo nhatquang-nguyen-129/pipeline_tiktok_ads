@@ -256,11 +256,12 @@ def update_ad_insights(update_date_start: str, update_date_end: str):
     logging.info(f"🚀 [UPDATE] Starting to update TikTok Ads ad insights from {update_date_start} to {update_date_end}...")
 
     # 1.2.1. Start timing TikTok Ads ad insights update
+    ICT = ZoneInfo("Asia/Ho_Chi_Minh")
     update_time_start = time.time()
     update_sections_status = {}
     update_sections_time = {}
-    print(f"🔍 [UPDATE] Proceeding to update TikTok Ads ad insights from {update_date_start} to {update_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
-    logging.info(f"🔍 [UPDATE] Proceeding to update TikTok Ads ad insights from {update_date_start} to {update_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
+    print(f"🔍 [UPDATE] Proceeding to update TikTok Ads ad insights from {update_date_start} to {update_date_end} at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
+    logging.info(f"🔍 [UPDATE] Proceeding to update TikTok Ads ad insights from {update_date_start} to {update_date_end} at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
 
     try:
 
