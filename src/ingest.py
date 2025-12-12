@@ -578,14 +578,14 @@ def ingest_ad_metadata(ingest_ids_ad: list) -> pd.DataFrame:
         try:
             print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of TikTok Ads ad metadata to Google BigQuery table {raw_table_ad}...")
             logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of TikTok Ads ad metadata to Google BigQuery table {raw_table_ad}...")
-            ingest_job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
-            ingest_job_load = google_bigquery_client.load_table_from_dataframe(
+            job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
+            job_load_load = google_bigquery_client.load_table_from_dataframe(
                 ingest_df_deduplicated, 
                 raw_table_ad, 
-                job_config=ingest_job_config
+                job_config=job_load_config
                 )
-            ingest_job_result = ingest_job_load.result()
-            ingest_rows_uploaded = ingest_job_result.output_rows
+            job_load_result = job_load_load.result()
+            ingest_rows_uploaded = job_load_result.output_rows
             ingest_df_uploaded = ingest_df_deduplicated.copy()
             ingest_sections_status[ingest_section_name] = "succeed"
             print(f"✅ [INGEST] Successfully uploaded {ingest_rows_uploaded} row(s) of TikTok Ads ad metadata to Google BigQuery table {raw_table_ad}.")
@@ -795,30 +795,30 @@ def ingest_ad_creative() -> pd.DataFrame:
                 logging.info(f"🔄 [INGEST] Found TikTok Ads ad creative table {raw_table_creative} then existing row(s) deletion will be proceeding...")
                 ingest_keys_unique = ingest_df_deduplicated[["video_id", "advertiser_id"]].dropna().drop_duplicates()
                 if not ingest_keys_unique.empty:
-                    ingest_table_temporary = f"{PROJECT}.{raw_dataset}.temp_table_ad_creative_delete_keys_{uuid.uuid4().hex[:8]}"
-                    ingest_job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
-                    ingest_job_load = google_bigquery_client.load_table_from_dataframe(
+                    table_id_temporary = f"{PROJECT}.{raw_dataset}.temp_table_ad_creative_delete_keys_{uuid.uuid4().hex[:8]}"
+                    job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
+                    job_load_load = google_bigquery_client.load_table_from_dataframe(
                         ingest_keys_unique, 
-                        ingest_table_temporary, 
-                        job_config=ingest_job_config
+                        table_id_temporary, 
+                        job_config=job_load_config
                         )
-                    ingest_job_result = ingest_job_load.result()
-                    ingest_join_condition = " AND ".join([
+                    job_load_result = job_load_load.result()
+                    query_delete_condition = " AND ".join([
                         f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
                         for col in ["video_id", "advertiser_id"]
                     ])
-                    ingest_query_config = f"""
+                    query_delete_config = f"""
                         DELETE FROM `{raw_table_creative}` AS main
                         WHERE EXISTS (
-                            SELECT 1 FROM `{ingest_table_temporary}` AS temp
-                            WHERE {ingest_join_condition}
+                            SELECT 1 FROM `{table_id_temporary}` AS temp
+                            WHERE {query_delete_condition}
                         )
                     """
-                    ingest_query_load = google_bigquery_client.query(ingest_query_config)
-                    ingest_query_result = ingest_query_load.result()
-                    ingest_rows_deleted = ingest_query_result.num_dml_affected_rows                    
+                    query_delete_load = google_bigquery_client.query(query_delete_config)
+                    query_delete_result = query_delete_load.result()
+                    ingest_rows_deleted = query_delete_result.num_dml_affected_rows                    
                     google_bigquery_client.delete_table(
-                        ingest_table_temporary, 
+                        table_id_temporary, 
                         not_found_ok=True
                         )                    
                     print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of TikTok Ads ad creative table {raw_table_creative}.")
@@ -840,13 +840,13 @@ def ingest_ad_creative() -> pd.DataFrame:
         try:
             print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of TikTok Ads ad creative to Google BigQuery table {raw_table_creative}...")
             logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of TikTok Ads ad creative to Google BigQuery table {raw_table_creative}...")
-            ingest_job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
-            ingest_job_load = google_bigquery_client.load_table_from_dataframe(
+            job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
+            job_load_load = google_bigquery_client.load_table_from_dataframe(
                 ingest_df_deduplicated, 
                 raw_table_creative, 
-                job_config=ingest_job_config)
-            ingest_job_result = ingest_job_load.result()
-            ingest_rows_uploaded = ingest_job_result.output_rows
+                job_config=job_load_config)
+            job_load_result = job_load_load.result()
+            ingest_rows_uploaded = job_load_result.output_rows
             ingest_df_uploaded = ingest_df_deduplicated.copy()
             ingest_sections_status[ingest_section_name] = "succeed"
             print(f"✅ [INGEST] Successfully uploaded {ingest_rows_uploaded} row(s) of TikTok Ads ad creative to Google BigQuery table {raw_table_creative}.")
@@ -1062,24 +1062,26 @@ def ingest_campaign_insights(ingest_date_start: str, ingest_date_end: str,) -> p
                         logging.error(f"❌ [INGEST] Failed to create TikTok Ads campaign insights table {raw_table_campaign} due to {e}.")
                 else:
                     ingest_dates_new = ingest_df_deduplicated["stat_time_day"].dropna().unique().tolist()
-                    ingest_query_existed = f"SELECT DISTINCT stat_time_day FROM `{raw_table_campaign}`"
-                    ingest_dates_existed = [row.stat_time_day for row in google_bigquery_client.query(ingest_query_existed).result()]
+                    query_select_config = f"SELECT DISTINCT stat_time_day FROM `{raw_table_campaign}`"
+                    query_select_load = google_bigquery_client.query(query_select_config)
+                    query_select_result = query_select_load.result()
+                    ingest_dates_existed = [row.stat_time_day for row in query_select_result]
                     ingest_dates_overlapped = set(ingest_dates_new) & set(ingest_dates_existed)
                     if ingest_dates_overlapped:
                         print(f"⚠️ [INGEST] Found {len(ingest_dates_overlapped)} overlapping date(s) in raw TikTok Ads campaign insights {raw_table_campaign} table then deletion will be proceeding...")
                         logging.warning(f"⚠️ [INGEST] Found {len(ingest_dates_overlapped)} overlapping date(s) in raw TikTok Ads campaign insights {raw_table_campaign} table then deletion will be proceeding...")
                         for ingest_date_overlapped in ingest_dates_overlapped:
-                            ingest_query_config = f"""
+                            query_delete_config = f"""
                                 DELETE FROM `{raw_table_campaign}`
                                 WHERE stat_time_day = @date_value
                             """
-                            ingest_job_config = bigquery.QueryJobConfig(
+                            job_query_config = bigquery.QueryJobConfig(
                                 query_parameters=[bigquery.ScalarQueryParameter("date_value", "STRING", ingest_date_overlapped)]
                             )
                             try:
-                                ingest_query_load = google_bigquery_client.query(ingest_query_config, job_config=ingest_job_config)
-                                ingest_query_result = ingest_query_load.result()
-                                ingest_rows_deleted = ingest_query_result.num_dml_affected_rows
+                                query_delete_load = google_bigquery_client.query(query_delete_config, job_config=job_query_config)
+                                query_delete_result = query_delete_load.result()
+                                ingest_rows_deleted = query_delete_result.num_dml_affected_rows
                                 print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of TikTok Ads campaign insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_campaign}.")
                                 logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of TikTok Ads campaign insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_campaign}.")
                             except Exception as e:
@@ -1102,14 +1104,14 @@ def ingest_campaign_insights(ingest_date_start: str, ingest_date_end: str,) -> p
             try:
                 print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of TikTok Ads campaign insights to Google BigQuery table {raw_table_campaign}...")
                 logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of TikTok Ads campaign insights to Google BigQuery table {raw_table_campaign}...")
-                ingest_job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
-                ingest_job_load = google_bigquery_client.load_table_from_dataframe(
+                job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
+                job_load_load = google_bigquery_client.load_table_from_dataframe(
                     ingest_df_deduplicated,
                     raw_table_campaign,
-                    job_config=ingest_job_config
+                    job_config=job_load_config
                 )
-                ingest_job_result = ingest_job_load.result()
-                ingest_rows_uploaded = ingest_job_result.output_rows
+                job_load_result = job_load_load.result()
+                ingest_rows_uploaded = job_load_result.output_rows
                 ingest_dates_uploaded.append(ingest_df_deduplicated.copy())
                 ingest_sections_status[ingest_section_name] = "succeed"
                 print(f"✅ [INGEST] Successfully uploaded {ingest_rows_uploaded} row(s) of TikTok Ads campaign insights to Google BigQuery table {raw_table_campaign}.")
@@ -1356,24 +1358,26 @@ def ingest_ad_insights(ingest_date_start: str, ingest_date_end: str,) -> pd.Data
                         logging.error(f"❌ [INGEST] Failed to create raw TikTok Ads ad insights table {raw_table_ad} due to {e}.")
                 else:
                     ingest_dates_new = ingest_df_deduplicated["stat_time_day"].dropna().unique().tolist()
-                    ingest_query_existed = f"SELECT DISTINCT stat_time_day FROM `{raw_table_ad}`"
-                    ingest_dates_existed = [row.stat_time_day for row in google_bigquery_client.query(ingest_query_existed).result()]
+                    query_select_config = f"SELECT DISTINCT stat_time_day FROM `{raw_table_ad}`"
+                    query_select_load = google_bigquery_client.query(query_select_config)
+                    query_select_result = query_select_load.result()
+                    ingest_dates_existed = [row.stat_time_day for row in query_select_result]
                     ingest_dates_overlapped = set(ingest_dates_new) & set(ingest_dates_existed)
                     if ingest_dates_overlapped:
                         print(f"⚠️ [INGEST] Found {len(ingest_dates_overlapped)} overlapping date(s) in raw TikTok Ads ad insights {raw_table_ad} table then deletion will be proceeding...")
                         logging.warning(f"⚠️ [INGEST] Found {len(ingest_dates_overlapped)} overlapping date(s) in raw TikTok Ads ad insights {raw_table_ad} table then deletion will be proceeding...")
                         for ingest_date_overlapped in ingest_dates_overlapped:
-                            ingest_query_config = f"""
+                            query_delete_config = f"""
                                 DELETE FROM `{raw_table_ad}`
                                 WHERE stat_time_day = @date_value
                             """
-                            ingest_job_config = bigquery.QueryJobConfig(
+                            job_query_config = bigquery.QueryJobConfig(
                                 query_parameters=[bigquery.ScalarQueryParameter("date_value", "STRING", ingest_date_overlapped)]
                             )
                             try:
-                                ingest_query_load = google_bigquery_client.query(ingest_query_config, job_config=ingest_job_config).result()
-                                ingest_query_result = ingest_query_load.result()
-                                ingest_rows_deleted = ingest_query_result.num_dml_affected_rows
+                                query_delete_load = google_bigquery_client.query(query_delete_config, job_config=job_query_config)
+                                query_delete_result = query_delete_load.result()
+                                ingest_rows_deleted = query_delete_result.num_dml_affected_rows
                                 print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of TikTok Ads ad insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_ad}.")
                                 logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of TikTok Ads ad insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_ad}.")
                             except Exception as e:
@@ -1396,13 +1400,13 @@ def ingest_ad_insights(ingest_date_start: str, ingest_date_end: str,) -> pd.Data
             try:
                 print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of TikTok Ads ad insights to Google BigQuery table {raw_table_ad}...")
                 logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of TikTok Ads ad insights to Google BigQuery table {raw_table_ad}...")
-                ingest_job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
-                ingest_job_load = google_bigquery_client.load_table_from_dataframe(
+                job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
+                job_load_load = google_bigquery_client.load_table_from_dataframe(
                     ingest_df_deduplicated,
                     raw_table_ad,
-                    job_config=ingest_job_config
+                    job_config=job_load_config
                 )
-                ingest_job_result = ingest_job_load.result()
+                ingest_job_result = job_load_load.result()
                 ingest_rows_uploaded = ingest_job_result.output_rows
                 ingest_dates_uploaded.append(ingest_df_deduplicated.copy())
                 ingest_sections_status[ingest_section_name] = "succeed"
