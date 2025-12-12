@@ -240,10 +240,10 @@ def ingest_campaign_metadata(ingest_ids_campaign: list) -> pd.DataFrame:
                 try:    
                     print(f"🔍 [INGEST] Creating TikTok Ads campaign metadata table defined name {raw_table_campaign} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}...")
                     logging.info(f"🔍 [INGEST] Creating TikTok Ads campaign metadata table defined name {raw_table_campaign} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}...")
-                    ingest_table_create = google_bigquery_client.create_table(table_configuration_defined)
-                    ingest_table_id = ingest_table_create.full_table_id
-                    print(f"✅ [INGEST] Successfully created TikTok Ads campaign metadata table actual name {ingest_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}.")
-                    logging.info(f"✅ [INGEST] Successfully created TikTok Ads campaign metadata table actual name {ingest_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}.")
+                    query_table_create = google_bigquery_client.create_table(table_configuration_defined)
+                    query_table_id = query_table_create.full_table_id
+                    print(f"✅ [INGEST] Successfully created TikTok Ads campaign metadata table actual name {query_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}.")
+                    logging.info(f"✅ [INGEST] Successfully created TikTok Ads campaign metadata table actual name {query_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}.")
                 except Exception as e:
                     print(f"❌ [INGEST] Failed to create TikTok Ads campaign metadata table {raw_table_campaign} due to {e}.")
                     logging.error(f"❌ [INGEST] Failed to create TikTok Ads campaign metadata table {raw_table_campaign} due to {e}.")
@@ -253,30 +253,30 @@ def ingest_campaign_metadata(ingest_ids_campaign: list) -> pd.DataFrame:
                 logging.info(f"🔄 [INGEST] Found TikTok Ads campaign metadata table {raw_table_campaign} then existing row(s) deletion will be proceeding...")
                 ingest_keys_unique = ingest_df_deduplicated[["campaign_id", "advertiser_id"]].dropna().drop_duplicates()
                 if not ingest_keys_unique.empty:
-                    ingest_table_temporary = f"{PROJECT}.{raw_dataset}.temp_table_campaign_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
-                    ingest_job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
-                    ingest_job_load = google_bigquery_client.load_table_from_dataframe(
+                    table_id_temporary = f"{PROJECT}.{raw_dataset}.temp_table_campaign_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
+                    job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
+                    job_load_load = google_bigquery_client.load_table_from_dataframe(
                         ingest_keys_unique, 
-                        ingest_table_temporary, 
-                        job_config=ingest_job_config
+                        table_id_temporary, 
+                        job_config=job_load_config
                         )
-                    ingest_job_result = ingest_job_load.result()
-                    ingest_query_condition = " AND ".join([
+                    job_load_result = job_load_load.result()
+                    query_delete_condition = " AND ".join([
                         f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
                         for col in ["campaign_id", "advertiser_id"]
                     ])
-                    ingest_query_config = f"""
+                    query_delete_config = f"""
                         DELETE FROM `{raw_table_campaign}` AS main
                         WHERE EXISTS (
-                            SELECT 1 FROM `{ingest_table_temporary}` AS temp
-                            WHERE {ingest_query_condition}
+                            SELECT 1 FROM `{table_id_temporary}` AS temp
+                            WHERE {query_delete_condition}
                         )
                     """
-                    ingest_query_load = google_bigquery_client.query(ingest_query_config)
-                    ingest_query_result = ingest_query_load.result()
-                    ingest_rows_deleted = ingest_query_result.num_dml_affected_rows
+                    query_delete_load = google_bigquery_client.query(query_delete_config)
+                    query_delete_result = query_delete_load.result()
+                    ingest_rows_deleted = query_delete_result.num_dml_affected_rows
                     google_bigquery_client.delete_table(
-                        ingest_table_temporary, 
+                        table_id_temporary, 
                         not_found_ok=True
                         )                    
                     print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of TikTok Ads campaign metadata table {raw_table_campaign}.")
@@ -1077,7 +1077,7 @@ def ingest_campaign_insights(ingest_date_start: str, ingest_date_end: str,) -> p
                                 query_parameters=[bigquery.ScalarQueryParameter("date_value", "STRING", ingest_date_overlapped)]
                             )
                             try:
-                                ingest_query_load = google_bigquery_client.query(ingest_query_config, job_config=ingest_job_config).result()
+                                ingest_query_load = google_bigquery_client.query(ingest_query_config, job_config=ingest_job_config)
                                 ingest_query_result = ingest_query_load.result()
                                 ingest_rows_deleted = ingest_query_result.num_dml_affected_rows
                                 print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of TikTok Ads campaign insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_campaign}.")
