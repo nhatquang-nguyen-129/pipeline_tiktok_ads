@@ -27,6 +27,9 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
+# Add Python datetime utilities for integration
+from datetime import datetime
+
 # Add Python logging ultilities forintegration
 import logging
 
@@ -35,6 +38,9 @@ import time
 
 # Add Python UUID ultilities for integration
 import uuid
+
+# Add Python IANA time zone ultilities for integration
+from zoneinfo import ZoneInfo
 
 # Add Python Pandas libraries for integration
 import pandas as pd
@@ -84,11 +90,12 @@ def ingest_campaign_metadata(ingest_ids_campaign: list) -> pd.DataFrame:
     logging.info(f"🚀 [INGEST] Starting to ingest TikTok Ads campaign metadata for {len(ingest_ids_campaign)} campaign_id(s)...")
 
     # 1.1.1. Start timing TikTok Ads campaign metadata ingestion
+    ICT = ZoneInfo("Asia/Ho_Chi_Minh")    
     ingest_time_start = time.time()
     ingest_sections_status = {}
     ingest_sections_time = {}
-    print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads campaign metadata at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
+    logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads campaign metadata at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
 
     try:
 
@@ -363,11 +370,12 @@ def ingest_ad_metadata(ingest_ids_ad: list) -> pd.DataFrame:
     logging.info(f"🚀 [INGEST] Starting to ingest TikTok Ads ad metadata for {len(ingest_ids_ad)} ad_id(s)...")
 
     # 1.2.1. Start timing TikTok Ads ad metadata ingestion
+    ICT = ZoneInfo("Asia/Ho_Chi_Minh")    
     ingest_time_start = time.time()
     ingest_sections_status = {}
     ingest_sections_time = {}
-    print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad metadata at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
+    logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad metadata at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
 
     try:
 
@@ -642,11 +650,12 @@ def ingest_ad_creative() -> pd.DataFrame:
     logging.info(f"🚀 [INGEST] Starting to ingest TikTok Ads ad creative...")
 
     # 1.3.1. Start timing the TikTok Ads ad creative ingestion
+    ICT = ZoneInfo("Asia/Ho_Chi_Minh")    
     ingest_time_start = time.time()
     ingest_sections_status = {}
     ingest_sections_time = {}
-    print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad creative at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad creative at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad creative at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
+    logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad creative at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
 
     try:
 
@@ -898,6 +907,7 @@ def ingest_campaign_insights(ingest_date_start: str, ingest_date_end: str,) -> p
     logging.info(f"🚀 [INGEST] Starting to ingest TikTok Ads campaign insights from {ingest_date_start} to {ingest_date_end}...")
     
     # 2.1.1. Start timing the TikTok Ads campaign insights ingestion
+    ICT = ZoneInfo("Asia/Ho_Chi_Minh")    
     ingest_dates_uploaded = []
     ingest_time_start = time.time()
     ingest_sections_status = {}
@@ -910,8 +920,8 @@ def ingest_campaign_insights(ingest_date_start: str, ingest_date_end: str,) -> p
         "[INGEST] Upload TikTok Ads campaign insights to Google BigQuery": 0.0,
         "[INGEST] Cooldown before next TikTok Ads campaign insights fetch": 0.0,        
     }
-    print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads campaign insights from {ingest_date_start} to {ingest_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads campaign insights from {ingest_date_start} to {ingest_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads campaign insights from {ingest_date_start} to {ingest_date_end} at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
+    logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads campaign insights from {ingest_date_start} to {ingest_date_end} at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
     
     try:
 
@@ -1191,6 +1201,7 @@ def ingest_ad_insights(ingest_date_start: str, ingest_date_end: str,) -> pd.Data
     logging.info(f"🚀 [INGEST] Starting to ingest TikTok Ads ad insights from {ingest_date_start} to {ingest_date_end}...")
 
     # 2.2.1. Start timing TikTok Ads ad insights ingestion
+    ICT = ZoneInfo("Asia/Ho_Chi_Minh")    
     ingest_dates_uploaded = []
     ingest_time_start = time.time()
     ingest_sections_status = {}
@@ -1203,8 +1214,8 @@ def ingest_ad_insights(ingest_date_start: str, ingest_date_end: str,) -> pd.Data
         "[INGEST] Upload TikTok Ads ad insights to Google BigQuery": 0.0,
         "[INGEST] Cooldown before next TikTok Ads campaign insights fetch": 0.0,     
     }
-    print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad insights from {ingest_date_start} to {ingest_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad insights from {ingest_date_start} to {ingest_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad insights from {ingest_date_start} to {ingest_date_end} at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
+    logging.info(f"🔍 [INGEST] Proceeding to ingest TikTok Ads ad insights from {ingest_date_start} to {ingest_date_end} at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
 
     try:
 
