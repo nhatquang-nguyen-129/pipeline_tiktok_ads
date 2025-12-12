@@ -27,6 +27,9 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
+# Add Python datetime utilities for integration
+from datetime import datetime
+
 # Add Python logging ultilties for integration
 import logging
 
@@ -35,6 +38,9 @@ import requests
 
 # Add Python time ultilities for integration
 import time
+
+# Add Python IANA time zone ultilities for integration
+from zoneinfo import ZoneInfo
 
 # Add Python Pandas libraries for integration
 import pandas as pd
@@ -74,11 +80,12 @@ def fetch_campaign_metadata(fetch_campaign_ids: list[str]) -> pd.DataFrame:
     logging.info(f"🚀 [FETCH] Starting to fetch TikTok Ads campaign metadata for {len(fetch_campaign_ids)} campaign_id(s)...")
 
     # 1.1.1. Start timing the TikTok Ads campaign metadata fetching
+    ICT = ZoneInfo("Asia/Ho_Chi_Minh")    
     fetch_time_start = time.time()   
     fetch_sections_status = {}
     fetch_sections_time = {}
-    print(f"🔍 [FETCH] Proceeding to fetch TikTok Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [FETCH] Proceeding to fetch TikTok Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [FETCH] Proceeding to fetch TikTok Ads campaign metadata at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
+    logging.info(f"🔍 [FETCH] Proceeding to fetch TikTok Ads campaign metadata at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
 
     try:
 
@@ -326,11 +333,12 @@ def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
     logging.info(f"🚀 [FETCH] Starting to fetch TikTok Ads ad metadata for {len(fetch_ad_ids)} ad_id(s)...")
 
     # 1.2.1. Start timing the TikTok Ads ad metadata fetching
+    ICT = ZoneInfo("Asia/Ho_Chi_Minh")    
     fetch_time_start = time.time()   
     fetch_sections_status = {}
     fetch_sections_time = {}
-    print(f"🔍 [FETCH] Proceeding to fetch TikTok Ads ad metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [FETCH] Proceeding to fetch TikTok Ads ad metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [FETCH] Proceeding to fetch TikTok Ads ad metadata at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
+    logging.info(f"🔍 [FETCH] Proceeding to fetch TikTok Ads ad metadata at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
 
     try:
 
@@ -584,11 +592,12 @@ def fetch_ad_creative() -> pd.DataFrame:
     logging.info("🚀 [FETCH] Starting to fetch TikTok Ads ad creative...")
 
     # 1.3.1. Start timing the TikTok Ads ad creative
+    ICT = ZoneInfo("Asia/Ho_Chi_Minh")    
     fetch_time_start = time.time()   
     fetch_sections_status = {}
     fetch_sections_time = {}
-    print(f"🔍 [FETCH] Proceeding to fetch TikTok Ads ad creative at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [FETCH] Proceeding to fetch TikTok Ads ad creative at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [FETCH] Proceeding to fetch TikTok Ads ad creative at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
+    logging.info(f"🔍 [FETCH] Proceeding to fetch TikTok Ads ad creative at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
 
     try:
 
@@ -776,11 +785,12 @@ def fetch_campaign_insights(fetch_date_start: str, fetch_date_end: str) -> pd.Da
     logging.info(f"🚀 [FETCH] Starting to fetch TikTok Ads campaign insights from {fetch_date_start} to {fetch_date_end}...")      
 
     # 2.1.1. Start timing the TikTok Ads campaign insights fetching
+    ICT = ZoneInfo("Asia/Ho_Chi_Minh")
     fetch_time_start = time.time()   
     fetch_sections_status = {}
     fetch_sections_time = {}
-    print(f"🔍 [FETCH] Proceeding to fetch TikTok Ads campaign insights from {fetch_date_start} to {fetch_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [FETCH] Proceeding to fetch TikTok Ads campaign insights from {fetch_date_start} to {fetch_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [FETCH] Proceeding to fetch TikTok Ads campaign insights from {fetch_date_start} to {fetch_date_end} at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
+    logging.info(f"🔍 [FETCH] Proceeding to fetch TikTok Ads campaign insights from {fetch_date_start} to {fetch_date_end} at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
 
     try:
         
@@ -1001,11 +1011,12 @@ def fetch_ad_insights(fetch_date_start: str, fetch_date_end: str) -> pd.DataFram
     logging.info(f"🚀 [FETCH] Starting to fetch TikTok Ads ad insights from {fetch_date_start} to {fetch_date_end}...")       
 
     # 2.2.1. Start timing the TikTok Ads ad insights fetching
+    ICT = ZoneInfo("Asia/Ho_Chi_Minh")    
     fetch_time_start = time.time()   
     fetch_sections_status = {}
     fetch_sections_time = {}
-    print(f"🔍 [FETCH] Proceeding to fetch TikTok Ads ad insights from {fetch_date_start} to {fetch_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [FETCH] Proceeding to fetch TikTok Ads ad insights from {fetch_date_start} to {fetch_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [FETCH] Proceeding to fetch TikTok Ads ad insights from {fetch_date_start} to {fetch_date_end} at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
+    logging.info(f"🔍 [FETCH] Proceeding to fetch TikTok Ads ad insights from {fetch_date_start} to {fetch_date_end} at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
 
     try:
 
