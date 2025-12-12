@@ -16,17 +16,27 @@ execution and seamless data integration.
 ✔️ Automatically handle missing or mismatched columns  
 ✔️ Provide schema utilities for debugging and audit logging  
 
-⚠️ This module does *not* perform data fetching or transformation.  
+⚠️ This module does not perform data fetching or transformation.  
 It serves purely as a utility layer to support schema consistency  
 throughout the TikTok Ads ETL process.
 ===================================================================
 """
+# Add root directory to sys.path for absolute imports of internal modules
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
+
+# Add Python datetime utilities for integration
+from datetime import datetime
 
 # Add Python logging ultilities for integration
 import logging
 
 # Add Python time ultilities for integration
 import time
+
+# Add Python IANA time zone ultilities for integration
+from zoneinfo import ZoneInfo
 
 # Add Python Pandas libraries for integration
 import pandas as pd
@@ -37,11 +47,12 @@ import pandas as pd
 def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str) -> pd.DataFrame:
     
     # 1.1.1. Start timing the TikTok Ads schema enforcement
+    ICT = ZoneInfo("Asia/Ho_Chi_Minh")    
     schema_time_start = time.time()
     schema_sections_status = {}
     schema_sections_time = {}
-    print(f"🔍 [SCHEMA] Proceeding to enforce schema for TikTok Ads with {len(schema_df_input)} given row(s) for mapping type {schema_type_mapping} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [SCHEMA] Proceeding to enforce schema for TikTok Ads with {len(schema_df_input)} given row(s) for mapping type {schema_type_mapping} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [SCHEMA] Proceeding to enforce schema for TikTok Ads with {len(schema_df_input)} given row(s) for mapping type {schema_type_mapping} at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
+    logging.info(f"🔍 [SCHEMA] Proceeding to enforce schema for TikTok Ads with {len(schema_df_input)} given row(s) for mapping type {schema_type_mapping} at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
 
     # 1.1.2. Define schema mapping for TikTk Ads data type
     schema_section_name = "[SCHEMA] Define schema mapping for TikTk Ads data type"
