@@ -27,6 +27,9 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
+# Add Python datetime utilities for integration
+from datetime import datetime
+
 # Add Python logging ultilities for integration
 import logging
 
@@ -35,6 +38,9 @@ import time
 
 # Add Python Pandas libraries for integration
 import pandas as pd
+
+# Add Python IANA time zone ultilities for integration
+from zoneinfo import ZoneInfo
 
 # Add Google BigQuery modules for integration
 from google.cloud import bigquery
@@ -75,6 +81,7 @@ def staging_campaign_insights() -> dict:
     logging.info("🚀 [STAGING] Starting to build staging TikTok Ads campaign insights table...")
     
     # 1.1.1. Start timing the TikTok Ads campaign insights staging
+    ICT = ZoneInfo("Asia/Ho_Chi_Minh")    
     raw_tables_campaign = []
     staging_time_start = time.time()
     staging_tables_queried = []
@@ -82,8 +89,8 @@ def staging_campaign_insights() -> dict:
     staging_df_uploaded = pd.DataFrame()    
     staging_sections_status = {}
     staging_sections_time = {}
-    print(f"🔍 [STAGING] Proceeding to transform TikTok Ads campaign insights into cleaned staging table at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [STAGING] Proceeding to transform TikTok Ads campaign insights into cleaned staging table at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [STAGING] Proceeding to transform TikTok Ads campaign insights into cleaned staging table at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
+    logging.info(f"🔍 [STAGING] Proceeding to transform TikTok Ads campaign insights into cleaned staging table at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
 
     try:
 
@@ -441,6 +448,7 @@ def staging_ad_insights() -> dict:
     logging.info("🚀 [STAGING] Starting to build staging TikTok Ads ad insights table...")
 
     # 1.2.1. Start timing the TikTok Ads ad insights staging
+    ICT = ZoneInfo("Asia/Ho_Chi_Minh")    
     raw_tables_ad = []
     staging_time_start = time.time()
     staging_tables_queried = []
@@ -448,8 +456,8 @@ def staging_ad_insights() -> dict:
     staging_df_uploaded = pd.DataFrame()    
     staging_sections_status = {}
     staging_sections_time = {}
-    print(f"🔍 [STAGING] Proceeding to transform TikTok Ads ad insights into cleaned staging table at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [STAGING] Proceeding to transform TikTok Ads ad insights into cleaned staging table at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [STAGING] Proceeding to transform TikTok Ads ad insights into cleaned staging table at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
+    logging.info(f"🔍 [STAGING] Proceeding to transform TikTok Ads ad insights into cleaned staging table at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
 
     try:
 
