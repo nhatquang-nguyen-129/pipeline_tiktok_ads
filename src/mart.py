@@ -27,11 +27,17 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
+# Add Python datetime utilities for integration
+from datetime import datetime
+
 # Add Python logging ultilities for integraton
 import logging
 
 # Add Python time ultilities for integration
 import time
+
+# Add Python IANA time zone ultilities for integration
+from zoneinfo import ZoneInfo
 
 # Add Google Cloud modules for integration
 from google.cloud import bigquery
@@ -65,11 +71,12 @@ def mart_campaign_all() -> dict:
     logging.info(f"🚀 [MART] Starting to build materialized table TikTok Ads campaign performance...")
 
     # 1.1.1. Start timing the TikTok Ads campaign materialization
+    ICT = ZoneInfo("Asia/Ho_Chi_Minh")    
     mart_time_start = time.time()
     mart_sections_status = {}
     mart_sections_time = {}
-    print(f"🔍 [MART] Proceeding to build materialized table for TikTok Ads campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [MART] Proceeding to build materialized table for TikTok Ads campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [MART] Proceeding to build materialized table for TikTok Ads campaign performance at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
+    logging.info(f"🔍 [MART] Proceeding to build materialized table for TikTok Ads campaign performance at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
 
     try:
 
@@ -217,11 +224,12 @@ def mart_creative_all() -> dict:
     logging.info(f"🚀 [MART] Starting to build materialized table for TikTok Ads creative performance...")
 
     # 2.1.1. Start timing the TikTok Ads creative performance materialization
+    ICT = ZoneInfo("Asia/Ho_Chi_Minh")    
     mart_time_start = time.time()
     mart_sections_status = {}
     mart_sections_time = {}
-    print(f"🔍 [MART] Proceeding to build materialized table for TikTok Ads creative performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [MART] Proceeding to build materialized table for TikTok Ads creative performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [MART] Proceeding to build materialized table for TikTok Ads creative performance at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
+    logging.info(f"🔍 [MART] Proceeding to build materialized table for TikTok Ads creative performance at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
 
     try:
 
