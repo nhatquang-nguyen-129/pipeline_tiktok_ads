@@ -365,9 +365,9 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
     return ingest_results_final
 
 # 1.2. Ingest ad metadata for TikTok Ads
-def ingest_ad_metadata(ingest_ids_ad: list) -> pd.DataFrame:
-    print(f"🚀 [INGEST] Starting to ingest TikTok Ads ad metadata for {len(ingest_ids_ad)} ad_id(s)...")
-    logging.info(f"🚀 [INGEST] Starting to ingest TikTok Ads ad metadata for {len(ingest_ids_ad)} ad_id(s)...")
+def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
+    print(f"🚀 [INGEST] Starting to ingest TikTok Ads ad metadata for {len(ingest_ad_ids)} ad_id(s)...")
+    logging.info(f"🚀 [INGEST] Starting to ingest TikTok Ads ad metadata for {len(ingest_ad_ids)} ad_id(s)...")
 
     # 1.2.1. Start timing TikTok Ads ad metadata ingestion
     ICT = ZoneInfo("Asia/Ho_Chi_Minh")    
@@ -383,14 +383,14 @@ def ingest_ad_metadata(ingest_ids_ad: list) -> pd.DataFrame:
         ingest_section_name = "[INGEST] Validate input for TikTok Ads ad metadata ingestion"
         ingest_section_start = time.time()
         try:
-            if not ingest_ids_ad:
+            if not ingest_ad_ids:
                 ingest_sections_status[ingest_section_name] = "failed"
                 print("⚠️ [INGEST] Empty TikTok Ads ad_id_list provided then ingestion is suspended.")
                 logging.warning("⚠️ [INGEST] Empty TikTok Ads ad_id_list provided then ingestion is suspended.")
             else:
                 ingest_sections_status[ingest_section_name] = "succeed"
-                print(f"✅ [INGEST] Successfully validated input for {len(ingest_ids_ad)} ad_id(s) of TikTok Ads ad metadata ingestion.")
-                logging.info(f"✅ [INGEST] Successfully validated input for {len(ingest_ids_ad)} ad_id(s) of TikTok Ads ad metadata ingestion.")
+                print(f"✅ [INGEST] Successfully validated input for {len(ingest_ad_ids)} ad_id(s) of TikTok Ads ad metadata ingestion.")
+                logging.info(f"✅ [INGEST] Successfully validated input for {len(ingest_ad_ids)} ad_id(s) of TikTok Ads ad metadata ingestion.")
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
@@ -398,9 +398,9 @@ def ingest_ad_metadata(ingest_ids_ad: list) -> pd.DataFrame:
         ingest_section_name = "[INGEST] Trigger to fetch TikTok Ads ad metadata"
         ingest_section_start = time.time()
         try:
-            print(f"🔁 [INGEST] Triggering to fetch TikTok Ads ad metadata for {len(ingest_ids_ad)} ad_id(s)...")
-            logging.info(f"🔁 [INGEST] Triggering to fetch TikTok Ads ad metadata for {len(ingest_ids_ad)} ad_id(s)...")
-            ingest_results_fetched = fetch_ad_metadata(fetch_ids_ad=ingest_ids_ad)
+            print(f"🔁 [INGEST] Triggering to fetch TikTok Ads ad metadata for {len(ingest_ad_ids)} ad_id(s)...")
+            logging.info(f"🔁 [INGEST] Triggering to fetch TikTok Ads ad metadata for {len(ingest_ad_ids)} ad_id(s)...")
+            ingest_results_fetched = fetch_ad_metadata(fetch_ad_ids=ingest_ad_ids)
             ingest_df_fetched = ingest_results_fetched["fetch_df_final"]
             ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
             ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
@@ -451,8 +451,8 @@ def ingest_ad_metadata(ingest_ids_ad: list) -> pd.DataFrame:
             raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
             raw_table_ad = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_metadata"
             ingest_sections_status[ingest_section_name] = "succeed"
-            print(f"🔍 [INGEST] Preparing to ingest TikTok Ads ad metadata for {len(ingest_ids_ad)} ad_id(s) with Google BigQuery table_id {raw_table_ad}...")
-            logging.info(f"🔍 [INGEST] Preparing to ingest TikTok Ads ad metadata for {len(ingest_ids_ad)} ad_id(s) with Google BigQuery table_id {raw_table_ad}...")
+            print(f"🔍 [INGEST] Preparing to ingest TikTok Ads ad metadata for {len(ingest_ad_ids)} ad_id(s) with Google BigQuery table_id {raw_table_ad}...")
+            logging.info(f"🔍 [INGEST] Preparing to ingest TikTok Ads ad metadata for {len(ingest_ad_ids)} ad_id(s) with Google BigQuery table_id {raw_table_ad}...")
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)        
 
@@ -585,7 +585,7 @@ def ingest_ad_metadata(ingest_ids_ad: list) -> pd.DataFrame:
                 job_config=job_load_config
                 )
             job_load_result = job_load_load.result()
-            ingest_rows_uploaded = job_load_result.output_rows
+            ingest_rows_uploaded = job_load_load.output_rows
             ingest_df_uploaded = ingest_df_deduplicated.copy()
             ingest_sections_status[ingest_section_name] = "succeed"
             print(f"✅ [INGEST] Successfully uploaded {ingest_rows_uploaded} row(s) of TikTok Ads ad metadata to Google BigQuery table {raw_table_ad}.")
@@ -604,7 +604,7 @@ def ingest_ad_metadata(ingest_ids_ad: list) -> pd.DataFrame:
         ingest_sections_total = len(ingest_sections_status) 
         ingest_sections_failed = [k for k, v in ingest_sections_status.items() if v == "failed"] 
         ingest_sections_succeeded = [k for k, v in ingest_sections_status.items() if v == "succeed"]
-        ingest_rows_input = len(ingest_ids_ad)
+        ingest_rows_input = len(ingest_ad_ids)
         ingest_rows_output = ingest_rows_uploaded
         ingest_sections_summary = list(dict.fromkeys(
             list(ingest_sections_status.keys()) +
@@ -846,7 +846,7 @@ def ingest_ad_creative() -> pd.DataFrame:
                 raw_table_creative, 
                 job_config=job_load_config)
             job_load_result = job_load_load.result()
-            ingest_rows_uploaded = job_load_result.output_rows
+            ingest_rows_uploaded = job_load_load.output_rows
             ingest_df_uploaded = ingest_df_deduplicated.copy()
             ingest_sections_status[ingest_section_name] = "succeed"
             print(f"✅ [INGEST] Successfully uploaded {ingest_rows_uploaded} row(s) of TikTok Ads ad creative to Google BigQuery table {raw_table_creative}.")
@@ -1111,7 +1111,7 @@ def ingest_campaign_insights(ingest_date_start: str, ingest_date_end: str,) -> p
                     job_config=job_load_config
                 )
                 job_load_result = job_load_load.result()
-                ingest_rows_uploaded = job_load_result.output_rows
+                ingest_rows_uploaded = job_load_load.output_rows
                 ingest_dates_uploaded.append(ingest_df_deduplicated.copy())
                 ingest_sections_status[ingest_section_name] = "succeed"
                 print(f"✅ [INGEST] Successfully uploaded {ingest_rows_uploaded} row(s) of TikTok Ads campaign insights to Google BigQuery table {raw_table_campaign}.")
@@ -1406,8 +1406,8 @@ def ingest_ad_insights(ingest_date_start: str, ingest_date_end: str,) -> pd.Data
                     raw_table_ad,
                     job_config=job_load_config
                 )
-                ingest_job_result = job_load_load.result()
-                ingest_rows_uploaded = ingest_job_result.output_rows
+                job_load_result = job_load_load.result()
+                ingest_rows_uploaded = job_load_load.output_rows
                 ingest_dates_uploaded.append(ingest_df_deduplicated.copy())
                 ingest_sections_status[ingest_section_name] = "succeed"
                 print(f"✅ [INGEST] Successfully uploaded {ingest_rows_uploaded} row(s) of TikTok Ads ad insights to Google BigQuery table {raw_table_ad}.")
