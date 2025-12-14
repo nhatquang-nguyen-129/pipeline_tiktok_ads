@@ -298,7 +298,7 @@ def update_ad_insights(update_date_start: str, update_date_end: str):
             if update_ad_ids:
                 print(f"🔄 [UPDATE] Triggering to ingest TikTok Ads ad metadata for {len(update_ad_ids)} ad_id(s)...")
                 logging.info(f"🔄 [UPDATE] Triggering to ingest TikTok Ads ad metadata for {len(update_ad_ids)} ad_id(s)...")
-                ingest_results_metadata = ingest_ad_metadata(ingest_ids_ad=list(update_ad_ids))
+                ingest_results_metadata = ingest_ad_metadata(ingest_ad_ids=list(update_ad_ids))
                 ingest_status_metadata = ingest_results_metadata["ingest_status_final"]
                 ingest_summary_metadata = ingest_results_metadata["ingest_summary_final"]
                 if ingest_status_metadata == "ingest_succeed_all":

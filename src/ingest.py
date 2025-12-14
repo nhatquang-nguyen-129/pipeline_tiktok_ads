@@ -105,8 +105,8 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
         try:
             if not ingest_campaign_ids:
                 ingest_sections_status[ingest_section_name] = "failed"
-                print("⚠️ [INGEST] Empty TikTok Ads ingest_ids_campaign provided then ingestion is suspended.")
-                logging.warning("⚠️ [INGEST] Empty TikTok Ads ingest_ids_campaign provided then ingestion is suspended.")
+                print("⚠️ [INGEST] Empty TikTok Ads ingest_campaign_ids provided then ingestion is suspended.")
+                logging.warning("⚠️ [INGEST] Empty TikTok Ads ingest_campaign_ids provided then ingestion is suspended.")
             else:
                 ingest_sections_status[ingest_section_name] = "succeed"
                 print(f"✅ [INGEST] Successfully validated input for {len(ingest_campaign_ids)} campaign_id(s) of TikTok Ads campaign metadata ingestion.")
