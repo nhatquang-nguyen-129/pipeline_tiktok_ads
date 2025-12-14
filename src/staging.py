@@ -360,7 +360,7 @@ def staging_campaign_insights() -> dict:
                         job_config=job_load_config
                     )
                     job_load_result = job_load_load.result()
-                    staging_rows_uploaded = job_load_result.output_rows
+                    staging_rows_uploaded = job_load_load.output_rows
                     staging_df_uploaded = staging_df_deduplicated.copy()
                     staging_sections_status[staging_section_name] = "succeed"
                     print(f"✅ [STAGING] Successfully uploaded {staging_rows_uploaded} deduplicated row(s) of staging TikTok Ads campaign insights to new Google BigQuery table {staging_table_id}.")
@@ -382,7 +382,7 @@ def staging_campaign_insights() -> dict:
                         job_config=job_load_config
                     )
                     job_load_result = job_load_load.result()
-                    staging_rows_uploaded = job_load_result.output_rows
+                    staging_rows_uploaded = job_load_load.output_rows
                     staging_df_uploaded = staging_df_deduplicated.copy()
                     staging_sections_status[staging_section_name] = "succeed"
                     print(f"✅ [STAGING] Successfully overwrote {staging_rows_uploaded} deduplicated row(s) of staging TikTok Ads campaign insights to existing Google BigQuery table {staging_table_campaign}.")
@@ -598,7 +598,12 @@ def staging_ad_insights() -> dict:
                     print(f"✅ [STAGING] Successfully triggered TikTok Ads ad insights enrichment with {staging_summary_enriched['enrich_rows_output']}/{staging_summary_enriched['enrich_rows_input']} enriched row(s) in {staging_summary_enriched['enrich_time_elapsed']}s.")
                     logging.info(f"✅ [STAGING] Successfully triggered TikTok Ads ad insights enrichment with {staging_summary_enriched['enrich_rows_output']}/{staging_summary_enriched['enrich_rows_input']} enriched row(s) in {staging_summary_enriched['enrich_time_elapsed']}s.")
                     staging_tables_enriched.append(raw_table_ad)
-                    staging_dfs_enriched.append(staging_df_enriched)              
+                    staging_dfs_enriched.append(staging_df_enriched)
+                elif staging_status_enriched == "enrich_succeed_partial":
+                    print(f"⚠️ [STAGING] Partially triggered TikTok Ads ad insights enrichment with {staging_summary_enriched['enrich_rows_output']}/{staging_summary_enriched['enrich_rows_input']} enriched row(s) in {staging_summary_enriched['enrich_time_elapsed']}s.")
+                    logging.info(f"⚠️ [STAGING] Partially triggered TikTok Ads ad insights enrichment with {staging_summary_enriched['enrich_rows_output']}/{staging_summary_enriched['enrich_rows_input']} enriched row(s) in {staging_summary_enriched['enrich_time_elapsed']}s.")
+                    staging_tables_enriched.append(raw_table_ad)
+                    staging_dfs_enriched.append(staging_df_enriched)
                 else:
                     print(f"❌ [STAGING] Failed to trigger TikTok Ads ad insights enrichment with {staging_summary_enriched['enrich_rows_output']}/{staging_summary_enriched['enrich_rows_input']} enriched row(s) in {staging_summary_enriched['enrich_time_elapsed']}s.")
                     logging.error(f"❌ [STAGING] Failed to trigger TikTok Ads ad insights enrichment with {staging_summary_enriched['enrich_rows_output']}/{staging_summary_enriched['enrich_rows_input']} enriched row(s) in {staging_summary_enriched['enrich_time_elapsed']}s.")
@@ -606,10 +611,10 @@ def staging_ad_insights() -> dict:
             staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)             
         if len(staging_tables_enriched) == len(staging_tables_queried):
             staging_sections_status[staging_section_name] = "succeed"
-        elif len(staging_tables_enriched) > 0:
-            staging_sections_status[staging_section_name] = "partial"
-        else:
+        elif len(staging_tables_enriched) == 0:
             staging_sections_status[staging_section_name] = "failed"
+        else:
+            staging_sections_status[staging_section_name] = "parital"
     
     # 1.2.7. Concatenate enriched TikTok Ads ad insights
         staging_section_name = "[STAGING] Concatenate enriched TikTok Ads ad insights"
@@ -646,9 +651,13 @@ def staging_ad_insights() -> dict:
             staging_status_enforced = staging_results_enforced["schema_status_final"]
             staging_summary_enforced = staging_results_enforced["schema_summary_final"]
             if staging_status_enforced == "schema_succeed_all":
+                staging_sections_status[staging_section_name] = "succeed"
                 print(f"✅ [STAGING] Successfully triggered TikTok Ads ad insights schema enforcement with {staging_summary_enforced['schema_rows_output']}/{staging_summary_enforced['schema_rows_input']} enforced row(s) in {staging_summary_enforced['schema_time_elapsed']}s.")
                 logging.info(f"✅ [STAGING] Successfully triggered TikTok Ads ad insights schema enforcement with {staging_summary_enforced['schema_rows_output']}/{staging_summary_enforced['schema_rows_input']} enforced row(s) in {staging_summary_enforced['schema_time_elapsed']}s.")
-                staging_sections_status[staging_section_name] = "succeed"
+            elif staging_status_enforced == "schema_succeed_partial":
+                staging_sections_status[staging_section_name] = "partial"
+                print(f"⚠️ [FETCH] Partially triggered TikTok Ads ad insights schema enforcement with {staging_summary_enforced['schema_rows_output']}/{staging_summary_enforced['schema_rows_input']} enforced row(s) in {staging_summary_enforced['schema_time_elapsed']}s.")
+                logging.warning(f"⚠️ [FETCH] Partially triggered TikTok Ads ad insights schema enforcement with {staging_summary_enforced['schema_rows_output']}/{staging_summary_enforced['schema_rows_input']} enforced row(s) in {staging_summary_enforced['schema_time_elapsed']}s.")
             else:
                 staging_sections_status[staging_section_name] = "failed"
                 print(f"❌ [STAGING] Failed to trigger TikTok Ads ad insights schema enforcement with {staging_summary_enforced['schema_rows_output']}/{staging_summary_enforced['schema_rows_input']} enforced row(s) in {staging_summary_enforced['schema_time_elapsed']}s.")
@@ -709,7 +718,6 @@ def staging_ad_insights() -> dict:
                     staging_sections_status[staging_section_name] = "failed"
                     print(f"❌ [STAGING] Failed to create staging TikTok Ads ad insights table {staging_table_ad} due to {e}.")
                     logging.error(f"❌ [STAGING] Failed to create staging TikTok Ads ad insights table {staging_table_ad} due to {e}.")
-                    raise RuntimeError(f"❌ [STAGING] Failed to create staging TikTok Ads ad insights table {staging_table_ad} due to {e}.") from e
             else:
                 print(f"⚠️ [STAGING] Staging TikTok Ads ad insights table {staging_table_ad} already exists then creation will be skipped.")
                 logging.info(f"⚠️ [STAGING] Staging TikTok Ads ad insights table {staging_table_ad} already exists then creation will be skipped.")

@@ -296,8 +296,8 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
         ingest_section_name = "[INGEST] Upload TikTok Ads campaign metadata to Google BigQuery"
         ingest_section_start = time.time()
         try:
-            print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of TikTok Ads campaign metadata to Google BigQuery table {raw_table_campaign}...")
-            logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of TikTok Ads campaign metadata to Google BigQuery table {raw_table_campaign}...")
+            print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of TikTok Ads campaign metadata to Google BigQuery table {raw_table_campaign}...")
+            logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of TikTok Ads campaign metadata to Google BigQuery table {raw_table_campaign}...")
             job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
             job_load_load = google_bigquery_client.load_table_from_dataframe(
                 ingest_df_deduplicated, 
@@ -576,8 +576,8 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
         ingest_section_name = "[INGEST] Upload TikTok Ads ad metadata to Google BigQuery"
         ingest_section_start = time.time()
         try:
-            print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of TikTok Ads ad metadata to Google BigQuery table {raw_table_ad}...")
-            logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of TikTok Ads ad metadata to Google BigQuery table {raw_table_ad}...")
+            print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of TikTok Ads ad metadata to Google BigQuery table {raw_table_ad}...")
+            logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of TikTok Ads ad metadata to Google BigQuery table {raw_table_ad}...")
             job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
             job_load_load = google_bigquery_client.load_table_from_dataframe(
                 ingest_df_deduplicated, 
@@ -618,17 +618,17 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
             for ingest_section_summary in ingest_sections_summary
         }       
         if ingest_sections_failed:
+            ingest_status_final = "ingest_failed_all"
             print(f"❌ [INGEST] Failed to complete TikTok Ads ad metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")
             logging.error(f"❌ [INGEST] Failed to complete TikTok Ads ad metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")
-            ingest_status_final = "ingest_failed_all"
-        elif ingest_rows_input > 0 and ingest_rows_output < ingest_rows_input:
-            print(f"⚠️ [INGEST] Partially completed TikTok Ads ad metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")
-            logging.warning(f"⚠️ [INGEST] Partially completed TikTok Ads ad metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")
-            ingest_status_final = "ingest_succeed_partial"
-        else:
-            print(f"🏆 [INGEST] Successfully completed TikTok Ads ad metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")
-            logging.info(f"🏆 [INGEST] Successfully completed TikTok Ads ad metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")
+        elif ingest_rows_output == ingest_rows_input:
             ingest_status_final = "ingest_succeed_all"
+            print(f"🏆 [INGEST] Successfully completed TikTok Ads ad metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")
+            logging.info(f"🏆 [INGEST] Successfully completed TikTok Ads ad metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")    
+        else:
+            ingest_status_final = "ingest_succeed_partial"
+            print(f"⚠️ [INGEST] Partially completed TikTok Ads campaign ad ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")
+            logging.warning(f"⚠️ [INGEST] Partially completed TikTok Ads ad metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.") 
         ingest_results_final = {
             "ingest_df_final": ingest_df_final,
             "ingest_status_final": ingest_status_final,
@@ -838,8 +838,8 @@ def ingest_ad_creative() -> pd.DataFrame:
         ingest_section_name = "[INGEST] Upload TikTok Ads ad creative to Google BigQuery"
         ingest_section_start = time.time()
         try:
-            print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of TikTok Ads ad creative to Google BigQuery table {raw_table_creative}...")
-            logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of TikTok Ads ad creative to Google BigQuery table {raw_table_creative}...")
+            print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of TikTok Ads ad creative to Google BigQuery table {raw_table_creative}...")
+            logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of TikTok Ads ad creative to Google BigQuery table {raw_table_creative}...")
             job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
             job_load_load = google_bigquery_client.load_table_from_dataframe(
                 ingest_df_deduplicated, 
@@ -1102,8 +1102,8 @@ def ingest_campaign_insights(ingest_date_start: str, ingest_date_end: str,) -> p
             ingest_section_name = "[INGEST] Upload TikTok Ads campaign insights to Google BigQuery"
             ingest_section_start = time.time()
             try:
-                print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of TikTok Ads campaign insights to Google BigQuery table {raw_table_campaign}...")
-                logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of TikTok Ads campaign insights to Google BigQuery table {raw_table_campaign}...")
+                print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated deduplicated row(s) of TikTok Ads campaign insights to Google BigQuery table {raw_table_campaign}...")
+                logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated deduplicated row(s) of TikTok Ads campaign insights to Google BigQuery table {raw_table_campaign}...")
                 job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
                 job_load_load = google_bigquery_client.load_table_from_dataframe(
                     ingest_df_deduplicated,
@@ -1398,8 +1398,8 @@ def ingest_ad_insights(ingest_date_start: str, ingest_date_end: str,) -> pd.Data
             ingest_section_name = "[INGEST] Upload TikTok Ads ad insights to Google BigQuery"
             ingest_section_start = time.time()
             try:
-                print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of TikTok Ads ad insights to Google BigQuery table {raw_table_ad}...")
-                logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of TikTok Ads ad insights to Google BigQuery table {raw_table_ad}...")
+                print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated deduplicated row(s) of TikTok Ads ad insights to Google BigQuery table {raw_table_ad}...")
+                logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated deduplicated row(s) of TikTok Ads ad insights to Google BigQuery table {raw_table_ad}...")
                 job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
                 job_load_load = google_bigquery_client.load_table_from_dataframe(
                     ingest_df_deduplicated,
