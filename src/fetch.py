@@ -348,8 +348,8 @@ def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
         try:
             if not fetch_ad_ids:
                 fetch_sections_status[fetch_section_name] = "failed"        
-                print("⚠️ [FETCH] Empty TikTok Ads fetch_ids_ad list provided then fetching will be suspended.")
-                ("⚠️ [FETCH] Empty TikTok Ads fetch_ids_ad list provided then fetching will be suspended.")
+                print("⚠️ [FETCH] Empty TikTok Ads fetch_ad_ids list provided then fetching will be suspended.")
+                ("⚠️ [FETCH] Empty TikTok Ads fetch_ad_ids list provided then fetching will be suspended.")
             else:
                 fetch_sections_status[fetch_section_name] = "succeed"
                 print(f"✅ [FETCH] Successfully validated input for {len(fetch_ad_ids)} ad_id(s) of TikTok Ads ad metadata fetching.")

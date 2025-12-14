@@ -120,7 +120,7 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
         try:
             print(f"🔁 [INGEST] Triggering to fetch TikTok Ads campaign metadata for {len(ingest_campaign_ids)} campaign_id(s)...")
             logging.info(f"🔁 [INGEST] Triggering to fetch TikTok Ads campaign metadata for {len(ingest_campaign_ids)} campaign_id(s)...")
-            ingest_results_fetched = fetch_campaign_metadata(fetch_ids_campaign=ingest_campaign_ids)
+            ingest_results_fetched = fetch_campaign_metadata(fetch_campaign_ids=ingest_campaign_ids)
             ingest_df_fetched = ingest_results_fetched["fetch_df_final"]
             ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
             ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
@@ -305,7 +305,7 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
                 job_config=job_load_config
                 )
             job_load_result = job_load_load.result()
-            ingest_rows_uploaded = len(ingest_df_deduplicated)
+            ingest_rows_uploaded = job_load_load.output_rows
             ingest_df_uploaded = ingest_df_deduplicated.copy()
             ingest_sections_status[ingest_section_name] = "succeed"
             print(f"✅ [INGEST] Successfully uploaded {ingest_rows_uploaded} row(s) of TikTok Ads campaign metadata to Google BigQuery table {raw_table_campaign}.")
