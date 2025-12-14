@@ -747,7 +747,7 @@ def staging_ad_insights() -> dict:
                         job_config=job_load_config
                     )
                     job_load_result = job_load_load.result()
-                    staging_rows_uploaded = job_load_result.output_rows
+                    staging_rows_uploaded = job_load_load.output_rows
                     staging_df_uploaded = staging_df_deduplicated.copy()
                     staging_sections_status[staging_section_name] = "succeed"
                     print(f"✅ [STAGING] Successfully uploaded {staging_rows_uploaded} deduplicated row(s) of staging TikTok Ads ad insights to new Google BigQuery table {staging_table_id}.")
@@ -769,7 +769,7 @@ def staging_ad_insights() -> dict:
                         job_config=job_load_config
                     )
                     job_load_result = job_load_load.result()
-                    staging_rows_uploaded = job_load_result.output_rows
+                    staging_rows_uploaded = job_load_load.output_rows
                     staging_df_uploaded = staging_df_deduplicated.copy()
                     staging_sections_status[staging_section_name] = "succeed"
                     print(f"✅ [STAGING] Successfully overwrote {staging_rows_uploaded} deduplicated row(s) of staging TikTok Ads ad insights to existing Google BigQuery table {staging_table_ad}.")
