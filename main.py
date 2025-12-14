@@ -6,7 +6,7 @@ This script serves as the unified CLI controller for triggering
 ads data updates from TikTok Ads based on command-line arguments 
 and environment variables.
 
-It supports **incremental daily ingestion** for selected data layers  
+It supports incremental daily ingestion for selected data layers  
 (e.g., campaign, ad) and allows flexible control over date ranges.
 
 ✔️ Dynamic routing to the correct update module based on PLATFORM  
@@ -15,7 +15,7 @@ It supports **incremental daily ingestion** for selected data layers
 ✔️ Supports scheduled jobs or manual on-demand executions 
 ✔️ Automatic update summary and execution timing for each step
 
-⚠️ This script does *not* contain data processing logic itself.  
+⚠️ This script does not contain data processing logic itself.  
 It simply delegates update tasks to platform-specific modules .
 ==================================================================
 """
