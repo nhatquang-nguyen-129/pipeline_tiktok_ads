@@ -7,8 +7,8 @@ into a clean, BigQuery-ready dataset optimized for advanced analytics,
 cross-platform reporting and machine learning applications.
 
 By centralizing enrichment rules, this module ensures transparency, 
-consistency, and maintainability across the marketing data pipeline to  
-build insight-ready tables.
+consistency, and maintainability across the marketing data pipeline 
+to build insight-ready tables.
 
 ✔️ Maps optimization_goal to its corresponding business action type  
 ✔️ Standardizes campaign, ad set and ad-level naming conventions  
