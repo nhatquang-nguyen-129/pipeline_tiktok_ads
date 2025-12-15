@@ -369,8 +369,8 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
             logging.info(f"🏆 [ENRICH] Successfully completed TikTok Ads ad insights enrichment with {enrich_rows_output}/{enrich_rows_input} enriched row(s) in {enrich_time_elapsed}s.")
         else:
             enrich_status_final = "enrich_succeed_partial"
-            print(f"⚠️ [ENRICH] Partially completed TikTok Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} enriched row(s) in {enrich_time_elapsed}s.")
-            logging.warning(f"⚠️ [ENRICH] Partially completed TikTok Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} enriched row(s) in {enrich_time_elapsed}s.")                    
+            print(f"⚠️ [ENRICH] Partially completed TikTok Ads ad insights enrichment with {enrich_rows_output}/{enrich_rows_input} enriched row(s) in {enrich_time_elapsed}s.")
+            logging.warning(f"⚠️ [ENRICH] Partially completed TikTok Ads ad insights enrichment with {enrich_rows_output}/{enrich_rows_input} enriched row(s) in {enrich_time_elapsed}s.")                    
         enrich_results_final = {
             "enrich_df_final": enrich_df_final,
             "enrich_status_final": enrich_status_final,
