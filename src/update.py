@@ -6,7 +6,7 @@ This module performs incremental updates to TikTok Ads data at
 the raw layer, providing an efficient mechanism for refreshing  
 recent or specific-date datasets without the need for full reloads.
 
-By supporting targeted updates (per day, layer, or entity), it  
+By supporting targeted updates (per day, layer or entity), it  
 enables faster turnaround for near-real-time dashboards and daily  
 data sync jobs while maintaining historical accuracy and integrity.
 
@@ -16,9 +16,9 @@ data sync jobs while maintaining historical accuracy and integrity.
 ✔️ Implements error handling and retry logic for partial failures  
 ✔️ Designed for integration in daily or on-demand sync pipelines  
 
-⚠️ This module is strictly responsible for *RAW layer updates only*.  
+⚠️ This module is strictly responsible for raw layer updates only.  
 It does not perform transformations, enrichment, or aggregations.  
-Processed data is consumed by the STAGING and MART modules.
+Processed data is consumed by the staging and materialized modules.
 ==================================================================
 """
 
@@ -101,9 +101,9 @@ def update_campaign_insights(update_date_start: str, update_date_end: str):
             print(f"🔄 [UPDATE] Triggering to ingest TikTok Ads campaign insights ingestion from {update_date_start} to {update_date_end}...")
             logging.info(f"🔄 [UPDATE] Triggering to ingest TikTok Ads campaign insights ingestion from {update_date_start} to {update_date_end}...")
             ingest_results_insights = ingest_campaign_insights(ingest_date_start=update_date_start, ingest_date_end=update_date_end)
-            ingest_df_insights = ingest_results_insights["ingest_df_final"]
-            ingest_status_insights = ingest_results_insights["ingest_status_final"]
+            ingest_df_insights = ingest_results_insights["ingest_df_final"]            
             ingest_summary_insights = ingest_results_insights["ingest_summary_final"]
+            ingest_status_insights = ingest_results_insights["ingest_status_final"]
             updated_campaign_ids = set(ingest_df_insights["campaign_id"].dropna().unique())
             if ingest_status_insights == "ingest_succeed_all":
                 update_sections_status[update_section_name] = "succeed"
@@ -127,9 +127,9 @@ def update_campaign_insights(update_date_start: str, update_date_end: str):
             if updated_campaign_ids:
                 print(f"🔄 [UPDATE] Triggering to ingest TikTok Ads campaign metadata for {len(updated_campaign_ids)} campaign_id(s)...")
                 logging.info(f"🔄 [UPDATE] Triggering to ingest TikTok Ads campaign metadata for {len(updated_campaign_ids)} campaign_id(s)...")
-                ingest_results_metadata = ingest_campaign_metadata(ingest_campaign_ids=list(updated_campaign_ids))
-                ingest_status_metadata = ingest_results_metadata["ingest_status_final"]
+                ingest_results_metadata = ingest_campaign_metadata(ingest_campaign_ids=list(updated_campaign_ids))                
                 ingest_summary_metadata = ingest_results_metadata["ingest_summary_final"]
+                ingest_status_metadata = ingest_results_metadata["ingest_status_final"]
                 if ingest_status_metadata == "ingest_succeed_all":
                     update_sections_status[update_section_name] = "succeed"
                     print(f"✅ [UPDATE] Successfully triggered TikTok Ads campaign metadata ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
@@ -156,9 +156,9 @@ def update_campaign_insights(update_date_start: str, update_date_end: str):
             if updated_campaign_ids:
                 print("🔄 [UPDATE] Triggering to create or overwrite staging TikTok Ads campaign insights table...")
                 logging.info("🔄 [UPDATE] Triggering to create or overwrite staging TikTok Ads campaign insights table...")
-                staging_results_campaign = staging_campaign_insights()
-                staging_status_campaign = staging_results_campaign["staging_status_final"]
+                staging_results_campaign = staging_campaign_insights()                
                 staging_summary_campaign = staging_results_campaign["staging_summary_final"]
+                staging_status_campaign = staging_results_campaign["staging_status_final"]
                 if staging_status_campaign == "staging_succeed_all":
                     update_sections_status[update_section_name] = "succeed"
                     print(f"✅ [UPDATE] Successfully triggered TikTok Ads campaign insights staging with {staging_summary_campaign['staging_tables_output']}/{staging_summary_campaign['staging_tables_input']} table(s) on {staging_summary_campaign['staging_tables_input']} queried table(s) and {staging_summary_campaign['staging_rows_output']} uploaded row(s) in {staging_summary_campaign['staging_time_elapsed']}s.")
@@ -185,9 +185,9 @@ def update_campaign_insights(update_date_start: str, update_date_end: str):
             if staging_status_campaign in ["staging_succeed_all", "staging_failed_partial"]:
                 print("🔄 [UPDATE] Triggering to build materialized TikTok Ads campaign performance table...")
                 logging.info("🔄 [UPDATE] Triggering to build materialized TikTok Ads campaign performance table...")               
-                mart_results_all = mart_campaign_all()
-                mart_status_all = mart_results_all["mart_status_final"]
+                mart_results_all = mart_campaign_all()                
                 mart_summary_all = mart_results_all["mart_summary_final"]                
+                mart_status_all = mart_results_all["mart_status_final"]
                 if mart_status_all == "mart_succeed_all":
                     update_sections_status[update_section_name] = "succeed"
                     print(f"✅ [UPDATE] Successfully triggered TikTok Ads campaign performance materialization with {mart_summary_all['mart_rows_output']} in {mart_summary_all['mart_time_elapsed']}s.")
@@ -272,9 +272,9 @@ def update_ad_insights(update_date_start: str, update_date_end: str):
             print(f"🔄 [UPDATE] Triggering to ingest TikTok Ads ad insights ingestion from {update_date_start} to {update_date_end}...")
             logging.info(f"🔄 [UPDATE] Triggering to ingest TikTok Ads ad insights ingestion from {update_date_start} to {update_date_end}...")
             ingest_results_insights = ingest_ad_insights(ingest_date_start=update_date_start, ingest_date_end=update_date_end)
-            ingest_df_insights = ingest_results_insights["ingest_df_final"]
-            ingest_status_insights = ingest_results_insights["ingest_status_final"]
+            ingest_df_insights = ingest_results_insights["ingest_df_final"]            
             ingest_summary_insights = ingest_results_insights["ingest_summary_final"]
+            ingest_status_insights = ingest_results_insights["ingest_status_final"]
             update_ad_ids = set(ingest_df_insights["ad_id"].dropna().unique())
             if ingest_status_insights == "ingest_succeed_all":
                 update_sections_status[update_section_name] = "succeed"
@@ -298,11 +298,11 @@ def update_ad_insights(update_date_start: str, update_date_end: str):
             if update_ad_ids:
                 print(f"🔄 [UPDATE] Triggering to ingest TikTok Ads ad metadata for {len(update_ad_ids)} ad_id(s)...")
                 logging.info(f"🔄 [UPDATE] Triggering to ingest TikTok Ads ad metadata for {len(update_ad_ids)} ad_id(s)...")
-                ingest_results_metadata = ingest_ad_metadata(ingest_ad_ids=list(update_ad_ids))
-                ingest_status_metadata = ingest_results_metadata["ingest_status_final"]
+                ingest_results_metadata = ingest_ad_metadata(ingest_ad_ids=list(update_ad_ids))                
                 ingest_summary_metadata = ingest_results_metadata["ingest_summary_final"]
+                ingest_status_metadata = ingest_results_metadata["ingest_status_final"]
                 if ingest_status_metadata == "ingest_succeed_all":
-                    update_sections_status[update_section_name] = "partial"
+                    update_sections_status[update_section_name] = "succeed"
                     print(f"✅ [UPDATE] Successfully triggered TikTok Ads ad metadata ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
                     logging.info(f"✅ [UPDATE] Successfully triggered TikTok Ads ad metadata ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")                    
                 elif ingest_status_metadata == "ingest_succeed_partial":
@@ -327,9 +327,9 @@ def update_ad_insights(update_date_start: str, update_date_end: str):
             if update_ad_ids:
                 print(f"🔄 [UPDATE] Triggering to ingest TikTok ad creative...")
                 logging.info(f"🔄 [UPDATE] Triggering to ingest TikTok ad creative...")
-                ingest_results_metadata = ingest_ad_creative()
-                ingest_status_metadata = ingest_results_metadata["ingest_status_final"]
+                ingest_results_metadata = ingest_ad_creative()                
                 ingest_summary_metadata = ingest_results_metadata["ingest_summary_final"]
+                ingest_status_metadata = ingest_results_metadata["ingest_status_final"]
                 if ingest_status_metadata == "ingest_succeed_all":
                     update_sections_status[update_section_name] = "succeed"
                     print(f"✅ [UPDATE] Successfully triggered TikTok Ads ad creative ingestion with {ingest_summary_metadata['ingest_rows_output']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
@@ -352,9 +352,9 @@ def update_ad_insights(update_date_start: str, update_date_end: str):
             if update_ad_ids:
                 print("🔄 [UPDATE] Triggering to create or overwrite staging TikTok Ads ad insights table...")
                 logging.info("🔄 [UPDATE] Triggering to create or overwrite staging TikTok Ads ad insights table...")
-                staging_results_ad = staging_ad_insights()
-                staging_status_ad = staging_results_ad["staging_status_final"]
+                staging_results_ad = staging_ad_insights()                
                 staging_summary_ad = staging_results_ad["staging_summary_final"]
+                staging_status_ad = staging_results_ad["staging_status_final"]
                 if staging_status_ad == "staging_succeed_all":
                     update_sections_status[update_section_name] = "succeed"
                     print(f"✅ [UPDATE] Successfully triggered triggered Ads ad insights staging with {staging_summary_ad['staging_tables_output']}/{staging_summary_ad['staging_tables_input']} table(s) on {staging_summary_ad['staging_tables_input']} queried table(s) and {staging_summary_ad['staging_rows_output']} uploaded row(s) in {staging_summary_ad['staging_time_elapsed']}s.")
