@@ -106,9 +106,9 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
             print(f"🔁 [INGEST] Triggering to fetch TikTok Ads campaign metadata for {len(ingest_campaign_ids)} campaign_id(s)...")
             logging.info(f"🔁 [INGEST] Triggering to fetch TikTok Ads campaign metadata for {len(ingest_campaign_ids)} campaign_id(s)...")
             ingest_results_fetched = fetch_campaign_metadata(fetch_campaign_ids=ingest_campaign_ids)
-            ingest_df_fetched = ingest_results_fetched["fetch_df_final"]
-            ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
+            ingest_df_fetched = ingest_results_fetched["fetch_df_final"]            
             ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
+            ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
             if ingest_status_fetched == "fetch_succeed_all":
                 ingest_sections_status[ingest_section_name] = "succeed"
                 print(f"✅ [INGEST] Successfully triggered TikTok Ads campaign metadata fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
@@ -131,9 +131,9 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
             print(f"🔄 [INGEST] Triggering to enforce schema for TikTok Ads campaign metadata with {len(ingest_df_fetched)} fetched row(s)...")
             logging.info(f"🔄 [INGEST] Triggering to enforce schema for TikTok Ads campaign metadata with {len(ingest_df_fetched)} fetched row(s)...")
             ingest_results_enforced = enforce_table_schema(ingest_df_fetched, "ingest_campaign_metadata")
+            ingest_df_enforced = ingest_results_enforced["schema_df_final"]
             ingest_summary_enforced = ingest_results_enforced["schema_summary_final"]
-            ingest_status_enforced = ingest_results_enforced["schema_status_final"]
-            ingest_df_enforced = ingest_results_enforced["schema_df_final"]    
+            ingest_status_enforced = ingest_results_enforced["schema_status_final"]                
             if ingest_status_enforced == "schema_succeed_all":
                 ingest_sections_status[ingest_section_name] = "succeed"
                 print(f"✅ [INGEST] Successfully triggered TikTok Ads campaign metadata schema enforcement with {ingest_summary_enforced['schema_rows_output']}/{len(ingest_df_fetched)} enforced row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
@@ -178,8 +178,8 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
-    # 1.1.6. Delete existing row(s) or create new table if it not exist
-        ingest_section_name = "[INGEST] Delete existing row(s) or create new table if it not exist"
+    # 1.1.6. Delete existing rows or create new table if it not exist
+        ingest_section_name = "[INGEST] Delete existing rows or create new table if it not exist"
         ingest_section_start = time.time()
         try:
             ingest_df_deduplicated = ingest_df_enforced.drop_duplicates()           
@@ -231,8 +231,8 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
                     print(f"❌ [INGEST] Failed to create TikTok Ads campaign metadata table {raw_table_campaign} due to {e}.")
                     logging.error(f"❌ [INGEST] Failed to create TikTok Ads campaign metadata table {raw_table_campaign} due to {e}.")
             else:
-                print(f"🔄 [INGEST] Found TikTok Ads campaign metadata table {raw_table_campaign} then existing row(s) deletion will be proceeding...")
-                logging.info(f"🔄 [INGEST] Found TikTok Ads campaign metadata table {raw_table_campaign} then existing row(s) deletion will be proceeding...")
+                print(f"🔄 [INGEST] Found TikTok Ads campaign metadata table {raw_table_campaign} then existing rows deletion will be proceeding...")
+                logging.info(f"🔄 [INGEST] Found TikTok Ads campaign metadata table {raw_table_campaign} then existing rows deletion will be proceeding...")
                 ingest_keys_unique = ingest_df_deduplicated[["advertiser_id", "campaign_id"]].dropna().drop_duplicates()
                 if not ingest_keys_unique.empty:
                     try:
@@ -252,13 +252,13 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
                     except Exception as e:
                         print(f"❌ [INGEST] Failed to create temporary TikTok Ads campaign metadata table {temporary_table_id} for batch deletion due to {e}.")
                         logging.error(f"❌ [INGEST] Failed to create temporary TikTok Ads campaign metadata table {temporary_table_id} for batch deletion due to {e}.")                        
-                        query_delete_condition = " AND ".join([
-                            f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
-                            for col in ["campaign_id", "advertiser_id"]
-                        ])
                     try:                        
                         print(f"🔍 [INGEST] Deleting {len(ingest_keys_unique)} row(s) of TikTok Ads campaign metadata using batch deletion...")
                         logging.info(f"🔍 [INGEST] Deleting {len(ingest_keys_unique)} row(s) of TikTok Ads campaign metadata using batch deletion...")
+                        query_delete_condition = " AND ".join([
+                            f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
+                            for col in ["advertiser_id", "campaign_id"]
+                        ])                        
                         query_delete_config = f"""
                             DELETE FROM `{raw_table_campaign}` AS main
                             WHERE EXISTS (
@@ -276,17 +276,17 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
                         print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of TikTok Ads campaign metadata table {raw_table_campaign}.")
                         logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of TikTok Ads campaign metadata table {raw_table_campaign}.")
                     except Exception as e:
-                        print(f"❌ [INGEST] Failed to delete existing row(s) of TikTok Ads campaign metadata table {raw_table_campaign} by batch deletion due to {e}.")
-                        logging.error(f"❌ [INGEST] Failed to delete existing row(s) of TikTok Ads campaign metadata table {raw_table_campaign} by batch deletion due to {e}.")
+                        print(f"❌ [INGEST] Failed to delete existing rows of TikTok Ads campaign metadata table {raw_table_campaign} by batch deletion due to {e}.")
+                        logging.error(f"❌ [INGEST] Failed to delete existing rows of TikTok Ads campaign metadata table {raw_table_campaign} by batch deletion due to {e}.")
             ingest_sections_status[ingest_section_name] = "succeed"
         except Exception as e:
             ingest_sections_status[ingest_section_name] = "failed"
-            print(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_campaign} if it not exist for TikTok Ads campaign metadata due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_campaign} if it not exist for TikTok Ads campaign metadata due to {e}.")
+            print(f"❌ [INGEST] Failed to delete existing rows or create new table {raw_table_campaign} if it not exist for TikTok Ads campaign metadata due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to delete existing rows or create new table {raw_table_campaign} if it not exist for TikTok Ads campaign metadata due to {e}.")
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
-    # 1.1.8. Upload TikTok Ads campaign metadata to Google BigQuery
+    # 1.1.7. Upload TikTok Ads campaign metadata to Google BigQuery
         ingest_section_name = "[INGEST] Upload TikTok Ads campaign metadata to Google BigQuery"
         ingest_section_start = time.time()
         try:
@@ -311,7 +311,7 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
-    # 1.1.9. Summarize ingestion results for TikTok Ads campaign metadata
+    # 1.1.8. Summarize ingestion results for TikTok Ads campaign metadata
     finally:
         ingest_time_elapsed = round(time.time() - ingest_time_start, 2)
         ingest_df_final = (ingest_df_uploaded.copy() if "ingest_df_uploaded" in locals() and not ingest_df_uploaded.empty else pd.DataFrame())
@@ -373,39 +373,24 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
 
     try:
 
-    # 1.2.2. Validate input for TikTok Ads ad metadata ingestion
-        ingest_section_name = "[INGEST] Validate input for TikTok Ads ad metadata ingestion"
-        ingest_section_start = time.time()
-        try:
-            if not ingest_ad_ids:
-                ingest_sections_status[ingest_section_name] = "failed"
-                print("⚠️ [INGEST] Empty TikTok Ads ad_id_list provided then ingestion is suspended.")
-                logging.warning("⚠️ [INGEST] Empty TikTok Ads ad_id_list provided then ingestion is suspended.")
-            else:
-                ingest_sections_status[ingest_section_name] = "succeed"
-                print(f"✅ [INGEST] Successfully validated input for {len(ingest_ad_ids)} ad_id(s) of TikTok Ads ad metadata ingestion.")
-                logging.info(f"✅ [INGEST] Successfully validated input for {len(ingest_ad_ids)} ad_id(s) of TikTok Ads ad metadata ingestion.")
-        finally:
-            ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
-
-    # 1.2.3. Trigger to fetch TikTok Ads ad metadata
+    # 1.2.2. Trigger to fetch TikTok Ads ad metadata
         ingest_section_name = "[INGEST] Trigger to fetch TikTok Ads ad metadata"
         ingest_section_start = time.time()
         try:
             print(f"🔁 [INGEST] Triggering to fetch TikTok Ads ad metadata for {len(ingest_ad_ids)} ad_id(s)...")
             logging.info(f"🔁 [INGEST] Triggering to fetch TikTok Ads ad metadata for {len(ingest_ad_ids)} ad_id(s)...")
             ingest_results_fetched = fetch_ad_metadata(fetch_ad_ids=ingest_ad_ids)
-            ingest_df_fetched = ingest_results_fetched["fetch_df_final"]
-            ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
+            ingest_df_fetched = ingest_results_fetched["fetch_df_final"]            
             ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
+            ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
             if ingest_status_fetched == "fetch_succeed_all":
-                print(f"✅ [INGEST] Successfully triggered TikTok Ads ad metadata fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
-                logging.info(f"✅ [INGEST] Successfully triggered TikTok Ads ad metadata fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
                 ingest_sections_status[ingest_section_name] = "succeed"
+                print(f"✅ [INGEST] Successfully triggered TikTok Ads ad metadata fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                logging.info(f"✅ [INGEST] Successfully triggered TikTok Ads ad metadata fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")        
             elif ingest_status_fetched == "fetch_succeed_partial":
-                print(f"⚠️ [INGEST] Partially triggered TikTok Ads ad metadata fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
-                logging.warning(f"⚠️ [INGEST] Partially triggered TikTok Ads ad metadata fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
                 ingest_sections_status[ingest_section_name] = "partial"
+                print(f"⚠️ [INGEST] Partially triggered TikTok Ads ad metadata fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                logging.warning(f"⚠️ [INGEST] Partially triggered TikTok Ads ad metadata fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")                
             else:
                 ingest_sections_status[ingest_section_name] = "failed"
                 print(f"❌ [INGEST] Failed to trigger TikTok Ads ad metadata fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
@@ -413,16 +398,16 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2) 
 
-    # 1.2.4. Trigger to enforce schema for TikTok Ads ad metadata
+    # 1.2.3. Trigger to enforce schema for TikTok Ads ad metadata
         ingest_section_name = "[INGEST] Trigger to enforce schema for TikTok Ads ad metadata"
         ingest_section_start = time.time()
         try:
             print(f"🔄 [INGEST] Triggering to enforce schema for TikTok Ads ad metadata with {len(ingest_df_fetched)} row(s)...")
             logging.info(f"🔄 [INGEST] Triggering to enforce schema for TikTok Ads ad metadata with {len(ingest_df_fetched)} row(s)...")
             ingest_results_enforced = enforce_table_schema(ingest_df_fetched, "ingest_ad_metadata")
+            ingest_df_enforced = ingest_results_enforced["schema_df_final"]
             ingest_summary_enforced = ingest_results_enforced["schema_summary_final"]
-            ingest_status_enforced = ingest_results_enforced["schema_status_final"]
-            ingest_df_enforced = ingest_results_enforced["schema_df_final"]   
+            ingest_status_enforced = ingest_results_enforced["schema_status_final"]              
             if ingest_status_enforced == "schema_succeed_all":
                 ingest_sections_status[ingest_section_name] = "succeed"
                 print(f"✅ [INGEST] Successfully triggered TikTok Ads ad metadata schema enforcement with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
@@ -438,7 +423,7 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
-    # 1.2.5. Prepare Google BigQuery table_id for ingestion
+    # 1.2.4. Prepare Google BigQuery table_id for ingestion
         ingest_section_name = "[INGEST] Prepare Google BigQuery table_id for ingestion"
         ingest_section_start = time.time()
         try:    
@@ -450,7 +435,7 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)        
 
-    # 1.2.6. Initialize Google BigQuery client
+    # 1.2.5. Initialize Google BigQuery client
         ingest_section_name = "[INGEST] Initialize Google BigQuery client"
         ingest_section_start = time.time()
         try:
@@ -467,12 +452,12 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
-    # 1.2.7. Delete existing row(s) or create new table if it not exist
-        ingest_section_name = "[INGEST] Delete existing row(s) or create new table if it not exist"
+    # 1.2.6. Delete existing rows or create new table if it not exist
+        ingest_section_name = "[INGEST] Delete existing rows or create new table if it not exist"
         ingest_section_start = time.time()
         try:
             ingest_df_deduplicated = ingest_df_enforced.drop_duplicates()
-            table_clusters_defined = ["ad_id", "advertiser_id"]
+            table_clusters_defined = ["advertiser_id", "ad_id"]
             table_clusters_filtered = []
             table_schemas_defined = []    
             try:
@@ -485,35 +470,32 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
             except Exception as e:
                 print(f"❌ [INGEST] Failed to check TikTok Ads ad metadata table {raw_table_ad} existence due to {e}.")
                 logging.error(f"❌ [INGEST] Failed to check TikTok Ads ad metadata table {raw_table_ad} existence due to {e}.")
-                raise RuntimeError(f"❌ [INGEST] Failed to check TikTok Ads ad metadata table {raw_table_ad} existence due to {e}.") from e
             if not ingest_table_existed:
-                print(f"⚠️ [INGEST] TikTok Ads ad metadata table {raw_table_ad} not found then table creation will be proceeding...")
-                logging.info(f"⚠️ [INGEST] TikTok Ads ad metadata table {raw_table_ad} not found then table creation will be proceeding...")
-                for col, dtype in ingest_df_deduplicated.dtypes.items():
-                    if dtype.name.startswith("int"):
-                        bq_type = "INT64"
-                    elif dtype.name.startswith("float"):
-                        bq_type = "FLOAT64"
-                    elif dtype.name == "bool":
-                        bq_type = "BOOL"
-                    elif "datetime" in dtype.name:
-                        bq_type = "TIMESTAMP"
-                    else:
-                        bq_type = "STRING"
-                    table_schemas_defined.append(bigquery.SchemaField(col, bq_type))
-                table_configuration_defined = bigquery.Table(raw_table_ad, schema=table_schemas_defined)
-                table_partition_effective = "date" if "date" in ingest_df_deduplicated.columns else None
-                if table_partition_effective:
-                    table_configuration_defined.time_partitioning = bigquery.TimePartitioning(
-                        type_=bigquery.TimePartitioningType.DAY,
-                        field=table_partition_effective
-                    )
-                table_clusters_filtered = [f for f in table_clusters_defined if f in ingest_df_deduplicated.columns]
-                if table_clusters_filtered:  
-                    table_configuration_defined.clustering_fields = table_clusters_filtered
-                try:    
-                    print(f"🔍 [INGEST] Creating TikTok Ads ad metadata table defined name {raw_table_ad} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}...")
-                    logging.info(f"🔍 [INGEST] Creating TikTok Ads ad metadata table defined name {raw_table_ad} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}...")
+                try:
+                    print(f"⚠️ [INGEST] TikTok Ads ad metadata table {raw_table_ad} not found then table creation will be proceeding...")
+                    logging.info(f"⚠️ [INGEST] TikTok Ads ad metadata table {raw_table_ad} not found then table creation will be proceeding...")
+                    for col, dtype in ingest_df_deduplicated.dtypes.items():
+                        if dtype.name.startswith("int"):
+                            bq_type = "INT64"
+                        elif dtype.name.startswith("float"):
+                            bq_type = "FLOAT64"
+                        elif dtype.name == "bool":
+                            bq_type = "BOOL"
+                        elif "datetime" in dtype.name:
+                            bq_type = "TIMESTAMP"
+                        else:
+                            bq_type = "STRING"
+                        table_schemas_defined.append(bigquery.SchemaField(col, bq_type))
+                    table_configuration_defined = bigquery.Table(raw_table_ad, schema=table_schemas_defined)
+                    table_partition_effective = "date" if "date" in ingest_df_deduplicated.columns else None
+                    if table_partition_effective:
+                        table_configuration_defined.time_partitioning = bigquery.TimePartitioning(
+                            type_=bigquery.TimePartitioningType.DAY,
+                            field=table_partition_effective
+                        )
+                    table_clusters_filtered = [f for f in table_clusters_defined if f in ingest_df_deduplicated.columns]
+                    if table_clusters_filtered:  
+                        table_configuration_defined.clustering_fields = table_clusters_filtered                
                     ingest_table_create = google_bigquery_client.create_table(table_configuration_defined)
                     ingest_table_id = ingest_table_create.full_table_id
                     print(f"✅ [INGEST] Successfully created TikTok Ads ad metadata table actual name {ingest_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}.")
@@ -521,52 +503,64 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
                 except Exception as e:
                     print(f"❌ [INGEST] Failed to create TikTok Ads ad metadata table {raw_table_ad} due to {e}.")
                     logging.error(f"❌ [INGEST] Failed to create TikTok Ads ad metadata table {raw_table_ad} due to {e}.")
-                    raise RuntimeError(f"❌ [INGEST] Failed to create TikTok Ads ad metadata table {raw_table_ad} due to {e}..") from e
             else:
-                print(f"🔄 [INGEST] Found TikTok Ads ad metadata table {raw_table_ad} then existing row(s) deletion will be proceeding...")
-                logging.info(f"🔄 [INGEST] Found TikTok Ads ad metadata table {raw_table_ad} then existing row(s) deletion will be proceeding...")
-                ingest_keys_unique = ingest_df_deduplicated[["ad_id", "advertiser_id"]].dropna().drop_duplicates()
+                print(f"🔄 [INGEST] Found TikTok Ads ad metadata table {raw_table_ad} then existing rows deletion will be proceeding...")
+                logging.info(f"🔄 [INGEST] Found TikTok Ads ad metadata table {raw_table_ad} then existing rows deletion will be proceeding...")
+                ingest_keys_unique = ingest_df_deduplicated[["advertiser_id", "ad_id"]].dropna().drop_duplicates()
                 if not ingest_keys_unique.empty:
-                    table_id_temporary = f"{PROJECT}.{raw_dataset}.temp_table_ad_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
-                    job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
-                    job_load_load = google_bigquery_client.load_table_from_dataframe(
-                        ingest_keys_unique, 
-                        table_id_temporary, 
-                        job_config=job_load_config
-                        )
-                    job_load_result = job_load_load.result()
-                    query_delete_condition = " AND ".join([
-                        f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
-                        for col in ["ad_id", "advertiser_id"]
-                    ])
-                    query_delete_config = f"""
-                        DELETE FROM `{raw_table_ad}` AS main
-                        WHERE EXISTS (
-                            SELECT 1 FROM `{table_id_temporary}` AS temp
-                            WHERE {query_delete_condition}
-                        )
-                    """
-                    query_delete_load = google_bigquery_client.query(query_delete_config)
-                    query_delete_result = query_delete_load.result()
-                    ingest_rows_deleted = query_delete_result.num_dml_affected_rows
-                    google_bigquery_client.delete_table(
-                        table_id_temporary, 
-                        not_found_ok=True
+                    try:
+                        temporary_table_id = f"{PROJECT}.{raw_dataset}.temp_table_ad_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
+                        job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
+                        job_load_load = google_bigquery_client.load_table_from_dataframe(
+                            ingest_keys_unique, 
+                            temporary_table_id, 
+                            job_config=job_load_config
+                            )
+                        job_load_result = job_load_load.result()
+                        created_table_id = f"{job_load_load.destination.project}.{job_load_load.destination.dataset_id}.{job_load_load.destination.table_id}"
+                        print(f"✅ [INGEST] Successfully created temporary TikTok Ads ad metadata table {created_table_id} for batch deletion.")
+                        logging.info(f"✅ [INGEST] Successfully created temporary TikTok Ads ad metadata table {created_table_id} for batch deletion.")
+                    except Exception as e:
+                        print(f"❌ [INGEST] Failed to create temporary TikTok Ads ad metadata table {temporary_table_id} for batch deletion due to {e}.")
+                        logging.error(f"❌ [INGEST] Failed to create temporary TikTok Ads ad metadata table {temporary_table_id} for batch deletion due to {e}.")                     
+                    try:
+                        print(f"🔍 [INGEST] Deleting {len(ingest_keys_unique)} row(s) of TikTok Ads ad metadata using batch deletion...")
+                        logging.info(f"🔍 [INGEST] Deleting {len(ingest_keys_unique)} row(s) of TikTok Ads ad metadata using batch deletion...")                        
+                        query_delete_condition = " AND ".join([
+                            f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
+                            for col in ["advertiser_id", "ad_id"]
+                        ])
+                        query_delete_config = f"""
+                            DELETE FROM `{raw_table_ad}` AS main
+                            WHERE EXISTS (
+                                SELECT 1 FROM `{temporary_table_id}` AS temp
+                                WHERE {query_delete_condition}
+                            )
+                        """
+                        query_delete_load = google_bigquery_client.query(query_delete_config)
+                        query_delete_result = query_delete_load.result()
+                        ingest_rows_deleted = query_delete_result.num_dml_affected_rows
+                        google_bigquery_client.delete_table(
+                            temporary_table_id, 
+                            not_found_ok=True
                         )                             
-                    print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of TikTok Ads ad metadata table {raw_table_ad}.")
-                    logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of TikTok Ads ad metadata table {raw_table_ad}.")
+                        print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of TikTok Ads ad metadata table {raw_table_ad}.")
+                        logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of TikTok Ads ad metadata table {raw_table_ad}.")
+                    except Exception as e:
+                        print(f"❌ [INGEST] Failed to delete existing rows of TikTok Ads ad metadata table {raw_table_ad} by batch deletion due to {e}.")
+                        logging.error(f"❌ [INGEST] Failed to delete existing rows of TikTok Ads ad metadata table {raw_table_ad} by batch deletion due to {e}.")
                 else:
-                    print(f"⚠️ [INGEST] No unique ad_id and advertiser_id keys found in TikTok ad metadata table {raw_table_ad} then existing row(s) deletion is skipped.")
-                    logging.warning(f"⚠️ [INGEST] No unique ad_id and advertiser_id keys found in TikTok ad metadata table {raw_table_ad} then existing row(s) deletion is skipped.")
+                    print(f"⚠️ [INGEST] No unique ad_id and advertiser_id keys found in TikTok ad metadata table {raw_table_ad} then existing rows deletion is skipped.")
+                    logging.warning(f"⚠️ [INGEST] No unique ad_id and advertiser_id keys found in TikTok ad metadata table {raw_table_ad} then existing rows deletion is skipped.")
             ingest_sections_status[ingest_section_name] = "succeed"
         except Exception as e:
             ingest_sections_status[ingest_section_name] = "failed"
-            print(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_ad} if it not exist for TikTok Ads ad metadata due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_ad} if it not exist for TikTok Ads ad metadata due to {e}.")
+            print(f"❌ [INGEST] Failed to delete existing rows or create new table {raw_table_ad} if it not exist for TikTok Ads ad metadata due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to delete existing rows or create new table {raw_table_ad} if it not exist for TikTok Ads ad metadata due to {e}.")
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
-    # 1.2.8. Upload TikTok Ads ad metadata to Google BigQuery
+    # 1.2.7. Upload TikTok Ads ad metadata to Google BigQuery
         ingest_section_name = "[INGEST] Upload TikTok Ads ad metadata to Google BigQuery"
         ingest_section_start = time.time()
         try:
@@ -591,7 +585,7 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
     
-    # 1.2.9. Summarize ingestion results for TikTok Ads ad metadata
+    # 1.2.8. Summarize ingestion results for TikTok Ads ad metadata
     finally:
         ingest_time_elapsed = round(time.time() - ingest_time_start, 2)
         ingest_df_final = (ingest_df_uploaded.copy() if "ingest_df_uploaded" in locals() and not ingest_df_uploaded.empty else pd.DataFrame())
