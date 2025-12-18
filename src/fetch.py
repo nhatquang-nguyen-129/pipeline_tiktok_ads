@@ -88,41 +88,8 @@ def fetch_campaign_metadata(fetch_campaign_ids: list[str]) -> pd.DataFrame:
     logging.info(f"🔍 [FETCH] Proceeding to fetch TikTok Ads campaign metadata at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
 
     try:
-
-    # 1.1.2. Validate input for the TikTok Ads campaign metadata fetching
-        fetch_section_name = "[FETCH] Validate input for the TikTok Ads campaign metadata fetching"
-        fetch_section_start = time.time()    
-        try:
-            if not fetch_campaign_ids:
-                fetch_sections_status[fetch_section_name] = "failed"        
-                print("⚠️ [FETCH] Empty TikTok Ads campaign_id_list provided then fetching is suspended.")
-                logging.warning("⚠️ [FETCH] Empty TikTok Ads campaign_id_list provided then fetching is suspended.")
-            else:
-                fetch_sections_status[fetch_section_name] = "succeed"
-                print(f"✅ [FETCH] Successfully validated input for {len(fetch_campaign_ids)} campaign_id(s) of TikTok Ads campaign metadata fetching.")
-                logging.info(f"✅ [FETCH] Successfully validated input for {len(fetch_campaign_ids)} campaign_id(s) of TikTok Ads campaign metadata fetching.")
-        finally:
-            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
-
-    # 1.1.3. Prepare fields for TikTok Ads campaign metadata fetching
-        fetch_section_name = "[FETCH] Prepare fields for TikTok Ads campaign metadata fetching"
-        fetch_section_start = time.time()        
-        try:
-            fetch_campaign_fields = [
-                "advertiser_id",
-                "campaign_id",
-                "campaign_name",
-                "operation_status",
-                "objective_type",
-                "create_time"
-            ]
-            fetch_sections_status[fetch_section_name] = "succeed"
-            print(f"🔍 [FETCH] Preparing to fetch TikTok Ads campaign metadata with {fetch_campaign_fields} field(s)...")
-            logging.info(f"🔍 [FETCH] Preparing to fetch TikTok Ads campaign metadata with {fetch_campaign_fields} field(s)...")
-        finally:
-            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)         
     
-    # 1.1.4 Initialize Google Secret Manager client
+    # 1.1.2 Initialize Google Secret Manager client
         fetch_section_name = "[FETCH] Initialize Google Secret Manager client"
         fetch_section_start = time.time()                
         try:
@@ -139,7 +106,7 @@ def fetch_campaign_metadata(fetch_campaign_ids: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2) 
 
-    # 1.1.5. Get TikTok Ads access token from Google Secret Manager
+    # 1.1.3. Get TikTok Ads access token from Google Secret Manager
         fetch_section_name = "[FETCH] Get TikTok Ads access token from Google Secret Manager"
         fetch_section_start = time.time()              
         try: 
@@ -159,7 +126,7 @@ def fetch_campaign_metadata(fetch_campaign_ids: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
     
-    # 1.1.6. Get TikTok Ads advertiser_id from Google Secret Manager
+    # 1.1.4. Get TikTok Ads advertiser_id from Google Secret Manager
         fetch_section_name = "[FETCH] Get TikTok Ads advertiser_id from Google Secret Manager"
         fetch_section_start = time.time()        
         try:
@@ -179,7 +146,7 @@ def fetch_campaign_metadata(fetch_campaign_ids: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
-    # 1.1.7. Make TikTok Ads API call for advertiser endpoint
+    # 1.1.5. Make TikTok Ads API call for advertiser endpoint
         fetch_section_name = "[FETCH] Make TikTok Ads API call for advertiser endpoint"
         fetch_section_start = time.time()     
         try: 
@@ -207,7 +174,7 @@ def fetch_campaign_metadata(fetch_campaign_ids: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
-    # 1.1.8. Make TikTok Ads API call for campaign endpoint
+    # 1.1.6. Make TikTok Ads API call for campaign endpoint
         fetch_section_name = "[FETCH] Make TikTok Ads API call for campaign metadata"
         fetch_section_start = time.time()           
         try:
@@ -219,6 +186,14 @@ def fetch_campaign_metadata(fetch_campaign_ids: list[str]) -> pd.DataFrame:
                 "Access-Token": fetch_access_user,
                 "Content-Type": "application/json"
             }
+            fetch_campaign_fields = [
+                "advertiser_id",
+                "campaign_id",
+                "campaign_name",
+                "operation_status",
+                "objective_type",
+                "create_time"
+            ]
             for fetch_campaign_id in fetch_campaign_ids:
                 try:
                     fetch_campaign_payload = {
@@ -255,7 +230,7 @@ def fetch_campaign_metadata(fetch_campaign_ids: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
-    # 1.1.9. Trigger to enforce schema for TikTok Ads campaign metadata
+    # 1.1.7. Trigger to enforce schema for TikTok Ads campaign metadata
         fetch_section_name = "[FETCH] Trigger to enforce schema for TikTok Ads campaign metadata"
         fetch_section_start = time.time()
         try:
@@ -280,7 +255,7 @@ def fetch_campaign_metadata(fetch_campaign_ids: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
-    # 1.1.10. Summarize fetch results for TikTok Ads campaign metadata
+    # 1.1.8. Summarize fetch results for TikTok Ads campaign metadata
     finally:
         fetch_time_elapsed = round(time.time() - fetch_time_start, 2)
         fetch_df_final = fetch_df_enforced.copy() if "fetch_df_enforced" in locals() and not fetch_df_enforced.empty else pd.DataFrame()
