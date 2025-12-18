@@ -302,7 +302,7 @@ def update_ad_insights(update_date_start: str, update_date_end: str):
                 ingest_summary_metadata = ingest_results_metadata["ingest_summary_final"]
                 ingest_status_metadata = ingest_results_metadata["ingest_status_final"]
                 if ingest_status_metadata == "ingest_succeed_all":
-                    update_sections_status[update_section_name] = "partial"
+                    update_sections_status[update_section_name] = "succeed"
                     print(f"✅ [UPDATE] Successfully triggered TikTok Ads ad metadata ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
                     logging.info(f"✅ [UPDATE] Successfully triggered TikTok Ads ad metadata ingestion with {ingest_summary_metadata['ingest_rows_output']}/{ingest_summary_metadata['ingest_rows_input']} ingested row(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")                    
                 elif ingest_status_metadata == "ingest_succeed_partial":
