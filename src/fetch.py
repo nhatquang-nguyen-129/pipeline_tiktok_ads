@@ -632,7 +632,7 @@ def fetch_ad_creative() -> pd.DataFrame:
                     fetch_video_url, 
                     headers=fetch_video_headers, 
                     json=fetch_video_payload
-                    )
+                )
                 fetch_video_response.raise_for_status()
                 fetch_video_json = fetch_video_response.json()
                 if fetch_video_json.get("code") == 0 and fetch_video_json.get("data", {}).get("list"):
