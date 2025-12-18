@@ -162,21 +162,21 @@ def staging_campaign_insights() -> dict:
         staging_section_start = time.time()            
         try:        
             for raw_table_campaign in raw_tables_campaign:
-                query_select_config = f"""
-                    SELECT
-                        raw.*,
-                        metadata.campaign_name,
-                        metadata.advertiser_name,
-                        metadata.operation_status,
-                        metadata.objective_type
-                    FROM `{raw_table_campaign}` AS raw
-                    LEFT JOIN `{raw_campaign_metadata}` AS metadata
-                        ON CAST(raw.campaign_id AS STRING) = CAST(metadata.campaign_id AS STRING)
-                        AND CAST(raw.advertiser_id  AS STRING) = CAST(metadata.advertiser_id AS STRING)
-                """
                 try:
                     print(f"🔄 [STAGING] Querying raw TikTok Ads campaign insights table {raw_table_campaign}...")
-                    logging.info(f"🔄 [STAGING] Querying raw TikTok Ads campaign insights table {raw_table_campaign}...")
+                    logging.info(f"🔄 [STAGING] Querying raw TikTok Ads campaign insights table {raw_table_campaign}...")                    
+                    query_select_config = f"""
+                        SELECT
+                            raw.*,
+                            metadata.campaign_name,
+                            metadata.advertiser_name,
+                            metadata.operation_status,
+                            metadata.objective_type
+                        FROM `{raw_table_campaign}` AS raw
+                        LEFT JOIN `{raw_campaign_metadata}` AS metadata
+                            ON CAST(raw.campaign_id AS STRING) = CAST(metadata.campaign_id AS STRING)
+                            AND CAST(raw.advertiser_id  AS STRING) = CAST(metadata.advertiser_id AS STRING)
+                    """
                     query_select_load = google_bigquery_client.query(query_select_config)
                     staging_df_queried = query_select_load.to_dataframe()
                     staging_tables_queried.append({"raw_table_campaign": raw_table_campaign, "staging_df_queried": staging_df_queried})
@@ -198,9 +198,9 @@ def staging_campaign_insights() -> dict:
     # 1.1.6. Trigger to enrich TikTok Ads campaign insights
         staging_section_name = "[STAGING] Trigger to enrich TikTok Ads campaign insights"
         staging_section_start = time.time()         
-        staging_tables_enriched = []
-        staging_dfs_enriched = []  
         try:
+            staging_tables_enriched = []
+            staging_dfs_enriched = []              
             for staging_table_queried in staging_tables_queried:
                 raw_table_campaign = staging_table_queried["raw_table_campaign"]
                 staging_df_queried = staging_table_queried["staging_df_queried"]
@@ -294,34 +294,32 @@ def staging_campaign_insights() -> dict:
             except Exception:
                 staging_table_exists = False
             if not staging_table_exists:
-                print(f"⚠️ [STAGING] Staging TikTok Ads campaign insights table {staging_table_campaign} not found then new table creation will be proceeding...")
-                logging.warning(f"⚠️ [STAGING] Staging TikTok Ads campaign insights table {staging_table_campaign} not found then new table creation will be proceeding...")
-                for col, dtype in staging_df_deduplicated.dtypes.items():
-                    if dtype.name.startswith("int"):
-                        google_bigquery_type = "INT64"
-                    elif dtype.name.startswith("float"):
-                        google_bigquery_type = "FLOAT64"
-                    elif dtype.name == "bool":
-                        google_bigquery_type = "BOOL"
-                    elif "datetime" in dtype.name:
-                        google_bigquery_type = "TIMESTAMP"
-                    else:
-                        google_bigquery_type = "STRING"
-                    table_schemas_defined.append(bigquery.SchemaField(col, google_bigquery_type))
-                table_configuration_defined = bigquery.Table(staging_table_campaign, schema=table_schemas_defined)
-                table_partition_effective = "date" if "date" in staging_df_deduplicated.columns else None
-                if table_partition_effective:
-                    table_configuration_defined.time_partitioning = bigquery.TimePartitioning(
-                        type_=bigquery.TimePartitioningType.DAY,
-                        field=table_partition_effective
-                    )
-                table_clusters_defined = ["chuong_trinh", "ma_ngan_sach_cap_1", "nhan_su"]
-                table_clusters_filtered = [f for f in table_clusters_defined if f in staging_df_deduplicated.columns]
-                if table_clusters_filtered:  
-                    table_configuration_defined.clustering_fields = table_clusters_filtered  
                 try:
-                    print(f"🔍 [STAGING] Creating staging TikTok Ads campaign insights table {staging_table_campaign} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}...")
-                    logging.info(f"🔍 [STAGING] Creating staging TikTok Ads campaign insights table {staging_table_campaign} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}...")
+                    print(f"⚠️ [STAGING] Staging TikTok Ads campaign insights table {staging_table_campaign} not found then new table creation will be proceeding...")
+                    logging.warning(f"⚠️ [STAGING] Staging TikTok Ads campaign insights table {staging_table_campaign} not found then new table creation will be proceeding...")
+                    for col, dtype in staging_df_deduplicated.dtypes.items():
+                        if dtype.name.startswith("int"):
+                            google_bigquery_type = "INT64"
+                        elif dtype.name.startswith("float"):
+                            google_bigquery_type = "FLOAT64"
+                        elif dtype.name == "bool":
+                            google_bigquery_type = "BOOL"
+                        elif "datetime" in dtype.name:
+                            google_bigquery_type = "TIMESTAMP"
+                        else:
+                            google_bigquery_type = "STRING"
+                        table_schemas_defined.append(bigquery.SchemaField(col, google_bigquery_type))
+                    table_configuration_defined = bigquery.Table(staging_table_campaign, schema=table_schemas_defined)
+                    table_partition_effective = "date" if "date" in staging_df_deduplicated.columns else None
+                    if table_partition_effective:
+                        table_configuration_defined.time_partitioning = bigquery.TimePartitioning(
+                            type_=bigquery.TimePartitioningType.DAY,
+                            field=table_partition_effective
+                        )
+                    table_clusters_defined = ["chuong_trinh", "ma_ngan_sach_cap_1", "nhan_su"]
+                    table_clusters_filtered = [f for f in table_clusters_defined if f in staging_df_deduplicated.columns]
+                    if table_clusters_filtered:  
+                        table_configuration_defined.clustering_fields = table_clusters_filtered  
                     staging_table_create = google_bigquery_client.create_table(table_configuration_defined)
                     staging_table_id = staging_table_create.full_table_id
                     staging_sections_status[staging_section_name] = "succeed"
@@ -533,34 +531,34 @@ def staging_ad_insights() -> dict:
         staging_section_start = time.time() 
         try:            
             for raw_table_ad in raw_tables_ad:
-                query_select_config = f"""
-                SELECT
-                    raw.*,
-                    ad.advertiser_id,
-                    ad.ad_id,
-                    ad.ad_name,
-                    ad.adgroup_id,
-                    ad.adgroup_name,
-                    ad.campaign_id,
-                    ad.campaign_name,
-                    ad.operation_status,
-                    ad.ad_format,
-                    ad.optimization_event,
-                    ad.video_id,
-                    creative.video_cover_url,
-                    creative.preview_url,
-                    creative.create_time AS creative_create_time
-                FROM `{raw_table_ad}` AS raw
-                LEFT JOIN `{raw_ad_metadata}` AS ad
-                    ON CAST(raw.ad_id AS STRING) = CAST(ad.ad_id AS STRING)
-                    AND CAST(raw.advertiser_id AS STRING) = CAST(ad.advertiser_id AS STRING)
-                LEFT JOIN `{raw_ad_creative}` AS creative
-                    ON CAST(ad.video_id AS STRING) = CAST(creative.video_id AS STRING)
-                    AND CAST(ad.advertiser_id AS STRING) = CAST(creative.advertiser_id AS STRING)
-                """
                 try:
                     print(f"🔄 [STAGING] Querying raw TikTok Ads ad insights table {raw_table_ad}...")
-                    logging.info(f"🔄 [STAGING] Querying raw TikTok Ads ad insights table {raw_table_ad}...")
+                    logging.info(f"🔄 [STAGING] Querying raw TikTok Ads ad insights table {raw_table_ad}...")                    
+                    query_select_config = f"""
+                    SELECT
+                        raw.*,
+                        ad.advertiser_id,
+                        ad.ad_id,
+                        ad.ad_name,
+                        ad.adgroup_id,
+                        ad.adgroup_name,
+                        ad.campaign_id,
+                        ad.campaign_name,
+                        ad.operation_status,
+                        ad.ad_format,
+                        ad.optimization_event,
+                        ad.video_id,
+                        creative.video_cover_url,
+                        creative.preview_url,
+                        creative.create_time AS creative_create_time
+                    FROM `{raw_table_ad}` AS raw
+                    LEFT JOIN `{raw_ad_metadata}` AS ad
+                        ON CAST(raw.ad_id AS STRING) = CAST(ad.ad_id AS STRING)
+                        AND CAST(raw.advertiser_id AS STRING) = CAST(ad.advertiser_id AS STRING)
+                    LEFT JOIN `{raw_ad_creative}` AS creative
+                        ON CAST(ad.video_id AS STRING) = CAST(creative.video_id AS STRING)
+                        AND CAST(ad.advertiser_id AS STRING) = CAST(creative.advertiser_id AS STRING)
+                    """
                     query_select_load = google_bigquery_client.query(query_select_config)
                     staging_df_queried = query_select_load.to_dataframe()
                     staging_tables_queried.append({"raw_table_ad": raw_table_ad, "staging_df_queried": staging_df_queried})
@@ -680,34 +678,32 @@ def staging_ad_insights() -> dict:
             except Exception:
                 staging_table_exists = False
             if not staging_table_exists:
-                print(f"⚠️ [STAGING] Staging TikTok Ads ad insights table {staging_table_ad} not found then new table creation will be proceeding...")
-                logging.warning(f"⚠️ [STAGING] Staging TikTok Ads ad insights table {staging_table_ad} not found then new table creation will be proceeding...")
-                for col, dtype in staging_df_deduplicated.dtypes.items():
-                    if dtype.name.startswith("int"):
-                        google_bigquery_type = "INT64"
-                    elif dtype.name.startswith("float"):
-                        google_bigquery_type = "FLOAT64"
-                    elif dtype.name == "bool":
-                        google_bigquery_type = "BOOL"
-                    elif "datetime" in dtype.name:
-                        google_bigquery_type = "TIMESTAMP"
-                    else:
-                        google_bigquery_type = "STRING"
-                    table_schemas_defined.append(bigquery.SchemaField(col, google_bigquery_type))
-                table_configuration_defined = bigquery.Table(staging_table_ad, schema=table_schemas_defined)
-                table_partition_effective = "date" if "date" in staging_df_deduplicated.columns else None
-                if table_partition_effective:
-                    table_configuration_defined.time_partitioning = bigquery.TimePartitioning(
-                        type_=bigquery.TimePartitioningType.DAY,
-                        field=table_partition_effective
-                    )
-                table_clusters_defined = ["chuong_trinh", "ma_ngan_sach_cap_1", "nhan_su"]
-                table_clusters_filtered = [f for f in table_clusters_defined if f in staging_df_deduplicated.columns]
-                if table_clusters_filtered:  
-                    table_configuration_defined.clustering_fields = table_clusters_filtered  
                 try:
-                    print(f"🔍 [STAGING] Creating staging TikTok Ads ad insights table with defined name {staging_table_ad} and partition on {table_partition_effective}...")
-                    logging.info(f"🔍 [STAGING] Creating staging TikTok Ads ad insights table with defined name {staging_table_ad} and partition on {table_partition_effective}...")
+                    print(f"⚠️ [STAGING] Staging TikTok Ads ad insights table {staging_table_ad} not found then new table creation will be proceeding...")
+                    logging.warning(f"⚠️ [STAGING] Staging TikTok Ads ad insights table {staging_table_ad} not found then new table creation will be proceeding...")
+                    for col, dtype in staging_df_deduplicated.dtypes.items():
+                        if dtype.name.startswith("int"):
+                            google_bigquery_type = "INT64"
+                        elif dtype.name.startswith("float"):
+                            google_bigquery_type = "FLOAT64"
+                        elif dtype.name == "bool":
+                            google_bigquery_type = "BOOL"
+                        elif "datetime" in dtype.name:
+                            google_bigquery_type = "TIMESTAMP"
+                        else:
+                            google_bigquery_type = "STRING"
+                        table_schemas_defined.append(bigquery.SchemaField(col, google_bigquery_type))
+                    table_configuration_defined = bigquery.Table(staging_table_ad, schema=table_schemas_defined)
+                    table_partition_effective = "date" if "date" in staging_df_deduplicated.columns else None
+                    if table_partition_effective:
+                        table_configuration_defined.time_partitioning = bigquery.TimePartitioning(
+                            type_=bigquery.TimePartitioningType.DAY,
+                            field=table_partition_effective
+                        )
+                    table_clusters_defined = ["chuong_trinh", "ma_ngan_sach_cap_1", "nhan_su"]
+                    table_clusters_filtered = [f for f in table_clusters_defined if f in staging_df_deduplicated.columns]
+                    if table_clusters_filtered:  
+                        table_configuration_defined.clustering_fields = table_clusters_filtered  
                     staging_table_create = google_bigquery_client.create_table(table_configuration_defined)
                     staging_table_id = staging_table_create.full_table_id
                     staging_sections_status[staging_section_name] = "succeed"
