@@ -196,7 +196,6 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
             except Exception as e:
                 print(f"❌ [INGEST] Failed to check TikTok Ads campaign metadata table {raw_table_campaign} existence due to {e}.")
                 logging.error(f"❌ [INGEST] Failed to check TikTok Ads campaign metadata table {raw_table_campaign} existence due to {e}.")
-                raise RuntimeError(f"❌ [INGEST] Failed to check TikTok Ads campaign metadata table {raw_table_campaign} existence due to {e}.") from e
             if not ingest_table_existed:
                 try:
                     print(f"⚠️ [INGEST] TikTok Ads campaign metadata table {raw_table_campaign} not found then table creation will be proceeding...")
@@ -237,7 +236,7 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
                 if not ingest_keys_unique.empty:
                     try:
                         print(f"🔍 [INGEST] Creating temporary table contains duplicated TikTok Ads campaign metadata for batch deletion...")
-                        logging.info(f"🔍 [INGEST] Creating temporary table contains duplicated TikTok Ads campaign metadata for batch deletion...")                        
+                        logging.info(f"🔍 [INGEST] Creating temporary table contains duplicated TikTok Ads campaign metadata for batch deletion...")
                         temporary_table_id = f"{PROJECT}.{raw_dataset}.temp_table_campaign_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
                         job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
                         job_load_load = google_bigquery_client.load_table_from_dataframe(
@@ -509,6 +508,8 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
                 ingest_keys_unique = ingest_df_deduplicated[["advertiser_id", "ad_id"]].dropna().drop_duplicates()
                 if not ingest_keys_unique.empty:
                     try:
+                        print(f"🔍 [INGEST] Creating temporary table contains duplicated TikTok Ads ad metadata for batch deletion...")
+                        logging.info(f"🔍 [INGEST] Creating temporary table contains duplicated TikTok Ads ad metadata for batch deletion...")
                         temporary_table_id = f"{PROJECT}.{raw_dataset}.temp_table_ad_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
                         job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
                         job_load_load = google_bigquery_client.load_table_from_dataframe(
@@ -741,7 +742,6 @@ def ingest_ad_creative() -> pd.DataFrame:
             except Exception as e:
                 print(f"❌ [INGEST] Failed to check TikTok Ads ad creative table {raw_table_creative} existence due to {e}.")
                 logging.error(f"❌ [INGEST] Failed to check TikTok Ads ad creative table {raw_table_creative} existence due to {e}.")
-                raise RuntimeError(f"❌ [INGEST] Failed to check TikTok Ads ad creative table {raw_table_creative} existence due to {e}.") from e                
             if not ingest_table_existed:
                 print(f"⚠️ [INGEST] TikTok Ads ad creative table {raw_table_creative} not found then table creation will be proceeding...")
                 logging.info(f"⚠️ [INGEST] TikTok Ads ad creative table {raw_table_creative} not found then table creation will be proceeding...")
@@ -777,7 +777,6 @@ def ingest_ad_creative() -> pd.DataFrame:
                 except Exception as e:
                     print(f"❌ [INGEST] Failed to create TikTok Ads ad creative table {raw_table_creative} due to {e}.")
                     logging.error(f"❌ [INGEST] Failed to create TikTok Ads ad creative table {raw_table_creative} due to {e}.")
-                    raise RuntimeError(f"❌ [INGEST] Failed to create TikTok Ads ad creative table {raw_table_creative} due to {e}.") from e
             else:
                 print(f"🔄 [INGEST] Found TikTok Ads ad creative table {raw_table_creative} then existing row(s) deletion will be proceeding...")
                 logging.info(f"🔄 [INGEST] Found TikTok Ads ad creative table {raw_table_creative} then existing row(s) deletion will be proceeding...")
@@ -1048,8 +1047,8 @@ def ingest_campaign_insights(ingest_date_start: str, ingest_date_end: str,) -> p
                         logging.error(f"❌ [INGEST] Failed to create TikTok Ads campaign insights table {raw_table_campaign} due to {e}.")
                 else:
                     try:
-                        print(f"🔄 [INGEST] Found Facebook Ads campaign insights table {raw_table_campaign} then overlapping dates validation will be proceeding...")
-                        logging.info(f"🔄 [INGEST] Found Facebook Ads campaign insights table {raw_table_campaign} then overlapping dates validation will be proceeding...")
+                        print(f"🔄 [INGEST] Found TikTok Ads campaign insights table {raw_table_campaign} then overlapping dates validation will be proceeding...")
+                        logging.info(f"🔄 [INGEST] Found TikTok Ads campaign insights table {raw_table_campaign} then overlapping dates validation will be proceeding...")
                         ingest_dates_new = ingest_df_deduplicated["stat_time_day"].dropna().unique().tolist()
                         query_select_config = f"SELECT DISTINCT stat_time_day FROM `{raw_table_campaign}`"
                         query_select_load = google_bigquery_client.query(query_select_config)
@@ -1351,40 +1350,50 @@ def ingest_ad_insights(ingest_date_start: str, ingest_date_end: str,) -> pd.Data
                         print(f"❌ [INGEST] Failed to create raw TikTok Ads ad insights table {raw_table_ad} due to {e}.")
                         logging.error(f"❌ [INGEST] Failed to create raw TikTok Ads ad insights table {raw_table_ad} due to {e}.")
                 else:
-                    ingest_dates_new = ingest_df_deduplicated["stat_time_day"].dropna().unique().tolist()
-                    query_select_config = f"SELECT DISTINCT stat_time_day FROM `{raw_table_ad}`"
-                    query_select_load = google_bigquery_client.query(query_select_config)
-                    query_select_result = query_select_load.result()
-                    ingest_dates_existed = [row.stat_time_day for row in query_select_result]
-                    ingest_dates_overlapped = set(ingest_dates_new) & set(ingest_dates_existed)
+                    try:
+                        print(f"🔄 [INGEST] Found TikTok Ads ad insights table {raw_table_ad} then overlapping dates validation will be proceeding...")
+                        logging.info(f"🔄 [INGEST] Found TikTok Ads ad insights table {raw_table_ad} then overlapping dates validation will be proceeding...")
+                        ingest_dates_new = ingest_df_deduplicated["stat_time_day"].dropna().unique().tolist()
+                        query_select_config = f"SELECT DISTINCT stat_time_day FROM `{raw_table_ad}`"
+                        query_select_load = google_bigquery_client.query(query_select_config)
+                        query_select_result = query_select_load.result()
+                        ingest_dates_existed = [row.stat_time_day for row in query_select_result]
+                        ingest_dates_overlapped = set(ingest_dates_new) & set(ingest_dates_existed)
+                        print(f"✅ [INGEST] Successfully validated {len(ingest_dates_overlapped)} overlapping date(s) in TikTok Ads ad insights {raw_table_ad} table.")
+                        logging.info(f"✅ [INGEST] Successfully validated {len(ingest_dates_overlapped)} overlapping date(s) in TikTok Ads ad insights {raw_table_ad} table.")
+                    except Exception as e:
+                        print(f"❌ [INGEST] Failed to validate overlapping dates of TikTok Ads ad insights table {raw_table_ad} due to {e}.")
+                        logging.error(f"❌ [INGEST] Failed to validate overlapping dates of TikTok Ads ad insights table {raw_table_ad} due to {e}.")
                     if ingest_dates_overlapped:
                         print(f"⚠️ [INGEST] Found {len(ingest_dates_overlapped)} overlapping date(s) in raw TikTok Ads ad insights {raw_table_ad} table then deletion will be proceeding...")
                         logging.warning(f"⚠️ [INGEST] Found {len(ingest_dates_overlapped)} overlapping date(s) in raw TikTok Ads ad insights {raw_table_ad} table then deletion will be proceeding...")
                         for ingest_date_overlapped in ingest_dates_overlapped:
-                            query_delete_config = f"""
-                                DELETE FROM `{raw_table_ad}`
-                                WHERE stat_time_day = @date_value
-                            """
-                            job_query_config = bigquery.QueryJobConfig(
-                                query_parameters=[bigquery.ScalarQueryParameter("date_value", "STRING", ingest_date_overlapped)]
-                            )
                             try:
+                                print(f"🔍 [INGEST] Deleting existing rows of TikTok Ads ad insights in Google BigQuery table {raw_table_ad}...")
+                                logging.info(f"🔍 [INGEST] Deleting existing rows of TikTok Ads ad insights in Google BigQuery table {raw_table_ad}...")
+                                query_delete_config = f"""
+                                    DELETE FROM `{raw_table_ad}`
+                                    WHERE stat_time_day = @date_value
+                                """
+                                job_query_config = bigquery.QueryJobConfig(
+                                    query_parameters=[bigquery.ScalarQueryParameter("date_value", "STRING", ingest_date_overlapped)]
+                                )
                                 query_delete_load = google_bigquery_client.query(query_delete_config, job_config=job_query_config)
                                 query_delete_result = query_delete_load.result()
                                 ingest_rows_deleted = query_delete_result.num_dml_affected_rows
                                 print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of TikTok Ads ad insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_ad}.")
                                 logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of TikTok Ads ad insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_ad}.")
                             except Exception as e:
-                                print(f"❌ [INGEST] Failed to delete existing row(s) of TikTok Ads ad insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_ad} due to {e}.")
-                                logging.error(f"❌ [INGEST] Failed to delete existing row(s) of TikTok Ads ad insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_ad} due to {e}.")
+                                print(f"❌ [INGEST] Failed to delete existing rows of TikTok Ads ad insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_ad} due to {e}.")
+                                logging.error(f"❌ [INGEST] Failed to delete existing rows of TikTok Ads ad insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_ad} due to {e}.")
                     else:
-                        print(f"⚠️ [INGEST] No overlapping date(s) of TikTok Ads ad insights found in Google BigQuery {raw_table_ad} table then deletion is skipped.")
-                        logging.info(f"⚠️ [INGEST] No overlapping date(s) of TikTok Ads ad insights found in Google BigQuery {raw_table_ad} table then deletion is skipped.")
+                        print(f"⚠️ [INGEST] No overlapping date of TikTok Ads ad insights found in Google BigQuery {raw_table_ad} table then deletion is skipped.")
+                        logging.info(f"⚠️ [INGEST] No overlapping date of TikTok Ads ad insights found in Google BigQuery {raw_table_ad} table then deletion is skipped.")
                 ingest_sections_status[ingest_section_name] = "succeed"
             except Exception as e:
                 ingest_sections_status[ingest_section_name] = "failed"
-                print(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_ad} if it not exist for TikTok Ads ad insights due to {e}.")
-                logging.error(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_ad} if it not exist for TikTok Ads ad insights due to {e}.")
+                print(f"❌ [INGEST] Failed to delete existing rows or create new table {raw_table_ad} if it not exist for TikTok Ads ad insights due to {e}.")
+                logging.error(f"❌ [INGEST] Failed to delete existing rows or create new table {raw_table_ad} if it not exist for TikTok Ads ad insights due to {e}.")
             finally:
                 ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)
 
