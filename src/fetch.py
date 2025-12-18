@@ -162,7 +162,7 @@ def fetch_campaign_metadata(fetch_campaign_ids: list[str]) -> pd.DataFrame:
                 fetch_advertiser_url, 
                 headers=fetch_advertiser_headers, 
                 json=fetch_advertiser_payload
-                )
+            )
             fetch_advertiser_name = fetch_advertiser_response.json()["data"]["list"][0]["name"]       
             fetch_sections_status[fetch_section_name] = "succeed"
             print(f"✅ [FETCH] Successfully retrieved advertiser_name {fetch_advertiser_name} for TikTok Ads advertiser_id {fetch_advertiser_id}.")
@@ -205,7 +205,7 @@ def fetch_campaign_metadata(fetch_campaign_ids: list[str]) -> pd.DataFrame:
                         fetch_campaign_url, 
                         headers=fetch_campaign_headers, 
                         json=fetch_campaign_payload
-                        )
+                    )
                     fetch_campaign_response.raise_for_status()
                     fetch_campaign_json = fetch_campaign_response.json()
                     fetch_campaign_metadata = fetch_campaign_json["data"]["list"][0]
@@ -317,46 +317,7 @@ def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
 
     try:
 
-    # 1.2.2. Validate input for TikTok Ads ad metadata fetching
-        fetch_section_name = "[FETCH] Validate input for TikTok Ads ad metadata fetching"
-        fetch_section_start = time.time()        
-        try:
-            if not fetch_ad_ids:
-                fetch_sections_status[fetch_section_name] = "failed"        
-                print("⚠️ [FETCH] Empty TikTok Ads fetch_ad_ids list provided then fetching will be suspended.")
-                logging.warning("⚠️ [FETCH] Empty TikTok Ads fetch_ad_ids list provided then fetching will be suspended.")
-            else:
-                fetch_sections_status[fetch_section_name] = "succeed"
-                print(f"✅ [FETCH] Successfully validated input for {len(fetch_ad_ids)} ad_id(s) of TikTok Ads ad metadata fetching.")
-                logging.info(f"✅ [FETCH] Successfully validated input for {len(fetch_ad_ids)} ad_id(s) of TikTok Ads ad metadata fetching.")
-        finally:
-            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
-
-    # 1.2.3. Prepare fields for TikTok Ads ad metadata fetching
-        fetch_section_name = "[FETCH] Prepare fields for TikTok Ads ad metadata fetching"
-        fetch_section_start = time.time()
-        try:
-            fetch_ad_fields = [
-                "advertiser_id",
-                "ad_id",
-                "ad_name",
-                "adgroup_id",
-                "adgroup_name",
-                "campaign_id",
-                "campaign_name",
-                "operation_status",
-                "create_time",
-                "ad_format",
-                "optimization_event",
-                "video_id"
-            ]
-            fetch_sections_status[fetch_section_name] = "succeed" 
-            print(f"🔍 [FETCH] Preparing to fetch TikTok Ads ad metadata with {fetch_ad_fields} field(s)...")
-            logging.info(f"🔍 [FETCH] Preparing to fetch TikTok Ads ad metadata with {fetch_ad_fields} field(s)...")
-        finally:
-            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
-
-    # 1.2.4 Initialize Google Secret Manager client
+    # 1.2.2 Initialize Google Secret Manager client
         fetch_section_name = "[FETCH] Initialize Google Secret Manager client"
         fetch_section_start = time.time()          
         try:
@@ -373,7 +334,7 @@ def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2) 
 
-    # 1.2.5. Get TikTok Ads access token from Google Secret Manager
+    # 1.2.3. Get TikTok Ads access token from Google Secret Manager
         fetch_section_name = "[FETCH] Get TikTok Ads access token from Google Secret Manager"
         fetch_section_start = time.time()              
         try: 
@@ -393,7 +354,7 @@ def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
-    # 1.2.6. Get TikTok Ads advertiser_id from Google Secret Manager
+    # 1.2.4. Get TikTok Ads advertiser_id from Google Secret Manager
         fetch_section_name = "[FETCH] Get TikTok Ads advertiser_id from Google Secret Manager"
         fetch_section_start = time.time()        
         try:
@@ -413,7 +374,7 @@ def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
     
-    # 1.2.7. Make TikTok Ads API call for advertiser endpoint
+    # 1.2.5. Make TikTok Ads API call for advertiser endpoint
         fetch_section_name = "[FETCH] Make TikTok Ads API call for advertiser endpoint"
         fetch_section_start = time.time()     
         try: 
@@ -429,7 +390,7 @@ def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
                 fetch_advertiser_url, 
                 headers=fetch_advertiser_headers, 
                 json=fetch_advertiser_payload
-                )
+            )
             fetch_advertiser_name = fetch_advertiser_response.json()["data"]["list"][0]["name"]       
             fetch_sections_status[fetch_section_name] = "succeed"
             print(f"✅ [FETCH] Successfully retrieved advertiser_name {fetch_advertiser_name} for TikTok Ads advertiser_id {fetch_advertiser_id}.")
@@ -441,7 +402,7 @@ def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
-    # 1.2.8. Make TikTok Ads API call for ad endpoint
+    # 1.2.6. Make TikTok Ads API call for ad endpoint
         fetch_section_name = "[FETCH] Make TikTok Ads API call for ad endpoint"
         fetch_section_start = time.time()            
         try:
@@ -453,6 +414,20 @@ def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
                 "Access-Token": fetch_access_user,
                 "Content-Type": "application/json"
             }
+            fetch_ad_fields = [
+                "advertiser_id",
+                "ad_id",
+                "ad_name",
+                "adgroup_id",
+                "adgroup_name",
+                "campaign_id",
+                "campaign_name",
+                "operation_status",
+                "create_time",
+                "ad_format",
+                "optimization_event",
+                "video_id"
+            ]
             for fetch_ad_id in fetch_ad_ids:
                 try:
                     fetch_ad_payload = {
@@ -464,7 +439,7 @@ def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
                         fetch_ad_url, 
                         headers=fetch_ad_headers, 
                         json=fetch_ad_payload
-                        )
+                    )
                     fetch_ad_response.raise_for_status()
                     fetch_ad_json = fetch_ad_response.json()
                     fetch_ad_metadata = fetch_ad_json["data"]["list"][0]
@@ -489,7 +464,7 @@ def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
-    # 1.2.9. Trigger to enforce schema for TikTok Ads ad metadata
+    # 1.2.7. Trigger to enforce schema for TikTok Ads ad metadata
         fetch_section_name = "[FETCH] Trigger to enforce schema for TikTok Ads ad metadata"
         fetch_section_start = time.time()
         try:
@@ -514,7 +489,7 @@ def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
-    # 1.2.10. Summarize fetch results for TikTok Ads ad metadata
+    # 1.2.8. Summarize fetch results for TikTok Ads ad metadata
     finally:
         fetch_time_elapsed = round(time.time() - fetch_time_start, 2)
         fetch_df_final = fetch_df_enforced.copy() if "fetch_df_enforced" in locals() and not fetch_df_enforced.empty else pd.DataFrame()
