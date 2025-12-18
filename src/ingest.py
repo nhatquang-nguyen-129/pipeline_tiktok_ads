@@ -1048,6 +1048,8 @@ def ingest_campaign_insights(ingest_date_start: str, ingest_date_end: str,) -> p
                         logging.error(f"❌ [INGEST] Failed to create TikTok Ads campaign insights table {raw_table_campaign} due to {e}.")
                 else:
                     try:
+                        print(f"🔄 [INGEST] Found Facebook Ads campaign insights table {raw_table_campaign} then overlapping dates validation will be proceeding...")
+                        logging.info(f"🔄 [INGEST] Found Facebook Ads campaign insights table {raw_table_campaign} then overlapping dates validation will be proceeding...")
                         ingest_dates_new = ingest_df_deduplicated["stat_time_day"].dropna().unique().tolist()
                         query_select_config = f"SELECT DISTINCT stat_time_day FROM `{raw_table_campaign}`"
                         query_select_load = google_bigquery_client.query(query_select_config)
@@ -1241,9 +1243,9 @@ def ingest_ad_insights(ingest_date_start: str, ingest_date_end: str,) -> pd.Data
                 print(f"🔁 [INGEST] Triggering to fetch TikTok Ads ad insights for {ingest_date_separated}...")
                 logging.info(f"🔁 [INGEST] Triggering to fetch TikTok Ads ad insights for {ingest_date_separated}...")
                 ingest_results_fetched = fetch_ad_insights(ingest_date_separated, ingest_date_separated)
-                ingest_df_fetched = ingest_results_fetched["fetch_df_final"]
-                ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
+                ingest_df_fetched = ingest_results_fetched["fetch_df_final"]                
                 ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
+                ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
                 if ingest_status_fetched == "fetch_succeed_all":
                     ingest_sections_status[ingest_section_name] = "succeed"
                     print(f"✅ [INGEST] Successfully triggered TikTok Ads ad insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
@@ -1266,9 +1268,9 @@ def ingest_ad_insights(ingest_date_start: str, ingest_date_end: str,) -> pd.Data
                 print(f"🔁 [INGEST] Triggering to enforce schema for TikTok Ads ad insights for {ingest_date_separated} with {len(ingest_df_fetched)} fetched row(s)...")
                 logging.info(f"🔁 [INGEST] Triggering to enforce schema for TikTok Ads ad insights for {ingest_date_separated} with {len(ingest_df_fetched)} fetched row(s)...")
                 ingest_results_enforced = enforce_table_schema(schema_df_input=ingest_df_fetched,schema_type_mapping="ingest_ad_insights")
-                ingest_df_enforced = ingest_results_enforced["schema_df_final"]
-                ingest_status_enforced = ingest_results_enforced["schema_status_final"]
+                ingest_df_enforced = ingest_results_enforced["schema_df_final"]                
                 ingest_summary_enforced = ingest_results_enforced["schema_summary_final"]
+                ingest_status_enforced = ingest_results_enforced["schema_status_final"]
                 if ingest_status_enforced == "schema_succeed_all":
                     ingest_sections_status[ingest_section_name] = "succeed"
                     print(f"✅ [INGEST] Successfully triggered TikTok Ads ad insights schema enforcement for {ingest_date_separated} with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
@@ -1316,33 +1318,31 @@ def ingest_ad_insights(ingest_date_start: str, ingest_date_end: str,) -> pd.Data
                     print(f"❌ [INGEST] Failed to check TikTok Ads ad insights table {raw_table_ad} existence due to {e}.")
                     logging.error(f"❌ [INGEST] Failed to check TikTok Ads ad insights table {raw_table_ad} existence due to {e}.")
                 if not ingest_table_existed:
-                    print(f"⚠️ [INGEST] TikTok Ads ad insights table {raw_table_ad} not found then table creation will be proceeding...")
-                    logging.info(f"⚠️ [INGEST] TikTok Ads ad insights table {raw_table_ad} not found then table creation will be proceeding...")
-                    for col, dtype in ingest_df_deduplicated.dtypes.items():
-                        if dtype.name.startswith("int"):
-                            bq_type = "INT64"
-                        elif dtype.name.startswith("float"):
-                            bq_type = "FLOAT64"
-                        elif dtype.name == "bool":
-                            bq_type = "BOOL"
-                        elif "datetime" in dtype.name:
-                            bq_type = "TIMESTAMP"
-                        else:
-                            bq_type = "STRING"
-                        table_schemas_defined.append(bigquery.SchemaField(col, bq_type))
-                    table_configuration_defined = bigquery.Table(raw_table_ad, schema=table_schemas_defined)
-                    table_partition_effective = "date" if "date" in ingest_df_deduplicated.columns else None
-                    if table_partition_effective:
-                        table_configuration_defined.time_partitioning = bigquery.TimePartitioning(
-                            type_=bigquery.TimePartitioningType.DAY,
-                            field=table_partition_effective
-                        )                    
-                    table_clusters_filtered = [f for f in table_clusters_defined if f in ingest_df_deduplicated.columns] if table_clusters_defined else []
-                    if table_clusters_filtered:
-                        table_configuration_defined.clustering_fields = table_clusters_filtered
                     try:
-                        print(f"🔍 [INGEST] Creating TikTok Ads ad insights table {raw_table_ad} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}...")
-                        logging.info(f"🔍 [INGEST] Creating TikTok Ads ad insights table {raw_table_ad} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}...")
+                        print(f"⚠️ [INGEST] TikTok Ads ad insights table {raw_table_ad} not found then table creation will be proceeding...")
+                        logging.info(f"⚠️ [INGEST] TikTok Ads ad insights table {raw_table_ad} not found then table creation will be proceeding...")
+                        for col, dtype in ingest_df_deduplicated.dtypes.items():
+                            if dtype.name.startswith("int"):
+                                bq_type = "INT64"
+                            elif dtype.name.startswith("float"):
+                                bq_type = "FLOAT64"
+                            elif dtype.name == "bool":
+                                bq_type = "BOOL"
+                            elif "datetime" in dtype.name:
+                                bq_type = "TIMESTAMP"
+                            else:
+                                bq_type = "STRING"
+                            table_schemas_defined.append(bigquery.SchemaField(col, bq_type))
+                        table_configuration_defined = bigquery.Table(raw_table_ad, schema=table_schemas_defined)
+                        table_partition_effective = "date" if "date" in ingest_df_deduplicated.columns else None
+                        if table_partition_effective:
+                            table_configuration_defined.time_partitioning = bigquery.TimePartitioning(
+                                type_=bigquery.TimePartitioningType.DAY,
+                                field=table_partition_effective
+                            )                    
+                        table_clusters_filtered = [f for f in table_clusters_defined if f in ingest_df_deduplicated.columns] if table_clusters_defined else []
+                        if table_clusters_filtered:
+                            table_configuration_defined.clustering_fields = table_clusters_filtered
                         ingest_table_create = google_bigquery_client.create_table(table_configuration_defined)
                         ingest_table_id = ingest_table_create.full_table_id
                         print(f"✅ [INGEST] Successfully created TikTok Ads ad insights table {ingest_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}.")
